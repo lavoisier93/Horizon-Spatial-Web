@@ -11,6 +11,7 @@
  * V5: + Mode sombre + Section FAQ + Animations de scroll
  * V6: + Section Partenaires Institutionnels (9 logos)
  * V7: + Lien Partenaires navbar + Carrousel logos footer + Liens cliquables sites officiels
+ * V8: + Bouton retour en haut + Tracking UTM sur liens CTA
  */
 
 import {
@@ -410,6 +411,41 @@ function Navbar({ isDark, onToggleDark }: { isDark: boolean; onToggleDark: () =>
 }
 
 // ─── WHATSAPP FLOATING BUTTON ───────────────────
+// ─── SCROLL TO TOP BUTTON ──────────────────────
+function ScrollToTopButton() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setVisible(window.scrollY > 600);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <button
+      onClick={scrollToTop}
+      aria-label="Retour en haut"
+      className={`fixed bottom-6 left-6 z-50 w-12 h-12 rounded-full bg-[#0047AB] hover:bg-[#003580] text-white shadow-lg shadow-[#0047AB]/30 hover:shadow-xl flex items-center justify-center transition-all duration-500 print:hidden ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+      }`}
+    >
+      <ChevronDown className="w-5 h-5 rotate-180" />
+    </button>
+  );
+}
+
+// ─── UTM TRACKING HELPER ──────────────────────
+function addUtm(url: string, source: string, medium: string, campaign: string = "plaquette_amenageurs_2026") {
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}utm_source=${encodeURIComponent(source)}&utm_medium=${encodeURIComponent(medium)}&utm_campaign=${encodeURIComponent(campaign)}`;
+}
+
 function WhatsAppButton() {
   const [visible, setVisible] = useState(false);
 
@@ -426,7 +462,7 @@ function WhatsAppButton() {
 
   return (
     <a
-      href={`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`}
+      href={addUtm(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "whatsapp", "floating_button")}
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-6 right-6 z-50 group print:hidden"
@@ -907,6 +943,9 @@ export default function Home() {
 
       {/* WhatsApp Floating Button */}
       <WhatsAppButton />
+
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
 
       {/* ===== SECTION 1: HERO / COVER ===== */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -1569,13 +1608,13 @@ export default function Home() {
                       <div className="text-white/40 text-sm">+225 27 22 25 60 38</div>
                     </div>
                   </a>
-                  <a href="mailto:contact@horizonspatial.ci" className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                  <a href={addUtm("mailto:contact@horizonspatial.ci", "plaquette", "email_button")} className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
                     <div className="w-12 h-12 rounded-xl bg-[#00A86B]/20 flex items-center justify-center">
                       <Mail className="w-5 h-5 text-[#00A86B]" />
                     </div>
                     <div className="text-white font-semibold">contact@horizonspatial.ci</div>
                   </a>
-                  <a href="https://www.horizonspatial.ci" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                  <a href={addUtm("https://www.horizonspatial.ci", "plaquette", "website_button")} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
                     <div className="w-12 h-12 rounded-xl bg-[#00A86B]/20 flex items-center justify-center">
                       <Globe className="w-5 h-5 text-[#00A86B]" />
                     </div>
@@ -1586,7 +1625,7 @@ export default function Home() {
                 {/* Réseaux sociaux */}
                 <div className="flex gap-4 mt-2">
                   <a
-                    href={LINKEDIN_URL}
+                    href={addUtm(LINKEDIN_URL, "plaquette", "social_button")}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 px-5 py-3 bg-[#0077B5]/20 backdrop-blur-sm rounded-xl border border-[#0077B5]/30 hover:bg-[#0077B5]/30 transition-all duration-300"
@@ -1595,7 +1634,7 @@ export default function Home() {
                     <span className="text-white font-medium text-sm">LinkedIn</span>
                   </a>
                   <a
-                    href={FACEBOOK_URL}
+                    href={addUtm(FACEBOOK_URL, "plaquette", "social_button")}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 px-5 py-3 bg-[#1877F2]/20 backdrop-blur-sm rounded-xl border border-[#1877F2]/30 hover:bg-[#1877F2]/30 transition-all duration-300"
