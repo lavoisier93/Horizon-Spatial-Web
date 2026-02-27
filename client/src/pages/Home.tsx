@@ -9,6 +9,7 @@
  * V3: + Navbar fixe + Compteurs animés + Bouton WhatsApp flottant
  * V4: + Bandeau d'urgence + Galerie photos projets + Menu hamburger animé
  * V5: + Mode sombre + Section FAQ + Animations de scroll
+ * V6: + Section Partenaires Institutionnels (9 logos)
  */
 
 import {
@@ -71,6 +72,16 @@ const LAVOISIER_IMG = "https://files.manuscdn.com/user_upload_by_module/session_
 const LAVOISIER_ONUCI_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/txpCQkaXHRfFEpEb.jpg";
 const LOGO_COLOR = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/iMiXhhfBFkffYFqG.png";
 const WHATSAPP_NUMBER = "2250143430505";
+
+// Logos partenaires institutionnels
+const LOGO_MCLU = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/rtgqWktgGTrElydU.png";
+const LOGO_GEOMETRES = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/kTHTCWAldhRQrGUs.png";
+const LOGO_BNETD = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/xbLNosfwBJlegNVB.jpg";
+const LOGO_OACI = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/MfzGwWlTIFyWqLjI.jpg";
+const LOGO_IGNFI = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/CfXlumoRUdVoCOaG.jpg";
+const LOGO_AFOR = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/zSphuRsFWmQkEIeY.png";
+const LOGO_GEOFIT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/MISETdlKHwxopnBt.png";
+const LOGO_DISTRICT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/eCjjxsKqeNdNcKhJ.jpg";
 const GALLERY_DRONE = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/ObYE2HNxqV6UNOr9igklvu-img-1_1772154316000_na1fn_Z2FsbGVyeS1kcm9uZS1sb3Rpc3NlbWVudA.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94L09iWUUySE54cVY2VU5PcjlpZ2tsdnUtaW1nLTFfMTc3MjE1NDMxNjAwMF9uYTFmbl9aMkZzYkdWeWVTMWtjbTl1WlMxc2IzUnBjM05sYldWdWRBLmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=K08ALPhID2S2hE2uVAcx5zrRCLmcFoGCtHLcZu24PQCRSSbar9ikNs5E0Y~g0hyxuho~PukDBI~yD5OecG1Xmxksv8kBnrdj-T1phWmJRJ7anmFttyAk7txAWXiatPsRzWutyG962nTzpiv78O5-b-ONClB-RT3r3zyQYTag8KYEu-fiC5SWSK3A0AQyPWUNi151Y3lFYhUOp4-xpQouVFql8fy2aB45B04Z4fGRzI8x0Mslh-Rnhry-lahtUsl-EqSkyVlZGH4RoU2iwUzjloaKYOyDDrvuv9PGORF9nSz0952qlBraRptYkkVKnHdjDA0x8hMh5~fv37Ow1I0FcA__";
 const GALLERY_PLAN = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/ObYE2HNxqV6UNOr9igklvu-img-2_1772154312000_na1fn_Z2FsbGVyeS1wbGFuLWFwcHJvdXZl.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94L09iWUUySE54cVY2VU5PcjlpZ2tsdnUtaW1nLTJfMTc3MjE1NDMxMjAwMF9uYTFmbl9aMkZzYkdWeWVTMXdiR0Z1TFdGd2NISnZkWFpsLmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=PabrNXNEe90ud2lnzoW-RvDcgmDxns3gfXhytPh6Slf9J~mU4JLg-bgsF6ZrlJar-xp2wMVB0vQgaiQqBs31FPZQpIaQAJa1wxG2MFq9Dh7RT3uL355rL1riMBEzswXYOUpvMCkFhHxFrP-OyW1ZDMuRldMQ8XVAO1aewjAzlkpiYP0UdZfnr~arDhgAzKfl6L03bhZGO1guTAYk3yWxoHDbSi601eZoTOcmxmK8GE~OhXaEyMCCDCjnOq9w42wy~lvrcQKZp4EyibjFWODKS8E7sEg32SaTcgVz42fqsRFLSBuoDbNnABje1VGwcMFiQDWFpSbAXVNFaGGw-UZ2QA__";
 const GALLERY_MAQUETTE = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/ObYE2HNxqV6UNOr9igklvu-img-3_1772154313000_na1fn_Z2FsbGVyeS1tYXF1ZXR0ZS0zZA.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94L09iWUUySE54cVY2VU5PcjlpZ2tsdnUtaW1nLTNfMTc3MjE1NDMxMzAwMF9uYTFmbl9aMkZzYkdWeWVTMXRZWEYxWlhSMFpTMHpaQS5qcGc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=A1v2b51etsVUcAVv1w1mojRiSO3mDSU9dU9F05wNY6jpmghZrke~MryI4lKjT3n9bcC2kW4~O8eTGmunGD5RJjJ7ZcDbJX-6WGB2rgUACiJN0o4XuWYvvVndhx2~A5yFHLDj2O2Si8trWe75oQ7xl9h6rkGRN33CwqlvWKeEd5XuwATyBxh~JVOkVJikVWdG9QeM5MZoFS04PQJtwqFSpwvNpag1VjU-e2ohvKX33SSTI8kImG3AuZdFV2xmJjJ1PTAEXDHCKEbJ0Py~1qXgK7Zlc8KYqzH8aF5Pcp~lxk3QNQPfeUzVAITj2Ejp7KNUdW3mGBDAhOIwokielcvdQg__";
@@ -1411,6 +1422,101 @@ export default function Home() {
           </Reveal>
           <Reveal delay={100}>
             <FAQSection isDark={isDark} />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ===== SECTION 7.6: PARTENAIRES INSTITUTIONNELS ===== */}
+      <section id="partenaires" className={`py-20 lg:py-24 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-[#0A1628]" : "bg-[#F8FAFC]"}`}>
+        <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: `url(${TOPO_IMG})`, backgroundSize: "cover" }} />
+        <div className="container mx-auto px-6 lg:px-12 relative z-10">
+          <Reveal>
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
+                <span className="text-[#00A86B] font-semibold text-sm uppercase tracking-wider" style={poppins}>Écosystème</span>
+                <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
+              </div>
+              <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
+                Nos <span className="text-[#0047AB]">partenaires</span> institutionnels
+              </h2>
+              <p className={`text-lg leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>
+                H-Spatial évolue au sein d'un réseau solide d'institutions publiques et de partenaires techniques de référence en Côte d'Ivoire et à l'international.
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Grille de logos - Institutions publiques */}
+          <Reveal delay={100}>
+            <div className="mb-12">
+              <h3 className={`text-center text-sm font-semibold uppercase tracking-widest mb-8 ${isDark ? "text-white/40" : "text-[#4A5568]/60"}`} style={poppins}>Institutions & Ordres Professionnels</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                {[
+                  { src: LOGO_MCLU, name: "MCLU", desc: "Ministère de la Construction" },
+                  { src: LOGO_GEOMETRES, name: "OGE-CI", desc: "Ordre des Géomètres-Experts" },
+                  { src: LOGO_OACI, name: "OACI", desc: "Ordre des Architectes" },
+                  { src: LOGO_BNETD, name: "BNETD", desc: "Bureau National d'Études" },
+                  { src: LOGO_DISTRICT, name: "District d'Abidjan", desc: "District Autonome" },
+                ].map((p, i) => (
+                  <div
+                    key={i}
+                    className={`group flex flex-col items-center justify-center p-6 rounded-xl border transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                      isDark
+                        ? "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                        : "bg-white border-gray-200 hover:border-[#0047AB]/30 hover:shadow-[#0047AB]/10"
+                    }`}
+                  >
+                    <div className="w-20 h-20 flex items-center justify-center mb-3 rounded-lg overflow-hidden">
+                      <img src={p.src} alt={p.name} className="max-w-full max-h-full object-contain" />
+                    </div>
+                    <span className={`text-xs font-bold text-center ${isDark ? "text-white/80" : "text-[#0A1628]"}`} style={poppins}>{p.name}</span>
+                    <span className={`text-[10px] text-center mt-0.5 ${isDark ? "text-white/40" : "text-[#4A5568]/70"}`}>{p.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Grille de logos - Partenaires techniques */}
+          <Reveal delay={200}>
+            <div>
+              <h3 className={`text-center text-sm font-semibold uppercase tracking-widest mb-8 ${isDark ? "text-white/40" : "text-[#4A5568]/60"}`} style={poppins}>Partenaires Techniques & Fonciers</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {[
+                  { src: LOGO_IGNFI, name: "IGN FI", desc: "Ingénierie Géospatiale" },
+                  { src: LOGO_GEOFIT, name: "GeoFIT", desc: "Géomatique & Topographie" },
+                  { src: LOGO_AFOR, name: "AFOR", desc: "Agence Foncière Rurale" },
+                  { src: LAVOISIER_ONUCI_IMG, name: "O.N.U.C.I.", desc: "Ordre National des Urbanistes" },
+                ].map((p, i) => (
+                  <div
+                    key={i}
+                    className={`group flex flex-col items-center justify-center p-6 rounded-xl border transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                      isDark
+                        ? "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                        : "bg-white border-gray-200 hover:border-[#00A86B]/30 hover:shadow-[#00A86B]/10"
+                    }`}
+                  >
+                    <div className="w-20 h-20 flex items-center justify-center mb-3 rounded-lg overflow-hidden">
+                      <img src={p.src} alt={p.name} className="max-w-full max-h-full object-contain" />
+                    </div>
+                    <span className={`text-xs font-bold text-center ${isDark ? "text-white/80" : "text-[#0A1628]"}`} style={poppins}>{p.name}</span>
+                    <span className={`text-[10px] text-center mt-0.5 ${isDark ? "text-white/40" : "text-[#4A5568]/70"}`}>{p.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Bandeau de confiance */}
+          <Reveal delay={300}>
+            <div className={`mt-16 text-center p-8 rounded-2xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200"}`}>
+              <p className={`text-lg font-medium mb-2 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
+                Un réseau de <span className="text-[#0047AB] font-bold">9 partenaires</span> institutionnels et techniques
+              </p>
+              <p className={`text-sm ${isDark ? "text-white/50" : "text-[#4A5568]"}`}>
+                H-Spatial collabore avec les acteurs majeurs du foncier, de l'urbanisme et de la géomatique en Côte d'Ivoire et en Afrique de l'Ouest.
+              </p>
+            </div>
           </Reveal>
         </div>
       </section>
