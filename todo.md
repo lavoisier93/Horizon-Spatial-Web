@@ -1,5 +1,5 @@
-# TODO V4
+# TODO V5
 
-- [ ] Menu hamburger mobile animé avec transitions fluides
-- [ ] Galerie de photos de projets (drone, plans approuvés, maquettes 3D)
-- [ ] Bandeau d'urgence réglementaire en haut de page
+- [ ] Mode sombre avec toggle dans la navbar
+- [ ] Section FAQ avec questions fréquentes des aménageurs
+- [ ] Animations de scroll subtiles (fade-in progressif des sections)

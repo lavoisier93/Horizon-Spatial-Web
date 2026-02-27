@@ -178,8 +178,14 @@ html {
   animation: heroFadeUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* ─── Reveal elements - always visible ─── */
+/* ─── Reveal elements - scroll fade-in ─── */
 .reveal-element {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.reveal-element.revealed {
   opacity: 1;
   transform: translateY(0);
 }
@@ -243,4 +249,36 @@ input:focus, select:focus, textarea:focus {
 select option {
   background-color: #0A1628;
   color: white;
+}
+
+/* ─── Dark mode overrides ─── */
+.dark body,
+.dark {
+  color-scheme: dark;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* ─── FAQ accordion animation ─── */
+.faq-answer {
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.3s ease;
+}
+
+/* ─── Dark mode toggle animation ─── */
+@keyframes toggleSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.theme-toggle-spin {
+  animation: toggleSpin 0.5s ease;
 }

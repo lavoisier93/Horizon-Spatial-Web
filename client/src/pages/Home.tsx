@@ -8,6 +8,7 @@
  * V2: + Formulaire de contact + Témoignages/Références + Bouton PDF
  * V3: + Navbar fixe + Compteurs animés + Bouton WhatsApp flottant
  * V4: + Bandeau d'urgence + Galerie photos projets + Menu hamburger animé
+ * V5: + Mode sombre + Section FAQ + Animations de scroll
  */
 
 import {
@@ -50,6 +51,11 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle,
+  Moon,
+  Sun,
+  HelpCircle,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -276,10 +282,11 @@ const navLinks = [
   { label: "Services", href: "#services" },
   { label: "Méthodologie", href: "#methodologie" },
   { label: "Références", href: "#references" },
+  { label: "FAQ", href: "#faq" },
   { label: "Contact", href: "#contact" },
 ];
 
-function Navbar() {
+function Navbar({ isDark, onToggleDark }: { isDark: boolean; onToggleDark: () => void }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -293,7 +300,7 @@ function Navbar() {
     <nav
       className={`fixed left-0 right-0 z-50 transition-all duration-500 print:hidden ${
         scrolled
-          ? "top-0 bg-white/95 backdrop-blur-lg shadow-lg shadow-black/5 py-3"
+          ? `top-0 ${isDark ? "bg-[#0A1628]/95" : "bg-white/95"} backdrop-blur-lg shadow-lg ${isDark ? "shadow-black/20" : "shadow-black/5"} py-3`
           : "top-[40px] bg-transparent py-5"
       }`}
     >
@@ -301,7 +308,7 @@ function Navbar() {
         {/* Logo */}
         <a href="#" className="flex items-center gap-2">
           <img
-            src={scrolled ? LOGO_COLOR : LOGO_WHITE}
+            src={scrolled ? (isDark ? LOGO_WHITE : LOGO_COLOR) : LOGO_WHITE}
             alt="H-Spatial"
             className="h-10 transition-all duration-300"
           />
@@ -315,7 +322,7 @@ function Navbar() {
               href={link.href}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                 scrolled
-                  ? "text-[#4A5568] hover:text-[#0047AB] hover:bg-[#0047AB]/5"
+                  ? isDark ? "text-white/70 hover:text-white hover:bg-white/10" : "text-[#4A5568] hover:text-[#0047AB] hover:bg-[#0047AB]/5"
                   : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
               style={poppins}
@@ -323,9 +330,10 @@ function Navbar() {
               {link.label}
             </a>
           ))}
+          <DarkModeToggle isDark={isDark} onToggle={onToggleDark} scrolled={scrolled} />
           <a
             href="#contact"
-            className="ml-3 px-5 py-2.5 bg-[#00A86B] hover:bg-[#009960] text-white text-sm font-semibold rounded-lg transition-all duration-300 shadow-md shadow-[#00A86B]/20"
+            className="ml-2 px-5 py-2.5 bg-[#00A86B] hover:bg-[#009960] text-white text-sm font-semibold rounded-lg transition-all duration-300 shadow-md shadow-[#00A86B]/20"
             style={poppins}
           >
             Devis gratuit
@@ -336,7 +344,7 @@ function Navbar() {
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className={`lg:hidden p-2 rounded-lg transition-colors ${
-            scrolled ? "text-[#0A1628] hover:bg-gray-100" : "text-white hover:bg-white/10"
+            scrolled ? (isDark ? "text-white hover:bg-white/10" : "text-[#0A1628] hover:bg-gray-100") : "text-white hover:bg-white/10"
           }`}
         >
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -346,7 +354,7 @@ function Navbar() {
       {/* Mobile menu - animated */}
       <div
         className={`lg:hidden overflow-hidden transition-all duration-500 ease-in-out border-t ${
-          scrolled ? "bg-white border-gray-100" : "bg-[#0A1628]/95 backdrop-blur-lg border-white/10"
+          scrolled ? (isDark ? "bg-[#0A1628]/95 backdrop-blur-lg border-white/10" : "bg-white border-gray-100") : "bg-[#0A1628]/95 backdrop-blur-lg border-white/10"
         }`}
         style={{
           maxHeight: mobileOpen ? "400px" : "0px",
@@ -362,7 +370,7 @@ function Navbar() {
                 onClick={() => setMobileOpen(false)}
                 className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                   scrolled
-                    ? "text-[#4A5568] hover:text-[#0047AB] hover:bg-[#0047AB]/5"
+                    ? isDark ? "text-white/70 hover:text-white hover:bg-white/10" : "text-[#4A5568] hover:text-[#0047AB] hover:bg-[#0047AB]/5"
                     : "text-white/80 hover:text-white hover:bg-white/10"
                 }`}
                 style={poppins}
@@ -569,6 +577,106 @@ function ProjectGallery() {
   );
 }
 
+// ─── FAQ DATA ────────────────────────────────
+const faqItems = [
+  {
+    q: "Quels sont les délais moyens pour obtenir l'approbation d'un lotissement ?",
+    a: "Le délai moyen est de 3 à 6 mois, selon la complexité du projet et la réactivité des services administratifs. Nous optimisons ce délai grâce à notre maîtrise du processus et nos relations avec les services compétents du Ministère.",
+  },
+  {
+    q: "Quels documents dois-je fournir pour démarrer mon projet ?",
+    a: "Vous devez fournir : le titre de propriété (ACD, certificat foncier ou lettre d'attribution), un plan de situation du terrain, et une note d'intention décrivant votre projet. Nous vous accompagnons pour constituer le reste du dossier.",
+  },
+  {
+    q: "Combien coûte la conception d'un plan de lotissement ?",
+    a: "Les honoraires dépendent de la superficie du terrain, du nombre de lots envisagés et de la complexité du projet. Nous proposons un devis gratuit et détaillé après une première analyse de votre projet. Nos tarifs sont compétitifs et transparents.",
+  },
+  {
+    q: "Pourquoi est-il obligatoire de faire appel à un urbaniste agréé ?",
+    a: "Le Code de l'Urbanisme de 2020 (Articles 60, 65 et 76) impose que tout projet de lotissement soit conçu par un urbaniste inscrit à l'O.N.U.C.I. Le non-respect expose à des sanctions pénales pouvant aller jusqu'à 2 ans d'emprisonnement et 50 millions FCFA d'amende.",
+  },
+  {
+    q: "Intervenez-vous en dehors d'Abidjan ?",
+    a: "Oui, nous intervenons sur l'ensemble du territoire ivoirien et dans la sous-région ouest-africaine (UEMOA/CEDEAO). Nos équipes se déplacent pour les levés topographiques et les visites de site, où que soit votre terrain.",
+  },
+  {
+    q: "Quelle est la différence entre H-Spatial et un géomètre ?",
+    a: "Un géomètre réalise les levés topographiques et le bornage. L'urbaniste conçoit le plan d'aménagement (découpage parcellaire, voiries, équipements). H-Spatial offre les deux compétences : urbanisme agréé O.N.U.C.I. ET géomatique avancée, pour un service intégré.",
+  },
+];
+
+// ─── FAQ SECTION COMPONENT ────────────────────
+function FAQSection({ isDark }: { isDark: boolean }) {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-3">
+      {faqItems.map((item, i) => {
+        const isOpen = openIdx === i;
+        return (
+          <div
+            key={i}
+            className={`rounded-xl border transition-all duration-300 ${
+              isDark
+                ? `border-white/10 ${isOpen ? "bg-white/5" : "bg-white/[0.02] hover:bg-white/5"}`
+                : `border-gray-200 ${isOpen ? "bg-[#0047AB]/5 border-[#0047AB]/20" : "bg-white hover:bg-gray-50"}`
+            }`}
+          >
+            <button
+              onClick={() => setOpenIdx(isOpen ? null : i)}
+              className="w-full flex items-start gap-4 p-5 text-left"
+            >
+              <div className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                isOpen
+                  ? "bg-[#0047AB] text-white"
+                  : isDark ? "bg-white/10 text-white/60" : "bg-[#0047AB]/10 text-[#0047AB]"
+              }`}>
+                {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+              </div>
+              <span className={`font-semibold text-sm md:text-base leading-snug ${
+                isDark ? "text-white" : "text-[#0A1628]"
+              }`} style={poppins}>
+                {item.q}
+              </span>
+            </button>
+            <div
+              className="faq-answer"
+              style={{
+                maxHeight: isOpen ? "300px" : "0px",
+                opacity: isOpen ? 1 : 0,
+              }}
+            >
+              <div className={`px-5 pb-5 pl-[4.25rem] text-sm leading-relaxed ${
+                isDark ? "text-white/60" : "text-[#4A5568]"
+              }`}>
+                {item.a}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── DARK MODE TOGGLE COMPONENT ────────────────
+function DarkModeToggle({ isDark, onToggle, scrolled }: { isDark: boolean; onToggle: () => void; scrolled: boolean }) {
+  return (
+    <button
+      onClick={onToggle}
+      className={`p-2 rounded-lg transition-all duration-300 ${
+        scrolled
+          ? "text-[#4A5568] hover:text-[#0047AB] hover:bg-[#0047AB]/5"
+          : "text-white/80 hover:text-white hover:bg-white/10"
+      }`}
+      aria-label={isDark ? "Passer en mode clair" : "Passer en mode sombre"}
+      title={isDark ? "Mode clair" : "Mode sombre"}
+    >
+      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+    </button>
+  );
+}
+
 // ─── CONTACT FORM COMPONENT ──────────────────────────
 function ContactForm() {
   const [formData, setFormData] = useState({
@@ -762,13 +870,23 @@ function ContactForm() {
 
 // ─── COMPONENT ────────────────────────────────────────
 export default function Home() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDark]);
+
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className={`min-h-screen overflow-x-hidden transition-colors duration-500 ${isDark ? "bg-[#0A1628]" : "bg-white"}`}>
       {/* Urgency Banner */}
       <UrgencyBanner />
 
       {/* Fixed Navbar */}
-      <Navbar />
+      <Navbar isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
 
       {/* WhatsApp Floating Button */}
       <WhatsAppButton />
@@ -840,7 +958,7 @@ export default function Home() {
       </section>
 
       {/* ===== SECTION 2: CADRE RÉGLEMENTAIRE ===== */}
-      <section id="reglementation" className="py-20 lg:py-28 bg-white relative overflow-hidden">
+      <section id="reglementation" className={`py-20 lg:py-28 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-[#0F1D32]" : "bg-white"}`}>
         <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: `url(${TOPO_IMG})`, backgroundSize: "cover" }} />
         <div className="container mx-auto px-6 lg:px-12 relative z-10">
           <Reveal>
@@ -849,11 +967,11 @@ export default function Home() {
                 <div className="w-10 h-1 bg-[#0047AB] rounded-full" />
                 <span className="text-[#0047AB] font-semibold text-sm uppercase tracking-wider" style={poppins}>Cadre Réglementaire</span>
               </div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#0A1628] leading-tight mb-6" style={poppins}>
+              <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
                 Pourquoi faire appel à un{" "}
                 <span className="text-[#0047AB]">Urbaniste Agréé</span> ?
               </h2>
-              <p className="text-lg text-[#4A5568] leading-relaxed">
+              <p className={`text-lg leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>
                 Depuis le Code de l'Urbanisme de 2020, tout projet de lotissement en Côte d'Ivoire
                 doit être réalisé par un urbaniste inscrit à l'Ordre National des Urbanistes (O.N.U.C.I.).
                 Le non-respect de cette obligation expose à des sanctions pénales lourdes.
@@ -863,18 +981,18 @@ export default function Home() {
 
           <div className="grid lg:grid-cols-2 gap-10">
             <Reveal delay={100}>
-              <div className="bg-[#F8FAFC] rounded-2xl p-8 border border-[#E2E8F0] h-full">
+              <div className={`rounded-2xl p-8 border h-full ${isDark ? "bg-white/5 border-white/10" : "bg-[#F8FAFC] border-[#E2E8F0]"}`}>
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 rounded-xl bg-[#0047AB]/10 flex items-center justify-center">
                     <Scale className="w-6 h-6 text-[#0047AB]" />
                   </div>
-                  <h3 className="text-xl font-bold text-[#0A1628]" style={poppins}>Ce que dit la loi</h3>
+                  <h3 className={`text-xl font-bold ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>Ce que dit la loi</h3>
                 </div>
                 <div className="space-y-4">
                   {articles.map((a) => (
-                    <div key={a.num} className="bg-white rounded-xl p-5 border border-[#E2E8F0]">
+                    <div key={a.num} className={`rounded-xl p-5 border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-[#E2E8F0]"}`}>
                       <div className="text-sm font-bold text-[#0047AB] mb-2" style={poppins}>{a.num}</div>
-                      <p className="text-sm text-[#4A5568] leading-relaxed">{a.text}</p>
+                      <p className={`text-sm leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>{a.text}</p>
                     </div>
                   ))}
                 </div>
@@ -883,20 +1001,20 @@ export default function Home() {
 
             <Reveal delay={200}>
               <div className="space-y-6 h-full flex flex-col">
-                <div className="bg-red-50 rounded-2xl p-8 border border-red-100 flex-1">
+                <div className={`rounded-2xl p-8 border flex-1 ${isDark ? "bg-red-900/20 border-red-800/30" : "bg-red-50 border-red-100"}`}>
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
                       <AlertTriangle className="w-6 h-6 text-red-600" />
                     </div>
-                    <h3 className="text-xl font-bold text-[#0A1628]" style={poppins}>Les risques concrets</h3>
+                    <h3 className={`text-xl font-bold ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>Les risques concrets</h3>
                   </div>
                   <div className="space-y-3">
                     {risks.map((r) => (
-                      <div key={r} className="flex items-start gap-3 bg-white/60 rounded-lg p-3 border border-red-100/50">
-                        <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <div key={r} className={`flex items-start gap-3 rounded-lg p-3 border ${isDark ? "bg-red-900/10 border-red-800/20" : "bg-white/60 border-red-100/50"}`}>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${isDark ? "bg-red-900/30" : "bg-red-100"}`}>
                           <span className="text-red-600 text-xs font-bold">!</span>
                         </div>
-                        <p className="text-sm text-[#4A5568]">{r}</p>
+                        <p className={`text-sm ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>{r}</p>
                       </div>
                     ))}
                   </div>
@@ -1010,8 +1128,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== SECTION 4: SERVICES ===== */}
-      <section id="services" className="py-20 lg:py-28 bg-[#F8FAFC] relative overflow-hidden">
+      {/* ===== SECTION 4: NOS SERVICES ===== */}
+      <section id="services" className={`py-20 lg:py-28 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-[#0F1D32]" : "bg-white"}`}>
         <div className="container mx-auto px-6 lg:px-12 relative z-10">
           <Reveal>
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -1020,11 +1138,11 @@ export default function Home() {
                 <span className="text-[#0047AB] font-semibold text-sm uppercase tracking-wider" style={poppins}>Nos Services</span>
                 <div className="w-10 h-1 bg-[#0047AB] rounded-full" />
               </div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#0A1628] leading-tight mb-6" style={poppins}>
+              <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
                 Une offre complète pour les{" "}
                 <span className="text-[#0047AB]">Aménageurs Fonciers</span>
               </h2>
-              <p className="text-lg text-[#4A5568] leading-relaxed">
+              <p className={`text-lg leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>
                 De l'étude préliminaire à la délivrance de l'arrêté d'approbation,
                 nous vous accompagnons à chaque étape de votre projet de lotissement.
               </p>
@@ -1034,7 +1152,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, i) => (
               <Reveal key={service.title} delay={i * 80}>
-                <div className="bg-white rounded-2xl p-8 border border-[#E2E8F0] hover:border-[#0047AB]/20 hover:shadow-xl hover:shadow-[#0047AB]/5 transition-all duration-500 h-full">
+                <div className={`rounded-2xl p-8 border transition-all duration-500 h-full ${isDark ? "bg-white/5 border-white/10 hover:border-[#0047AB]/30 hover:bg-white/[0.08]" : "bg-white border-[#E2E8F0] hover:border-[#0047AB]/20 hover:shadow-xl hover:shadow-[#0047AB]/5"}`}>
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-6" style={{ backgroundColor: `${service.color}10` }}>
                     <service.icon className="w-7 h-7" style={{ color: service.color }} />
                   </div>
@@ -1042,8 +1160,8 @@ export default function Home() {
                     <span className="text-xs font-bold text-[#0047AB]/30" style={poppins}>0{i + 1}</span>
                     <div className="w-6 h-px bg-[#E2E8F0]" />
                   </div>
-                  <h3 className="text-lg font-bold text-[#0A1628] mb-3" style={poppins}>{service.title}</h3>
-                  <p className="text-sm text-[#4A5568] leading-relaxed">{service.desc}</p>
+                  <h3 className={`text-lg font-bold mb-3 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{service.title}</h3>
+                  <p className={`text-sm leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>{service.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -1051,32 +1169,32 @@ export default function Home() {
 
           {/* Plan de lotissement showcase */}
           <Reveal delay={200}>
-            <div className="mt-16 bg-white rounded-2xl p-6 lg:p-10 border border-[#E2E8F0] shadow-sm">
+            <div className={`mt-16 rounded-2xl p-6 lg:p-10 border shadow-sm ${isDark ? "bg-white/5 border-white/10" : "bg-white border-[#E2E8F0]"}`}>
               <div className="grid lg:grid-cols-5 gap-8 items-center">
                 <div className="lg:col-span-2">
                   <div className="flex items-center gap-2 mb-4">
                     <Layers className="w-5 h-5 text-[#0047AB]" />
                     <span className="text-[#0047AB] font-semibold text-sm uppercase tracking-wider" style={poppins}>Exemple de réalisation</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-[#0A1628] mb-4" style={poppins}>Plan de Lotissement</h3>
-                  <p className="text-[#4A5568] leading-relaxed mb-6">
+                  <h3 className={`text-2xl font-bold mb-4 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>Plan de Lotissement</h3>
+                  <p className={`leading-relaxed mb-6 ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>
                     Aménagement d'un site de plus de 10 hectares comprenant 177 lots,
                     des espaces verts, des équipements publics (groupes scolaires,
                     aires de jeux, centres de préscolaire) et un réseau viaire structuré.
                   </p>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-[#F8FAFC] rounded-xl p-4 border border-[#E2E8F0]">
+                    <div className={`rounded-xl p-4 border ${isDark ? "bg-white/5 border-white/10" : "bg-[#F8FAFC] border-[#E2E8F0]"}`}>
                       <div className="text-2xl font-bold text-[#0047AB]" style={poppins}>10 Ha</div>
-                      <div className="text-xs text-[#4A5568] mt-1">Surface totale</div>
+                      <div className={`text-xs mt-1 ${isDark ? "text-white/40" : "text-[#4A5568]"}`}>Surface totale</div>
                     </div>
-                    <div className="bg-[#F8FAFC] rounded-xl p-4 border border-[#E2E8F0]">
+                    <div className={`rounded-xl p-4 border ${isDark ? "bg-white/5 border-white/10" : "bg-[#F8FAFC] border-[#E2E8F0]"}`}>
                       <div className="text-2xl font-bold text-[#00A86B]" style={poppins}>177</div>
-                      <div className="text-xs text-[#4A5568] mt-1">Lots créés</div>
+                      <div className={`text-xs mt-1 ${isDark ? "text-white/40" : "text-[#4A5568]"}`}>Lots créés</div>
                     </div>
                   </div>
                 </div>
                 <div className="lg:col-span-3">
-                  <div className="rounded-xl overflow-hidden border border-[#E2E8F0] shadow-lg">
+                  <div className={`rounded-xl overflow-hidden border shadow-lg ${isDark ? "border-white/10" : "border-[#E2E8F0]"}`}>
                     <img src={PLAN_IMG} alt="Plan de lotissement - Aménagement 10ha" className="w-full h-auto" />
                   </div>
                 </div>
@@ -1140,7 +1258,7 @@ export default function Home() {
       </section>
 
       {/* ===== SECTION 6: POURQUOI NOUS CHOISIR ===== */}
-      <section className="py-20 lg:py-28 bg-white relative overflow-hidden">
+      <section className={`py-20 lg:py-28 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-[#0F1D32]" : "bg-white"}`}>
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `url(${TOPO_IMG})`, backgroundSize: "cover" }} />
         <div className="container mx-auto px-6 lg:px-12 relative z-10">
           <Reveal>
@@ -1150,7 +1268,7 @@ export default function Home() {
                 <span className="text-[#00A86B] font-semibold text-sm uppercase tracking-wider" style={poppins}>Nos Avantages</span>
                 <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
               </div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#0A1628] leading-tight" style={poppins}>
+              <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold leading-tight ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
                 Pourquoi choisir{" "}
                 <span className="text-[#0047AB]">H-Spatial</span> ?
               </h2>
@@ -1160,12 +1278,12 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {advantages.map((adv, i) => (
               <Reveal key={adv.title} delay={i * 80}>
-                <div className="text-center p-8 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] hover:shadow-lg transition-all duration-300 h-full">
+                <div className={`text-center p-8 rounded-2xl border transition-all duration-300 h-full ${isDark ? "bg-white/5 border-white/10 hover:bg-white/[0.08]" : "bg-[#F8FAFC] border-[#E2E8F0] hover:shadow-lg"}`}>
                   <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-6" style={{ backgroundColor: `${adv.accent}10` }}>
                     <adv.icon className="w-8 h-8" style={{ color: adv.accent }} />
                   </div>
-                  <h3 className="text-lg font-bold text-[#0A1628] mb-3" style={poppins}>{adv.title}</h3>
-                  <p className="text-sm text-[#4A5568] leading-relaxed">{adv.desc}</p>
+                  <h3 className={`text-lg font-bold mb-3 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{adv.title}</h3>
+                  <p className={`text-sm leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>{adv.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -1179,7 +1297,7 @@ export default function Home() {
                 <span className="text-[#00A86B] font-semibold text-sm uppercase tracking-wider" style={poppins}>Galerie de Projets</span>
                 <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
               </div>
-              <h3 className="text-2xl md:text-3xl font-bold text-[#0A1628] text-center mb-10" style={poppins}>
+              <h3 className={`text-2xl md:text-3xl font-bold text-center mb-10 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
                 Nos réalisations en <span className="text-[#0047AB]">images</span>
               </h3>
               <ProjectGallery />
@@ -1189,7 +1307,7 @@ export default function Home() {
       </section>
 
       {/* ===== SECTION 7: TÉMOIGNAGES & RÉFÉRENCES (NEW) ===== */}
-      <section id="references" className="py-20 lg:py-28 bg-[#F8FAFC] relative overflow-hidden">
+      <section id="references" className={`py-20 lg:py-28 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-[#0A1628]" : "bg-[#F8FAFC]"}`}>
         <div className="container mx-auto px-6 lg:px-12 relative z-10">
           <Reveal>
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -1198,11 +1316,11 @@ export default function Home() {
                 <span className="text-[#0047AB] font-semibold text-sm uppercase tracking-wider" style={poppins}>Références & Témoignages</span>
                 <div className="w-10 h-1 bg-[#0047AB] rounded-full" />
               </div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#0A1628] leading-tight mb-6" style={poppins}>
+              <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
                 Ils nous font{" "}
                 <span className="text-[#0047AB]">confiance</span>
               </h2>
-              <p className="text-lg text-[#4A5568] leading-relaxed">
+              <p className={`text-lg leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>
                 Des projets réalisés avec succès et des partenaires satisfaits à travers la Côte d'Ivoire.
               </p>
             </div>
@@ -1212,7 +1330,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-6 mb-16">
             {references.map((ref, i) => (
               <Reveal key={ref.type} delay={i * 100}>
-                <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden hover:shadow-xl hover:shadow-[#0047AB]/5 transition-all duration-500 h-full">
+                <div className={`rounded-2xl border overflow-hidden transition-all duration-500 h-full ${isDark ? "bg-white/5 border-white/10 hover:bg-white/[0.08]" : "bg-white border-[#E2E8F0] hover:shadow-xl hover:shadow-[#0047AB]/5"}`}>
                   <div className="bg-[#0047AB] p-6">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
@@ -1235,7 +1353,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="p-6">
-                    <p className="text-sm text-[#4A5568] leading-relaxed">{ref.details}</p>
+                    <p className={`text-sm leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>{ref.details}</p>
                     <div className="mt-4 flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-[#00A86B]" />
                       <span className="text-xs text-[#00A86B] font-medium">Projet livré avec succès</span>
@@ -1250,7 +1368,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
               <Reveal key={t.company} delay={i * 100 + 300}>
-                <div className="bg-white rounded-2xl p-8 border border-[#E2E8F0] h-full relative">
+                <div className={`rounded-2xl p-8 border h-full relative ${isDark ? "bg-white/5 border-white/10" : "bg-white border-[#E2E8F0]"}`}>
                   <div className="absolute top-6 right-6">
                     <Quote className="w-8 h-8 text-[#0047AB]/10" />
                   </div>
@@ -1259,17 +1377,41 @@ export default function Home() {
                       <Star key={j} className="w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
                     ))}
                   </div>
-                  <p className="text-sm text-[#4A5568] leading-relaxed mb-6 italic">
+                  <p className={`text-sm leading-relaxed mb-6 italic ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>
                     "{t.text}"
                   </p>
-                  <div className="border-t border-[#E2E8F0] pt-4">
-                    <div className="font-bold text-[#0A1628] text-sm" style={poppins}>{t.name}</div>
-                    <div className="text-xs text-[#4A5568]">{t.company}</div>
+                  <div className={`border-t pt-4 ${isDark ? "border-white/10" : "border-[#E2E8F0]"}`}>
+                    <div className={`font-bold text-sm ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{t.name}</div>
+                    <div className={`text-xs ${isDark ? "text-white/40" : "text-[#4A5568]"}`}>{t.company}</div>
                   </div>
                 </div>
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ===== SECTION 7.5: FAQ ===== */}
+      <section id="faq" className={`py-20 lg:py-28 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-[#0F1D32]" : "bg-white"}`}>
+        <div className="container mx-auto px-6 lg:px-12 relative z-10">
+          <Reveal>
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
+                <span className="text-[#00A86B] font-semibold text-sm uppercase tracking-wider" style={poppins}>Questions Fréquentes</span>
+                <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
+              </div>
+              <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
+                Vos <span className="text-[#0047AB]">questions</span>, nos réponses
+              </h2>
+              <p className={`text-lg leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>
+                Retrouvez les réponses aux questions les plus fréquemment posées par les aménageurs fonciers et promoteurs immobiliers.
+              </p>
+            </div>
+          </Reveal>
+          <Reveal delay={100}>
+            <FAQSection isDark={isDark} />
+          </Reveal>
         </div>
       </section>
 
