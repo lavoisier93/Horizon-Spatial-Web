@@ -6,6 +6,7 @@
  * NO framer-motion — pure CSS animations for reliability
  * 
  * V2: + Formulaire de contact + Témoignages/Références + Bouton PDF
+ * V3: + Navbar fixe + Compteurs animés + Bouton WhatsApp flottant
  */
 
 import {
@@ -41,6 +42,8 @@ import {
   User,
   MessageSquare,
   Briefcase,
+  Menu,
+  X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -52,7 +55,10 @@ const OFFICE_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQI
 const LEGAL_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/1TrO5oX90s8Qy1dr4Oqoy5-img-4_1772151146000_na1fn_bGVnYWwtY29tcGxpYW5jZQ.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94LzFUck81b1g5MHM4UXkxZHI0T3FveTUtaW1nLTRfMTc3MjE1MTE0NjAwMF9uYTFmbl9iR1ZuWVd3dFkyOXRjR3hwWVc1alpRLmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=LcxV98B9g1ksDwQCJGC2hI4YTcTXEZL4sU50AdzJJZEgwMJ~p7MBKxqTBIT2AFCKpms4bsXOaPVfISu7xH5n8QL6N7KqZhMm0kFgHcc3Ha9QO0EGfVRrOkJOCkfJ5VUxNMYH1kf7B7rH7F4oG8pM9idKt7mU9-4xPzgsKudp~du3I1VulDezAUz07scI3JNjsoSnQgQFg5uVmJCrlHx7bSjHX2cPX58ZymNmOcBPjRvkuqk4GIBCA-vCq0kSv95Vupj1sNCN84UHW0u6mi6S5F-rM2AxaBEBpjzRCRiSJHuBLbT~w-9xMYInOPhNlcOyB7rfd5y5DQCWwdDrfOqkpg__";
 const TOPO_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/1TrO5oX90s8Qy1dr4Oqoy5-img-5_1772151172000_na1fn_dG9wby1wYXR0ZXJu.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94LzFUck81b1g5MHM4UXkxZHI0T3FveTUtaW1nLTVfMTc3MjE1MTE3MjAwMF9uYTFmbl9kRzl3Ynkxd1lYUjBaWEp1LnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=gKwZ1k6Nc2~9wd663cVE51kJSwGyU50QQoDOho9psivHmrU9TCYLLFGJxyVWYSnOk7bZ3hlTI3iVfIPP4fa98FOWPRAx8a1swapmHB59NECN~fzl2oDYqlUAuobu719dB4CIv3tbKhuKcRwDNqp6c~5PaFN35~pus3b7CAIFFYOhClpFpCl~SDqj1KXUsYaA1Wujj7dSdo2tKkjsUSqkjC9rlMZAJ2XRJxzx5rTUPvkjYVNrowEVzuhq2tLKNxIdQ7IzUVcDAfWXCYDEBCW0CTcPVQDs22nmRK9-0fSg14E19UG7rOhQk7RUNgjJ2IAGjzhlb4i01m5Zj~rQ7FJTRw__";
 const PLAN_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/yIyJWJSLuFtsFAez.png";
-const LAVOISIER_IMG = "https://media.licdn.com/dms/image/v2/D4E03AQFHCcvtY87wFQ/profile-displayphoto-scale_400_400/B4EZqECF01KcAk-/0/1763151733801?e=1765411200&v=beta&t=hswoEAgTvAsRL6TJTvdm1aTcuhuF9_9cnXzg9PBy19M";
+const LAVOISIER_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/wTZkjIfvofzfEdGe.png";
+const LAVOISIER_ONUCI_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/txpCQkaXHRfFEpEb.jpg";
+const LOGO_COLOR = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/iMiXhhfBFkffYFqG.png";
+const WHATSAPP_NUMBER = "2250143430505";
 
 const poppins = { fontFamily: "'Poppins', sans-serif" };
 
@@ -198,10 +204,214 @@ const testimonials = [
   },
 ];
 
-// ─── PDF DOWNLOAD HANDLER ─────────────────────────────
+//// ─── PDF DOWNLOAD HANDLER ─────────────────────────
 function handleDownloadPDF() {
-  // Print-optimized version of the page
   window.print();
+}
+
+// ─── ANIMATED COUNTER HOOK ──────────────────────
+function useCountUp(target: number, duration: number = 2000, suffix: string = "") {
+  const [count, setCount] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasStarted) {
+          setHasStarted(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasStarted]);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+    let startTime: number | null = null;
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * target));
+      if (progress < 1) requestAnimationFrame(step);
+      else setCount(target);
+    };
+    requestAnimationFrame(step);
+  }, [hasStarted, target, duration]);
+
+  return { ref, count, suffix };
+}
+
+function AnimatedStat({ value, label, suffix = "" }: { value: number; label: string; suffix?: string }) {
+  const { ref, count } = useCountUp(value, 2000);
+  return (
+    <div ref={ref}>
+      <div className="text-3xl lg:text-4xl font-bold text-white" style={poppins}>
+        {count}{suffix}
+      </div>
+      <div className="text-sm text-white/60 mt-1">{label}</div>
+    </div>
+  );
+}
+
+// ─── NAVBAR COMPONENT ──────────────────────────
+const navLinks = [
+  { label: "Réglementation", href: "#reglementation" },
+  { label: "Services", href: "#services" },
+  { label: "Méthodologie", href: "#methodologie" },
+  { label: "Références", href: "#references" },
+  { label: "Contact", href: "#contact" },
+];
+
+function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 print:hidden ${
+        scrolled
+          ? "bg-white/95 backdrop-blur-lg shadow-lg shadow-black/5 py-3"
+          : "bg-transparent py-5"
+      }`}
+    >
+      <div className="container mx-auto px-6 lg:px-12 flex items-center justify-between">
+        {/* Logo */}
+        <a href="#" className="flex items-center gap-2">
+          <img
+            src={scrolled ? LOGO_COLOR : LOGO_WHITE}
+            alt="H-Spatial"
+            className="h-10 transition-all duration-300"
+          />
+        </a>
+
+        {/* Desktop links */}
+        <div className="hidden lg:flex items-center gap-1">
+          {navLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                scrolled
+                  ? "text-[#4A5568] hover:text-[#0047AB] hover:bg-[#0047AB]/5"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+              style={poppins}
+            >
+              {link.label}
+            </a>
+          ))}
+          <a
+            href="#contact"
+            className="ml-3 px-5 py-2.5 bg-[#00A86B] hover:bg-[#009960] text-white text-sm font-semibold rounded-lg transition-all duration-300 shadow-md shadow-[#00A86B]/20"
+            style={poppins}
+          >
+            Devis gratuit
+          </a>
+        </div>
+
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className={`lg:hidden p-2 rounded-lg transition-colors ${
+            scrolled ? "text-[#0A1628] hover:bg-gray-100" : "text-white hover:bg-white/10"
+          }`}
+        >
+          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </div>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className={`lg:hidden border-t ${
+          scrolled ? "bg-white border-gray-100" : "bg-[#0A1628]/95 backdrop-blur-lg border-white/10"
+        }`}>
+          <div className="container mx-auto px-6 py-4 space-y-1">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  scrolled
+                    ? "text-[#4A5568] hover:text-[#0047AB] hover:bg-[#0047AB]/5"
+                    : "text-white/80 hover:text-white hover:bg-white/10"
+                }`}
+                style={poppins}
+              >
+                {link.label}
+              </a>
+            ))}
+            <a
+              href="#contact"
+              onClick={() => setMobileOpen(false)}
+              className="block px-4 py-3 bg-[#00A86B] hover:bg-[#009960] text-white text-sm font-semibold rounded-lg text-center mt-2"
+              style={poppins}
+            >
+              Devis gratuit
+            </a>
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+}
+
+// ─── WHATSAPP FLOATING BUTTON ───────────────────
+function WhatsAppButton() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!visible) return null;
+
+  const message = encodeURIComponent(
+    "Bonjour H-Spatial, je suis intéressé(e) par vos services d'urbanisme pour mon projet de lotissement. Pouvez-vous me recontacter ?"
+  );
+
+  return (
+    <a
+      href={`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="fixed bottom-6 right-6 z-50 group print:hidden"
+      aria-label="Contacter via WhatsApp"
+    >
+      <div className="relative">
+        {/* Pulse ring */}
+        <div className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20" />
+        {/* Button */}
+        <div className="relative w-16 h-16 rounded-full bg-[#25D366] hover:bg-[#20BD5A] shadow-xl shadow-[#25D366]/30 hover:shadow-2xl hover:shadow-[#25D366]/40 flex items-center justify-center transition-all duration-300 hover:scale-110">
+          <svg viewBox="0 0 24 24" className="w-8 h-8 fill-white">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+          </svg>
+        </div>
+        {/* Tooltip */}
+        <div className="absolute bottom-full right-0 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <div className="bg-[#0A1628] text-white text-xs font-medium px-4 py-2.5 rounded-xl whitespace-nowrap shadow-xl" style={poppins}>
+            Discuter sur WhatsApp
+            <div className="absolute top-full right-6 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#0A1628]" />
+          </div>
+        </div>
+      </div>
+    </a>
+  );
 }
 
 // ─── CONTACT FORM COMPONENT ──────────────────────────
@@ -399,6 +609,11 @@ function ContactForm() {
 export default function Home() {
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
+      {/* Fixed Navbar */}
+      <Navbar />
+
+      {/* WhatsApp Floating Button */}
+      <WhatsAppButton />
 
       {/* ===== SECTION 1: HERO / COVER ===== */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -410,10 +625,6 @@ export default function Home() {
         <div className="relative z-10 w-full">
           <div className="container mx-auto px-6 lg:px-12 py-20">
             <div className="max-w-3xl hero-content">
-              <div className="mb-10 hero-fade" style={{ animationDelay: "0.1s" }}>
-                <img src={LOGO_WHITE} alt="Horizon Spatial" className="h-16 lg:h-20" />
-              </div>
-
               <div className="mb-6 hero-fade" style={{ animationDelay: "0.3s" }}>
                 <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium">
                   <BadgeCheck className="w-4 h-4 text-[#00A86B]" />
@@ -455,16 +666,9 @@ export default function Home() {
               </div>
 
               <div className="mt-14 grid grid-cols-3 gap-8 max-w-lg hero-fade" style={{ animationDelay: "1.1s" }}>
-                {[
-                  { value: "8+", label: "Années d'expérience" },
-                  { value: "100%", label: "Conformité légale" },
-                  { value: "2", label: "Pôles d'expertise" },
-                ].map((stat) => (
-                  <div key={stat.label}>
-                    <div className="text-3xl lg:text-4xl font-bold text-white" style={poppins}>{stat.value}</div>
-                    <div className="text-sm text-white/60 mt-1">{stat.label}</div>
-                  </div>
-                ))}
+                <AnimatedStat value={8} label="Années d'expérience" suffix="+" />
+                <AnimatedStat value={100} label="Conformité légale" suffix="%" />
+                <AnimatedStat value={2} label="Pôles d'expertise" />
               </div>
             </div>
           </div>
@@ -478,7 +682,7 @@ export default function Home() {
       </section>
 
       {/* ===== SECTION 2: CADRE RÉGLEMENTAIRE ===== */}
-      <section className="py-20 lg:py-28 bg-white relative overflow-hidden">
+      <section id="reglementation" className="py-20 lg:py-28 bg-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: `url(${TOPO_IMG})`, backgroundSize: "cover" }} />
         <div className="container mx-auto px-6 lg:px-12 relative z-10">
           <Reveal>
@@ -582,9 +786,15 @@ export default function Home() {
 
           <div className="grid lg:grid-cols-12 gap-10">
             <Reveal delay={100} className="lg:col-span-4">
-              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 h-full">
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-[#00A86B]/30 mb-5">
+              <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 h-full overflow-hidden">
+                {/* Photo de groupe O.N.U.C.I. en arrière-plan */}
+                <div className="relative h-36 overflow-hidden">
+                  <img src={LAVOISIER_ONUCI_IMG} alt="Cérémonie O.N.U.C.I." className="w-full h-full object-cover object-top" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0A1628]" />
+                </div>
+                {/* Portrait circulaire */}
+                <div className="flex flex-col items-center text-center px-8 pb-8 -mt-14 relative z-10">
+                  <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-[#00A86B]/40 mb-5 shadow-xl shadow-black/30 ring-2 ring-white/10">
                     <img src={LAVOISIER_IMG} alt="Lavoisier Ousmane" className="w-full h-full object-cover" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-1" style={poppins}>Lavoisier Ousmane</h3>
@@ -719,7 +929,7 @@ export default function Home() {
       </section>
 
       {/* ===== SECTION 5: PROCESSUS ===== */}
-      <section className="py-20 lg:py-28 bg-[#0047AB] relative overflow-hidden">
+      <section id="methodologie" className="py-20 lg:py-28 bg-[#0047AB] relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <img src={DRONE_IMG} alt="" className="w-full h-full object-cover" />
         </div>
@@ -812,7 +1022,7 @@ export default function Home() {
       </section>
 
       {/* ===== SECTION 7: TÉMOIGNAGES & RÉFÉRENCES (NEW) ===== */}
-      <section className="py-20 lg:py-28 bg-[#F8FAFC] relative overflow-hidden">
+      <section id="references" className="py-20 lg:py-28 bg-[#F8FAFC] relative overflow-hidden">
         <div className="container mx-auto px-6 lg:px-12 relative z-10">
           <Reveal>
             <div className="text-center max-w-3xl mx-auto mb-16">
