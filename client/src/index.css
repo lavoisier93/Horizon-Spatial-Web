@@ -282,3 +282,13 @@ select option {
 .theme-toggle-spin {
   animation: toggleSpin 0.5s ease;
 }
+
+/* ─── Carrousel logos footer ─── */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}

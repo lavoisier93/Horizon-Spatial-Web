@@ -10,6 +10,7 @@
  * V4: + Bandeau d'urgence + Galerie photos projets + Menu hamburger animé
  * V5: + Mode sombre + Section FAQ + Animations de scroll
  * V6: + Section Partenaires Institutionnels (9 logos)
+ * V7: + Lien Partenaires navbar + Carrousel logos footer + Liens cliquables sites officiels
  */
 
 import {
@@ -57,6 +58,8 @@ import {
   HelpCircle,
   Plus,
   Minus,
+  Linkedin,
+  Facebook,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -72,6 +75,8 @@ const LAVOISIER_IMG = "https://files.manuscdn.com/user_upload_by_module/session_
 const LAVOISIER_ONUCI_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/txpCQkaXHRfFEpEb.jpg";
 const LOGO_COLOR = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/iMiXhhfBFkffYFqG.png";
 const WHATSAPP_NUMBER = "2250143430505";
+const LINKEDIN_URL = "https://www.linkedin.com/company/horizon-spatial/?viewAsMember=true";
+const FACEBOOK_URL = "https://www.facebook.com/profile.php?id=100091959134098&sk=about";
 
 // Logos partenaires institutionnels
 const LOGO_MCLU = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/rtgqWktgGTrElydU.png";
@@ -294,6 +299,7 @@ const navLinks = [
   { label: "Méthodologie", href: "#methodologie" },
   { label: "Références", href: "#references" },
   { label: "FAQ", href: "#faq" },
+  { label: "Partenaires", href: "#partenaires" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -1452,15 +1458,18 @@ export default function Home() {
               <h3 className={`text-center text-sm font-semibold uppercase tracking-widest mb-8 ${isDark ? "text-white/40" : "text-[#4A5568]/60"}`} style={poppins}>Institutions & Ordres Professionnels</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 {[
-                  { src: LOGO_MCLU, name: "MCLU", desc: "Ministère de la Construction" },
-                  { src: LOGO_GEOMETRES, name: "OGE-CI", desc: "Ordre des Géomètres-Experts" },
-                  { src: LOGO_OACI, name: "OACI", desc: "Ordre des Architectes" },
-                  { src: LOGO_BNETD, name: "BNETD", desc: "Bureau National d'Études" },
-                  { src: LOGO_DISTRICT, name: "District d'Abidjan", desc: "District Autonome" },
+                  { src: LOGO_MCLU, name: "MCLU", desc: "Ministère de la Construction", url: "https://construction.gouv.ci" },
+                  { src: LOGO_GEOMETRES, name: "OGE-CI", desc: "Ordre des Géomètres-Experts", url: "https://www.geometres-experts.ci" },
+                  { src: LOGO_OACI, name: "OACI", desc: "Ordre des Architectes", url: "https://www.oaci.ci" },
+                  { src: LOGO_BNETD, name: "BNETD", desc: "Bureau National d'Études", url: "https://www.bnetd.ci" },
+                  { src: LOGO_DISTRICT, name: "District d'Abidjan", desc: "District Autonome", url: "https://www.abidjan.district.ci" },
                 ].map((p, i) => (
-                  <div
+                  <a
                     key={i}
-                    className={`group flex flex-col items-center justify-center p-6 rounded-xl border transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                    href={p.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`group flex flex-col items-center justify-center p-6 rounded-xl border transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer no-underline ${
                       isDark
                         ? "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
                         : "bg-white border-gray-200 hover:border-[#0047AB]/30 hover:shadow-[#0047AB]/10"
@@ -1471,7 +1480,8 @@ export default function Home() {
                     </div>
                     <span className={`text-xs font-bold text-center ${isDark ? "text-white/80" : "text-[#0A1628]"}`} style={poppins}>{p.name}</span>
                     <span className={`text-[10px] text-center mt-0.5 ${isDark ? "text-white/40" : "text-[#4A5568]/70"}`}>{p.desc}</span>
-                  </div>
+                    <span className="text-[9px] text-[#0047AB] opacity-0 group-hover:opacity-100 transition-opacity mt-1">Visiter le site &rarr;</span>
+                  </a>
                 ))}
               </div>
             </div>
@@ -1483,14 +1493,17 @@ export default function Home() {
               <h3 className={`text-center text-sm font-semibold uppercase tracking-widest mb-8 ${isDark ? "text-white/40" : "text-[#4A5568]/60"}`} style={poppins}>Partenaires Techniques & Fonciers</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {[
-                  { src: LOGO_IGNFI, name: "IGN FI", desc: "Ingénierie Géospatiale" },
-                  { src: LOGO_GEOFIT, name: "GeoFIT", desc: "Géomatique & Topographie" },
-                  { src: LOGO_AFOR, name: "AFOR", desc: "Agence Foncière Rurale" },
-                  { src: LAVOISIER_ONUCI_IMG, name: "O.N.U.C.I.", desc: "Ordre National des Urbanistes" },
+                  { src: LOGO_IGNFI, name: "IGN FI", desc: "Ingénierie Géospatiale", url: "https://www.ignfi.fr" },
+                  { src: LOGO_GEOFIT, name: "GeoFIT", desc: "Géomatique & Topographie", url: "https://www.geofit.fr" },
+                  { src: LOGO_AFOR, name: "AFOR", desc: "Agence Foncière Rurale", url: "https://www.afor.ci" },
+                  { src: LAVOISIER_ONUCI_IMG, name: "O.N.U.C.I.", desc: "Ordre National des Urbanistes", url: "https://www.onuci.org" },
                 ].map((p, i) => (
-                  <div
+                  <a
                     key={i}
-                    className={`group flex flex-col items-center justify-center p-6 rounded-xl border transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                    href={p.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`group flex flex-col items-center justify-center p-6 rounded-xl border transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer no-underline ${
                       isDark
                         ? "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
                         : "bg-white border-gray-200 hover:border-[#00A86B]/30 hover:shadow-[#00A86B]/10"
@@ -1501,7 +1514,8 @@ export default function Home() {
                     </div>
                     <span className={`text-xs font-bold text-center ${isDark ? "text-white/80" : "text-[#0A1628]"}`} style={poppins}>{p.name}</span>
                     <span className={`text-[10px] text-center mt-0.5 ${isDark ? "text-white/40" : "text-[#4A5568]/70"}`}>{p.desc}</span>
-                  </div>
+                    <span className="text-[9px] text-[#00A86B] opacity-0 group-hover:opacity-100 transition-opacity mt-1">Visiter le site &rarr;</span>
+                  </a>
                 ))}
               </div>
             </div>
@@ -1569,6 +1583,28 @@ export default function Home() {
                   </a>
                 </div>
 
+                {/* Réseaux sociaux */}
+                <div className="flex gap-4 mt-2">
+                  <a
+                    href={LINKEDIN_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-5 py-3 bg-[#0077B5]/20 backdrop-blur-sm rounded-xl border border-[#0077B5]/30 hover:bg-[#0077B5]/30 transition-all duration-300"
+                  >
+                    <Linkedin className="w-5 h-5 text-[#0077B5]" />
+                    <span className="text-white font-medium text-sm">LinkedIn</span>
+                  </a>
+                  <a
+                    href={FACEBOOK_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-5 py-3 bg-[#1877F2]/20 backdrop-blur-sm rounded-xl border border-[#1877F2]/30 hover:bg-[#1877F2]/30 transition-all duration-300"
+                  >
+                    <Facebook className="w-5 h-5 text-[#1877F2]" />
+                    <span className="text-white font-medium text-sm">Facebook</span>
+                  </a>
+                </div>
+
                 {/* PDF Download button */}
                 <button
                   onClick={handleDownloadPDF}
@@ -1601,15 +1637,62 @@ export default function Home() {
       </section>
 
       {/* ===== FOOTER ===== */}
-      <footer className="bg-[#0A1628] py-8 border-t border-white/5">
+      <footer className="bg-[#0A1628] pt-8 pb-6 border-t border-white/5">
+        {/* Carrousel de logos partenaires */}
+        <div className="mb-8 overflow-hidden">
+          <p className="text-center text-white/20 text-[10px] uppercase tracking-widest mb-4" style={poppins}>Nos partenaires institutionnels</p>
+          <div className="relative">
+            <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[#0A1628] to-transparent z-10" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#0A1628] to-transparent z-10" />
+            <div className="flex animate-[scroll_25s_linear_infinite] gap-12 items-center w-max">
+              {[...Array(3)].map((_, setIdx) => (
+                <div key={setIdx} className="flex gap-12 items-center">
+                  {[
+                    { src: LOGO_MCLU, name: "MCLU", url: "https://construction.gouv.ci" },
+                    { src: LOGO_GEOMETRES, name: "OGE-CI", url: "https://www.geometres-experts.ci" },
+                    { src: LOGO_OACI, name: "OACI", url: "https://www.oaci.ci" },
+                    { src: LOGO_BNETD, name: "BNETD", url: "https://www.bnetd.ci" },
+                    { src: LOGO_DISTRICT, name: "District", url: "https://www.abidjan.district.ci" },
+                    { src: LOGO_IGNFI, name: "IGN FI", url: "https://www.ignfi.fr" },
+                    { src: LOGO_GEOFIT, name: "GeoFIT", url: "https://www.geofit.fr" },
+                    { src: LOGO_AFOR, name: "AFOR", url: "https://www.afor.ci" },
+                  ].map((p, i) => (
+                    <a
+                      key={`${setIdx}-${i}`}
+                      href={p.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-1 opacity-40 hover:opacity-80 transition-opacity shrink-0"
+                      title={p.name}
+                    >
+                      <img src={p.src} alt={p.name} className="h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all" />
+                      <span className="text-white/30 text-[8px]">{p.name}</span>
+                    </a>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         <div className="container mx-auto px-6 lg:px-12">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="border-t border-white/5 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <img src={LOGO_WHITE} alt="H-Spatial" className="h-8" />
               <span className="text-white/30 text-sm">Bureau d'Études d'Urbaniste Agréé & Géomatique</span>
             </div>
-            <div className="text-white/20 text-xs">
-              RCCM : CI-ABJ-03-2026-B13-00264 | Abidjan, Côte d'Ivoire
+            <div className="flex items-center gap-4">
+              <span className="text-white/20 text-xs">
+                RCCM : CI-ABJ-03-2026-B13-00264 | Abidjan, Côte d'Ivoire
+              </span>
+              <div className="flex gap-2">
+                <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-full bg-white/5 hover:bg-[#0077B5]/30 flex items-center justify-center transition-all" title="LinkedIn">
+                  <Linkedin className="w-3.5 h-3.5 text-white/40 hover:text-white" />
+                </a>
+                <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-full bg-white/5 hover:bg-[#1877F2]/30 flex items-center justify-center transition-all" title="Facebook">
+                  <Facebook className="w-3.5 h-3.5 text-white/40 hover:text-white" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
