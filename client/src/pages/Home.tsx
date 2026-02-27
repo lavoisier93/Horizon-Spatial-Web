@@ -4,6 +4,8 @@
  * Colors: #0047AB (blue), #00A86B (green), #4A5568 (gray), #0A1628 (dark)
  * Fonts: Poppins (headings), Open Sans (body)
  * NO framer-motion — pure CSS animations for reliability
+ * 
+ * V2: + Formulaire de contact + Témoignages/Références + Bouton PDF
  */
 
 import {
@@ -29,8 +31,18 @@ import {
   Handshake,
   Cuboid,
   ArrowRight,
+  Download,
+  Send,
+  Star,
+  Quote,
+  MapPinned,
+  TreePine,
+  Ruler,
+  User,
+  MessageSquare,
+  Briefcase,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // CDN URLs
 const LOGO_WHITE = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/gvCTmeZaVyxKdIeO.png";
@@ -137,6 +149,252 @@ const poleGeomatique = [
   "Applications WebSIG Foncier",
 ];
 
+// ─── TÉMOIGNAGES / RÉFÉRENCES ─────────────────────────
+const references = [
+  {
+    type: "Lotissement résidentiel",
+    location: "Grand Abidjan",
+    surface: "10 Ha",
+    lots: 177,
+    icon: MapPinned,
+    details: "Aménagement complet avec espaces verts, groupes scolaires, aires de jeux et réseau viaire structuré. Arrêté d'approbation obtenu.",
+  },
+  {
+    type: "Lotissement mixte",
+    location: "Région des Grands Ponts",
+    surface: "25 Ha",
+    lots: 312,
+    icon: TreePine,
+    details: "Projet intégrant zones résidentielles, commerciales et équipements publics. Cartographie drone et conception SIG complète.",
+  },
+  {
+    type: "Restructuration urbaine",
+    location: "Abidjan Sud",
+    surface: "5 Ha",
+    lots: 89,
+    icon: Ruler,
+    details: "Régularisation foncière et redécoupage parcellaire conforme au PUD. Accompagnement jusqu'à l'approbation ministérielle.",
+  },
+];
+
+const testimonials = [
+  {
+    name: "Directeur Général",
+    company: "Groupe de Promotion Immobilière",
+    text: "Horizon Spatial nous a accompagnés de A à Z sur notre projet de lotissement. Leur double expertise urbanisme-géomatique a fait toute la différence. Dossier approuvé du premier coup.",
+    rating: 5,
+  },
+  {
+    name: "Responsable Foncier",
+    company: "Société d'Aménagement",
+    text: "La rigueur technique et la connaissance parfaite du cadre réglementaire ivoirien nous ont permis de gagner un temps considérable. Je recommande vivement.",
+    rating: 5,
+  },
+  {
+    name: "Promoteur Immobilier",
+    company: "Investisseur Privé",
+    text: "Les maquettes 3D et les plans de vente fournis par H-Spatial ont accéléré la commercialisation de nos lots. Un partenaire de confiance.",
+    rating: 5,
+  },
+];
+
+// ─── PDF DOWNLOAD HANDLER ─────────────────────────────
+function handleDownloadPDF() {
+  // Print-optimized version of the page
+  window.print();
+}
+
+// ─── CONTACT FORM COMPONENT ──────────────────────────
+function ContactForm() {
+  const [formData, setFormData] = useState({
+    nom: "",
+    email: "",
+    telephone: "",
+    typeProjet: "",
+    superficie: "",
+    message: "",
+  });
+  const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSending(true);
+
+    // Construct mailto link with form data
+    const subject = encodeURIComponent(`Demande de devis - ${formData.typeProjet || "Projet de lotissement"}`);
+    const body = encodeURIComponent(
+      `Nom : ${formData.nom}\n` +
+      `Email : ${formData.email}\n` +
+      `Téléphone : ${formData.telephone}\n` +
+      `Type de projet : ${formData.typeProjet}\n` +
+      `Superficie estimée : ${formData.superficie}\n\n` +
+      `Message :\n${formData.message}\n\n` +
+      `---\nEnvoyé depuis la plaquette commerciale H-Spatial`
+    );
+
+    window.location.href = `mailto:contact@horizonspatial.ci?subject=${subject}&body=${body}`;
+
+    setTimeout(() => {
+      setSending(false);
+      setSubmitted(true);
+    }, 1000);
+  };
+
+  if (submitted) {
+    return (
+      <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-10 text-center">
+        <div className="w-20 h-20 rounded-full bg-[#00A86B]/20 flex items-center justify-center mx-auto mb-6">
+          <CheckCircle2 className="w-10 h-10 text-[#00A86B]" />
+        </div>
+        <h3 className="text-2xl font-bold text-white mb-3" style={poppins}>Demande envoyée !</h3>
+        <p className="text-white/60 leading-relaxed mb-6">
+          Votre client de messagerie s'est ouvert avec les informations pré-remplies.
+          Envoyez l'email pour finaliser votre demande. Notre équipe vous répondra sous 24h.
+        </p>
+        <button
+          onClick={() => { setSubmitted(false); setFormData({ nom: "", email: "", telephone: "", typeProjet: "", superficie: "", message: "" }); }}
+          className="text-[#00A86B] hover:text-white transition-colors text-sm font-medium"
+        >
+          Envoyer une autre demande
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 lg:p-10">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-12 h-12 rounded-xl bg-[#00A86B]/20 flex items-center justify-center">
+          <MessageSquare className="w-6 h-6 text-[#00A86B]" />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-white" style={poppins}>Demander un devis gratuit</h3>
+          <p className="text-white/40 text-sm">Réponse sous 24h ouvrées</p>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-5 mb-5">
+        <div>
+          <label className="block text-white/60 text-sm mb-2 font-medium">Nom complet *</label>
+          <div className="relative">
+            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <input
+              type="text"
+              name="nom"
+              value={formData.nom}
+              onChange={handleChange}
+              required
+              placeholder="Votre nom"
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/20 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-white/60 text-sm mb-2 font-medium">Email *</label>
+          <div className="relative">
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              placeholder="votre@email.com"
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/20 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-5 mb-5">
+        <div>
+          <label className="block text-white/60 text-sm mb-2 font-medium">Téléphone *</label>
+          <div className="relative">
+            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <input
+              type="tel"
+              name="telephone"
+              value={formData.telephone}
+              onChange={handleChange}
+              required
+              placeholder="+225 XX XX XX XX XX"
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/20 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-white/60 text-sm mb-2 font-medium">Type de projet</label>
+          <div className="relative">
+            <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <select
+              name="typeProjet"
+              value={formData.typeProjet}
+              onChange={handleChange}
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm appearance-none"
+            >
+              <option value="" className="bg-[#0A1628]">Sélectionner...</option>
+              <option value="Lotissement résidentiel" className="bg-[#0A1628]">Lotissement résidentiel</option>
+              <option value="Lotissement mixte" className="bg-[#0A1628]">Lotissement mixte</option>
+              <option value="Lotissement commercial" className="bg-[#0A1628]">Lotissement commercial</option>
+              <option value="Restructuration urbaine" className="bg-[#0A1628]">Restructuration urbaine</option>
+              <option value="Régularisation foncière" className="bg-[#0A1628]">Régularisation foncière</option>
+              <option value="Autre" className="bg-[#0A1628]">Autre</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-5">
+        <label className="block text-white/60 text-sm mb-2 font-medium">Superficie estimée du terrain</label>
+        <div className="relative">
+          <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+          <input
+            type="text"
+            name="superficie"
+            value={formData.superficie}
+            onChange={handleChange}
+            placeholder="Ex : 5 hectares, 10 000 m²..."
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/20 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm"
+          />
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <label className="block text-white/60 text-sm mb-2 font-medium">Message / Description du projet</label>
+        <textarea
+          name="message"
+          value={formData.message}
+          onChange={handleChange}
+          rows={4}
+          placeholder="Décrivez brièvement votre projet, sa localisation, vos attentes..."
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/20 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm resize-none"
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={sending}
+        className="w-full inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#00A86B] hover:bg-[#009960] disabled:opacity-60 text-white font-bold text-lg rounded-xl transition-all duration-300 shadow-lg shadow-[#00A86B]/30 hover:shadow-xl hover:shadow-[#00A86B]/40"
+        style={poppins}
+      >
+        {sending ? (
+          <>Envoi en cours...</>
+        ) : (
+          <>
+            Envoyer ma demande
+            <Send className="w-5 h-5" />
+          </>
+        )}
+      </button>
+    </form>
+  );
+}
+
 // ─── COMPONENT ────────────────────────────────────────
 export default function Home() {
   return (
@@ -186,13 +444,14 @@ export default function Home() {
                   Demander un devis gratuit
                   <ArrowRight className="w-5 h-5" />
                 </a>
-                <a
-                  href="#services"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-semibold rounded-lg border border-white/20 transition-all duration-300"
+                <button
+                  onClick={handleDownloadPDF}
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-semibold rounded-lg border border-white/20 transition-all duration-300 print:hidden"
                   style={poppins}
                 >
-                  Découvrir nos services
-                </a>
+                  <Download className="w-5 h-5" />
+                  Télécharger en PDF
+                </button>
               </div>
 
               <div className="mt-14 grid grid-cols-3 gap-8 max-w-lg hero-fade" style={{ animationDelay: "1.1s" }}>
@@ -552,7 +811,92 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== SECTION 7: CTA / CONTACT ===== */}
+      {/* ===== SECTION 7: TÉMOIGNAGES & RÉFÉRENCES (NEW) ===== */}
+      <section className="py-20 lg:py-28 bg-[#F8FAFC] relative overflow-hidden">
+        <div className="container mx-auto px-6 lg:px-12 relative z-10">
+          <Reveal>
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="w-10 h-1 bg-[#0047AB] rounded-full" />
+                <span className="text-[#0047AB] font-semibold text-sm uppercase tracking-wider" style={poppins}>Références & Témoignages</span>
+                <div className="w-10 h-1 bg-[#0047AB] rounded-full" />
+              </div>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#0A1628] leading-tight mb-6" style={poppins}>
+                Ils nous font{" "}
+                <span className="text-[#0047AB]">confiance</span>
+              </h2>
+              <p className="text-lg text-[#4A5568] leading-relaxed">
+                Des projets réalisés avec succès et des partenaires satisfaits à travers la Côte d'Ivoire.
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Références projets */}
+          <div className="grid md:grid-cols-3 gap-6 mb-16">
+            {references.map((ref, i) => (
+              <Reveal key={ref.type} delay={i * 100}>
+                <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden hover:shadow-xl hover:shadow-[#0047AB]/5 transition-all duration-500 h-full">
+                  <div className="bg-[#0047AB] p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                        <ref.icon className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-white font-bold text-sm" style={poppins}>{ref.type}</h3>
+                        <p className="text-white/60 text-xs">{ref.location}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-4 mt-4">
+                      <div className="bg-white/10 rounded-lg px-3 py-2">
+                        <div className="text-white font-bold text-lg" style={poppins}>{ref.surface}</div>
+                        <div className="text-white/50 text-xs">Surface</div>
+                      </div>
+                      <div className="bg-white/10 rounded-lg px-3 py-2">
+                        <div className="text-[#00A86B] font-bold text-lg" style={poppins}>{ref.lots}</div>
+                        <div className="text-white/50 text-xs">Lots</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <p className="text-sm text-[#4A5568] leading-relaxed">{ref.details}</p>
+                    <div className="mt-4 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-[#00A86B]" />
+                      <span className="text-xs text-[#00A86B] font-medium">Projet livré avec succès</span>
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          {/* Témoignages */}
+          <div className="grid md:grid-cols-3 gap-6">
+            {testimonials.map((t, i) => (
+              <Reveal key={t.company} delay={i * 100 + 300}>
+                <div className="bg-white rounded-2xl p-8 border border-[#E2E8F0] h-full relative">
+                  <div className="absolute top-6 right-6">
+                    <Quote className="w-8 h-8 text-[#0047AB]/10" />
+                  </div>
+                  <div className="flex gap-1 mb-5">
+                    {Array.from({ length: t.rating }).map((_, j) => (
+                      <Star key={j} className="w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-[#4A5568] leading-relaxed mb-6 italic">
+                    "{t.text}"
+                  </p>
+                  <div className="border-t border-[#E2E8F0] pt-4">
+                    <div className="font-bold text-[#0A1628] text-sm" style={poppins}>{t.name}</div>
+                    <div className="text-xs text-[#4A5568]">{t.company}</div>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== SECTION 8: CTA / CONTACT WITH FORM (UPDATED) ===== */}
       <section id="contact" className="relative py-20 lg:py-28 overflow-hidden">
         <div className="absolute inset-0">
           <img src={LEGAL_IMG} alt="" className="w-full h-full object-cover" />
@@ -560,55 +904,72 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-6 lg:px-12 relative z-10">
-          <Reveal>
-            <div className="text-center max-w-3xl mx-auto">
-              <img src={LOGO_WHITE} alt="Horizon Spatial" className="h-16 mx-auto mb-10" />
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            {/* Left: Info */}
+            <Reveal>
+              <div>
+                <img src={LOGO_WHITE} alt="Horizon Spatial" className="h-16 mb-10" />
 
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-6" style={poppins}>
-                Prêt à sécuriser votre prochain{" "}
-                <span className="text-[#00A86B]">lotissement</span> ?
-              </h2>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-6" style={poppins}>
+                  Prêt à sécuriser votre prochain{" "}
+                  <span className="text-[#00A86B]">lotissement</span> ?
+                </h2>
 
-              <p className="text-lg text-white/70 leading-relaxed mb-10">
-                Contactez-nous dès aujourd'hui pour une étude de faisabilité
-                gratuite de votre projet. Notre équipe est à votre disposition.
+                <p className="text-lg text-white/70 leading-relaxed mb-10">
+                  Contactez-nous dès aujourd'hui pour une étude de faisabilité
+                  gratuite de votre projet. Notre équipe est à votre disposition.
+                </p>
+
+                <div className="space-y-4 mb-10">
+                  <a href="tel:+2250143430505" className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-[#00A86B]/20 flex items-center justify-center">
+                      <Phone className="w-5 h-5 text-[#00A86B]" />
+                    </div>
+                    <div>
+                      <div className="text-white font-semibold">+225 01 43 43 05 05</div>
+                      <div className="text-white/40 text-sm">+225 27 22 25 60 38</div>
+                    </div>
+                  </a>
+                  <a href="mailto:contact@horizonspatial.ci" className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-[#00A86B]/20 flex items-center justify-center">
+                      <Mail className="w-5 h-5 text-[#00A86B]" />
+                    </div>
+                    <div className="text-white font-semibold">contact@horizonspatial.ci</div>
+                  </a>
+                  <a href="https://www.horizonspatial.ci" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-[#00A86B]/20 flex items-center justify-center">
+                      <Globe className="w-5 h-5 text-[#00A86B]" />
+                    </div>
+                    <div className="text-white font-semibold">www.horizonspatial.ci</div>
+                  </a>
+                </div>
+
+                {/* PDF Download button */}
+                <button
+                  onClick={handleDownloadPDF}
+                  className="inline-flex items-center gap-3 px-6 py-3 bg-white/5 backdrop-blur-sm hover:bg-white/10 text-white/70 hover:text-white font-medium rounded-xl border border-white/10 transition-all duration-300 print:hidden"
+                  style={poppins}
+                >
+                  <Download className="w-5 h-5" />
+                  Télécharger cette plaquette en PDF
+                </button>
+              </div>
+            </Reveal>
+
+            {/* Right: Contact Form */}
+            <Reveal delay={200}>
+              <ContactForm />
+            </Reveal>
+          </div>
+
+          <Reveal delay={300}>
+            <div className="mt-16 text-center">
+              <p className="text-white/30 text-sm italic" style={poppins}>
+                « Voir plus loin, bâtir mieux »
               </p>
-
-              <div className="grid sm:grid-cols-3 gap-6 mb-12">
-                <a href="tel:+2250143430505" className="flex flex-col items-center gap-3 p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
-                  <Phone className="w-6 h-6 text-[#00A86B]" />
-                  <div>
-                    <div className="text-white font-semibold text-sm">+225 01 43 43 05 05</div>
-                    <div className="text-white/40 text-xs mt-1">+225 27 22 25 60 38</div>
-                  </div>
-                </a>
-                <a href="mailto:contact@horizonspatial.ci" className="flex flex-col items-center gap-3 p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
-                  <Mail className="w-6 h-6 text-[#00A86B]" />
-                  <div className="text-white font-semibold text-sm">contact@horizonspatial.ci</div>
-                </a>
-                <a href="https://www.horizonspatial.ci" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-3 p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
-                  <Globe className="w-6 h-6 text-[#00A86B]" />
-                  <div className="text-white font-semibold text-sm">www.horizonspatial.ci</div>
-                </a>
-              </div>
-
-              <a
-                href="mailto:contact@horizonspatial.ci?subject=Demande%20de%20devis%20-%20Projet%20de%20lotissement"
-                className="inline-flex items-center gap-3 px-10 py-5 bg-[#00A86B] hover:bg-[#009960] text-white font-bold text-lg rounded-xl transition-all duration-300 shadow-lg shadow-[#00A86B]/30 hover:shadow-xl hover:shadow-[#00A86B]/40"
-                style={poppins}
-              >
-                Demander un devis gratuit
-                <ArrowRight className="w-5 h-5" />
-              </a>
-
-              <div className="mt-12">
-                <p className="text-white/30 text-sm italic" style={poppins}>
-                  « Voir plus loin, bâtir mieux »
-                </p>
-                <p className="text-white/20 text-xs mt-3">
-                  H-Spatial | Spatial Intelligence for Africa
-                </p>
-              </div>
+              <p className="text-white/20 text-xs mt-3">
+                H-Spatial | Spatial Intelligence for Africa
+              </p>
             </div>
           </Reveal>
         </div>

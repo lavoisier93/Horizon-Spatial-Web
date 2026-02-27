@@ -183,3 +183,64 @@ html {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ─── Print styles for PDF download ─── */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  section {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .hero-fade {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+
+  /* Ensure backgrounds print */
+  section[class*="bg-"] {
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Hide scroll indicator */
+  .animate-bounce {
+    animation: none;
+  }
+
+  /* Optimize images for print */
+  img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+
+  /* Footer on every page */
+  footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+}
+
+/* ─── Form input focus styles ─── */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+}
+
+select option {
+  background-color: #0A1628;
+  color: white;
+}
