@@ -7,6 +7,7 @@
  * 
  * V2: + Formulaire de contact + Témoignages/Références + Bouton PDF
  * V3: + Navbar fixe + Compteurs animés + Bouton WhatsApp flottant
+ * V4: + Bandeau d'urgence + Galerie photos projets + Menu hamburger animé
  */
 
 import {
@@ -44,6 +45,11 @@ import {
   Briefcase,
   Menu,
   X,
+  Camera,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -59,6 +65,9 @@ const LAVOISIER_IMG = "https://files.manuscdn.com/user_upload_by_module/session_
 const LAVOISIER_ONUCI_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/txpCQkaXHRfFEpEb.jpg";
 const LOGO_COLOR = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/iMiXhhfBFkffYFqG.png";
 const WHATSAPP_NUMBER = "2250143430505";
+const GALLERY_DRONE = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/ObYE2HNxqV6UNOr9igklvu-img-1_1772154316000_na1fn_Z2FsbGVyeS1kcm9uZS1sb3Rpc3NlbWVudA.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94L09iWUUySE54cVY2VU5PcjlpZ2tsdnUtaW1nLTFfMTc3MjE1NDMxNjAwMF9uYTFmbl9aMkZzYkdWeWVTMWtjbTl1WlMxc2IzUnBjM05sYldWdWRBLmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=K08ALPhID2S2hE2uVAcx5zrRCLmcFoGCtHLcZu24PQCRSSbar9ikNs5E0Y~g0hyxuho~PukDBI~yD5OecG1Xmxksv8kBnrdj-T1phWmJRJ7anmFttyAk7txAWXiatPsRzWutyG962nTzpiv78O5-b-ONClB-RT3r3zyQYTag8KYEu-fiC5SWSK3A0AQyPWUNi151Y3lFYhUOp4-xpQouVFql8fy2aB45B04Z4fGRzI8x0Mslh-Rnhry-lahtUsl-EqSkyVlZGH4RoU2iwUzjloaKYOyDDrvuv9PGORF9nSz0952qlBraRptYkkVKnHdjDA0x8hMh5~fv37Ow1I0FcA__";
+const GALLERY_PLAN = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/ObYE2HNxqV6UNOr9igklvu-img-2_1772154312000_na1fn_Z2FsbGVyeS1wbGFuLWFwcHJvdXZl.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94L09iWUUySE54cVY2VU5PcjlpZ2tsdnUtaW1nLTJfMTc3MjE1NDMxMjAwMF9uYTFmbl9aMkZzYkdWeWVTMXdiR0Z1TFdGd2NISnZkWFpsLmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=PabrNXNEe90ud2lnzoW-RvDcgmDxns3gfXhytPh6Slf9J~mU4JLg-bgsF6ZrlJar-xp2wMVB0vQgaiQqBs31FPZQpIaQAJa1wxG2MFq9Dh7RT3uL355rL1riMBEzswXYOUpvMCkFhHxFrP-OyW1ZDMuRldMQ8XVAO1aewjAzlkpiYP0UdZfnr~arDhgAzKfl6L03bhZGO1guTAYk3yWxoHDbSi601eZoTOcmxmK8GE~OhXaEyMCCDCjnOq9w42wy~lvrcQKZp4EyibjFWODKS8E7sEg32SaTcgVz42fqsRFLSBuoDbNnABje1VGwcMFiQDWFpSbAXVNFaGGw-UZ2QA__";
+const GALLERY_MAQUETTE = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/ObYE2HNxqV6UNOr9igklvu-img-3_1772154313000_na1fn_Z2FsbGVyeS1tYXF1ZXR0ZS0zZA.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94L09iWUUySE54cVY2VU5PcjlpZ2tsdnUtaW1nLTNfMTc3MjE1NDMxMzAwMF9uYTFmbl9aMkZzYkdWeWVTMXRZWEYxWlhSMFpTMHpaQS5qcGc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=A1v2b51etsVUcAVv1w1mojRiSO3mDSU9dU9F05wNY6jpmghZrke~MryI4lKjT3n9bcC2kW4~O8eTGmunGD5RJjJ7ZcDbJX-6WGB2rgUACiJN0o4XuWYvvVndhx2~A5yFHLDj2O2Si8trWe75oQ7xl9h6rkGRN33CwqlvWKeEd5XuwATyBxh~JVOkVJikVWdG9QeM5MZoFS04PQJtwqFSpwvNpag1VjU-e2ohvKX33SSTI8kImG3AuZdFV2xmJjJ1PTAEXDHCKEbJ0Py~1qXgK7Zlc8KYqzH8aF5Pcp~lxk3QNQPfeUzVAITj2Ejp7KNUdW3mGBDAhOIwokielcvdQg__";
 
 const poppins = { fontFamily: "'Poppins', sans-serif" };
 
@@ -282,10 +291,10 @@ function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 print:hidden ${
+      className={`fixed left-0 right-0 z-50 transition-all duration-500 print:hidden ${
         scrolled
-          ? "bg-white/95 backdrop-blur-lg shadow-lg shadow-black/5 py-3"
-          : "bg-transparent py-5"
+          ? "top-0 bg-white/95 backdrop-blur-lg shadow-lg shadow-black/5 py-3"
+          : "top-[40px] bg-transparent py-5"
       }`}
     >
       <div className="container mx-auto px-6 lg:px-12 flex items-center justify-between">
@@ -334,12 +343,18 @@ function Navbar() {
         </button>
       </div>
 
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div className={`lg:hidden border-t ${
+      {/* Mobile menu - animated */}
+      <div
+        className={`lg:hidden overflow-hidden transition-all duration-500 ease-in-out border-t ${
           scrolled ? "bg-white border-gray-100" : "bg-[#0A1628]/95 backdrop-blur-lg border-white/10"
-        }`}>
-          <div className="container mx-auto px-6 py-4 space-y-1">
+        }`}
+        style={{
+          maxHeight: mobileOpen ? "400px" : "0px",
+          opacity: mobileOpen ? 1 : 0,
+          borderTopWidth: mobileOpen ? "1px" : "0px",
+        }}
+      >
+        <div className="container mx-auto px-6 py-4 space-y-1">
             {navLinks.map((link) => (
               <a
                 key={link.href}
@@ -365,7 +380,6 @@ function Navbar() {
             </a>
           </div>
         </div>
-      )}
     </nav>
   );
 }
@@ -411,6 +425,147 @@ function WhatsAppButton() {
         </div>
       </div>
     </a>
+  );
+}
+
+// ─── GALLERY DATA ──────────────────────────────
+const galleryItems = [
+  {
+    img: GALLERY_DRONE,
+    title: "Vue aérienne par drone",
+    desc: "Levé topographique et photogrammétrie par drone pour un lotissement résidentiel de 15 hectares",
+    tag: "Photogrammétrie",
+  },
+  {
+    img: GALLERY_PLAN,
+    title: "Plan de lotissement approuvé",
+    desc: "Plan d'aménagement détaillé avec tampons officiels, soumis au MCLU pour approbation",
+    tag: "Urbanisme",
+  },
+  {
+    img: GALLERY_MAQUETTE,
+    title: "Maquette 3D du projet",
+    desc: "Rendu 3D photoréaliste d'un projet de lotissement mixte avec équipements et espaces verts",
+    tag: "Modélisation 3D",
+  },
+];
+
+// ─── URGENCY BANNER COMPONENT ───────────────────
+function UrgencyBanner() {
+  const [visible, setVisible] = useState(true);
+  if (!visible) return null;
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-[#B91C1C] via-[#DC2626] to-[#B91C1C] text-white print:hidden">
+      <div className="container mx-auto px-6 lg:px-12 py-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <AlertCircle className="w-4 h-4 shrink-0 animate-pulse" />
+          <p className="text-xs sm:text-sm font-medium truncate" style={poppins}>
+            <span className="font-bold">Code de l'Urbanisme 2020</span>
+            <span className="hidden sm:inline"> — Êtes-vous en conformité ? Tout lotissement sans urbaniste agréé est passible de sanctions pénales.</span>
+            <span className="sm:hidden"> — Conformité obligatoire !</span>
+          </p>
+        </div>
+        <div className="flex items-center gap-3 shrink-0 ml-4">
+          <a
+            href="#reglementation"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-md text-xs font-semibold transition-colors"
+            style={poppins}
+          >
+            En savoir plus
+            <ArrowRight className="w-3 h-3" />
+          </a>
+          <button
+            onClick={() => setVisible(false)}
+            className="p-1 hover:bg-white/20 rounded transition-colors"
+            aria-label="Fermer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── PROJECT GALLERY COMPONENT ──────────────────
+function ProjectGallery() {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [lightbox, setLightbox] = useState<number | null>(null);
+
+  return (
+    <>
+      <div className="grid md:grid-cols-3 gap-6">
+        {galleryItems.map((item, i) => (
+          <div
+            key={item.title}
+            className={`group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 ${
+              activeIdx === i ? "ring-2 ring-[#0047AB] shadow-xl shadow-[#0047AB]/10" : "hover:shadow-lg"
+            }`}
+            onMouseEnter={() => setActiveIdx(i)}
+            onClick={() => setLightbox(i)}
+          >
+            <div className="aspect-[16/10] overflow-hidden">
+              <img
+                src={item.img}
+                alt={item.title}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0A1628]/80 via-[#0A1628]/20 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-6">
+              <span className="inline-block px-2.5 py-1 bg-[#0047AB]/80 backdrop-blur-sm text-white text-xs font-medium rounded-md mb-3" style={poppins}>
+                {item.tag}
+              </span>
+              <h4 className="text-white font-bold text-lg mb-1" style={poppins}>{item.title}</h4>
+              <p className="text-white/60 text-sm leading-relaxed">{item.desc}</p>
+            </div>
+            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <Eye className="w-5 h-5 text-white" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Lightbox */}
+      {lightbox !== null && (
+        <div
+          className="fixed inset-0 z-[70] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+            onClick={() => setLightbox(null)}
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
+          <button
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+            onClick={(e) => { e.stopPropagation(); setLightbox((lightbox - 1 + galleryItems.length) % galleryItems.length); }}
+          >
+            <ChevronLeft className="w-6 h-6 text-white" />
+          </button>
+          <button
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+            onClick={(e) => { e.stopPropagation(); setLightbox((lightbox + 1) % galleryItems.length); }}
+          >
+            <ChevronRight className="w-6 h-6 text-white" />
+          </button>
+          <div className="max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={galleryItems[lightbox].img}
+              alt={galleryItems[lightbox].title}
+              className="w-full rounded-xl shadow-2xl"
+            />
+            <div className="mt-4 text-center">
+              <h4 className="text-white font-bold text-xl" style={poppins}>{galleryItems[lightbox].title}</h4>
+              <p className="text-white/60 text-sm mt-1">{galleryItems[lightbox].desc}</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -609,6 +764,9 @@ function ContactForm() {
 export default function Home() {
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
+      {/* Urgency Banner */}
+      <UrgencyBanner />
+
       {/* Fixed Navbar */}
       <Navbar />
 
@@ -1013,9 +1171,18 @@ export default function Home() {
             ))}
           </div>
 
+          {/* Galerie de projets */}
           <Reveal delay={200}>
-            <div className="mt-16 rounded-2xl overflow-hidden shadow-2xl shadow-[#0047AB]/10">
-              <img src={OFFICE_IMG} alt="Bureau d'études Horizon Spatial" className="w-full h-64 lg:h-80 object-cover" />
+            <div className="mt-20">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
+                <span className="text-[#00A86B] font-semibold text-sm uppercase tracking-wider" style={poppins}>Galerie de Projets</span>
+                <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-[#0A1628] text-center mb-10" style={poppins}>
+                Nos réalisations en <span className="text-[#0047AB]">images</span>
+              </h3>
+              <ProjectGallery />
             </div>
           </Reveal>
         </div>

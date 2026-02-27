@@ -1,5 +1,5 @@
-# TODO - Intégration des 3 suggestions
+# TODO V4
 
-- [ ] 1. Formulaire de contact fonctionnel dans la section CTA (nom, email, téléphone, type de projet, message)
-- [ ] 2. Section témoignages clients / références de projets réalisés
-- [ ] 3. Bouton de téléchargement PDF de la plaquette
+- [ ] Menu hamburger mobile animé avec transitions fluides
+- [ ] Galerie de photos de projets (drone, plans approuvés, maquettes 3D)
+- [ ] Bandeau d'urgence réglementaire en haut de page
