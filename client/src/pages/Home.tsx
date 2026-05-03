@@ -12,6 +12,7 @@
  * V6: + Section Partenaires Institutionnels (9 logos)
  * V7: + Lien Partenaires navbar + Carrousel logos footer + Liens cliquables sites officiels
  * V8: + Bouton retour en haut + Tracking UTM sur liens CTA
+ * V9: + Carte interactive Côte d'Ivoire avec zones d'intervention
  */
 
 import {
@@ -61,6 +62,7 @@ import {
   Minus,
   Linkedin,
   Facebook,
+  Navigation,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -412,6 +414,157 @@ function Navbar({ isDark, onToggleDark }: { isDark: boolean; onToggleDark: () =>
 
 // ─── WHATSAPP FLOATING BUTTON ───────────────────
 // ─── SCROLL TO TOP BUTTON ──────────────────────
+// ─── INTERACTIVE MAP - CÔTE D'IVOIRE ────────────
+function InteractiveMap({ isDark }: { isDark: boolean }) {
+  const [hoveredCity, setHoveredCity] = useState<string | null>(null);
+
+  // Coordonnées approximatives des villes sur la carte SVG (viewBox 0 0 400 420)
+  const cities = [
+    { name: "Abidjan", x: 230, y: 340, isHQ: true },
+    { name: "Grand-Bassam", x: 260, y: 345, isHQ: false },
+    { name: "Bingerville", x: 242, y: 335, isHQ: false },
+    { name: "Jacqueville", x: 195, y: 350, isHQ: false },
+    { name: "Yamoussoukro", x: 200, y: 270, isHQ: false },
+    { name: "Bouaké", x: 210, y: 220, isHQ: false },
+    { name: "Korhogo", x: 200, y: 100, isHQ: false },
+  ];
+
+  return (
+    <div className="relative">
+      {/* Titre de la carte */}
+      <div className="text-center mb-4">
+        <h4 className={`text-sm font-semibold uppercase tracking-wider ${isDark ? "text-white/40" : "text-[#4A5568]"}`} style={poppins}>Côte d'Ivoire</h4>
+      </div>
+
+      <svg viewBox="0 0 400 420" className="w-full h-auto max-h-[500px]" xmlns="http://www.w3.org/2000/svg">
+        {/* Fond de la carte - contour simplifié de la Côte d'Ivoire */}
+        <defs>
+          <linearGradient id="mapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={isDark ? "#1a3a5c" : "#e8f4f8"} />
+            <stop offset="100%" stopColor={isDark ? "#0d2240" : "#d1e8f0"} />
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="glowStrong">
+            <feGaussianBlur stdDeviation="5" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {/* Contour de la Côte d'Ivoire (simplifié) */}
+        <path
+          d="M 100 50 L 130 45 L 160 40 L 190 42 L 220 38 L 250 40 L 280 45 L 310 55 L 320 70 L 325 90 L 330 110 L 335 130 L 340 150 L 338 170 L 335 190 L 330 210 L 325 230 L 320 250 L 315 270 L 310 290 L 305 310 L 300 330 L 290 345 L 275 355 L 260 360 L 245 358 L 230 355 L 215 360 L 200 365 L 185 360 L 170 355 L 155 358 L 140 360 L 125 355 L 110 345 L 100 335 L 95 320 L 90 300 L 85 280 L 82 260 L 80 240 L 78 220 L 80 200 L 82 180 L 85 160 L 88 140 L 90 120 L 92 100 L 95 80 L 98 60 Z"
+          fill="url(#mapGradient)"
+          stroke={isDark ? "#2a5a8c" : "#90cdf4"}
+          strokeWidth="2"
+          className="transition-all duration-300"
+        />
+
+        {/* Lignes de connexion entre les villes */}
+        {cities.filter(c => !c.isHQ).map((city, i) => (
+          <line
+            key={`line-${i}`}
+            x1={cities[0].x}
+            y1={cities[0].y}
+            x2={city.x}
+            y2={city.y}
+            stroke={isDark ? "#00A86B" : "#0047AB"}
+            strokeWidth="0.8"
+            strokeDasharray="4 3"
+            opacity={hoveredCity === city.name ? 0.8 : 0.25}
+            className="transition-opacity duration-300"
+          />
+        ))}
+
+        {/* Marqueurs des villes */}
+        {cities.map((city, i) => (
+          <g
+            key={i}
+            onMouseEnter={() => setHoveredCity(city.name)}
+            onMouseLeave={() => setHoveredCity(null)}
+            className="cursor-pointer"
+          >
+            {/* Pulse animation pour le siège */}
+            {city.isHQ && (
+              <>
+                <circle cx={city.x} cy={city.y} r="18" fill="#0047AB" opacity="0.1" className="animate-ping" />
+                <circle cx={city.x} cy={city.y} r="12" fill="#0047AB" opacity="0.2" />
+              </>
+            )}
+
+            {/* Point principal */}
+            <circle
+              cx={city.x}
+              cy={city.y}
+              r={city.isHQ ? 8 : 5}
+              fill={city.isHQ ? "#0047AB" : "#00A86B"}
+              stroke="white"
+              strokeWidth="2"
+              filter={hoveredCity === city.name ? "url(#glowStrong)" : "url(#glow)"}
+              className="transition-all duration-300"
+              style={{ transform: hoveredCity === city.name ? "scale(1.3)" : "scale(1)", transformOrigin: `${city.x}px ${city.y}px` }}
+            />
+
+            {/* Label de la ville */}
+            <text
+              x={city.x + (city.isHQ ? 14 : 10)}
+              y={city.y + 4}
+              fill={isDark ? (hoveredCity === city.name ? "#ffffff" : "#94a3b8") : (hoveredCity === city.name ? "#0A1628" : "#4A5568")}
+              fontSize={city.isHQ ? "11" : "9"}
+              fontWeight={city.isHQ ? "bold" : "500"}
+              fontFamily="'Poppins', sans-serif"
+              className="transition-all duration-300"
+            >
+              {city.name}
+            </text>
+
+            {/* Badge siège */}
+            {city.isHQ && (
+              <text
+                x={city.x + 14}
+                y={city.y + 16}
+                fill="#0047AB"
+                fontSize="7"
+                fontWeight="600"
+                fontFamily="'Poppins', sans-serif"
+              >
+                SIÈGE
+              </text>
+            )}
+          </g>
+        ))}
+
+        {/* Légende */}
+        <g transform="translate(20, 380)">
+          <circle cx="8" cy="8" r="5" fill="#0047AB" stroke="white" strokeWidth="1.5" />
+          <text x="18" y="12" fill={isDark ? "#94a3b8" : "#4A5568"} fontSize="8" fontFamily="'Poppins', sans-serif">Siège social</text>
+          <circle cx="108" cy="8" r="4" fill="#00A86B" stroke="white" strokeWidth="1.5" />
+          <text x="118" y="12" fill={isDark ? "#94a3b8" : "#4A5568"} fontSize="8" fontFamily="'Poppins', sans-serif">Zone d'intervention</text>
+        </g>
+
+        {/* Océan Atlantique */}
+        <text x="140" y="400" fill={isDark ? "#2a5a8c" : "#90cdf4"} fontSize="10" fontStyle="italic" fontFamily="'Poppins', sans-serif" opacity="0.6">Océan Atlantique</text>
+      </svg>
+
+      {/* Info tooltip */}
+      {hoveredCity && (
+        <div className={`absolute top-4 right-4 px-4 py-2 rounded-lg text-xs font-medium ${isDark ? "bg-[#00A86B]/20 text-[#00A86B] border border-[#00A86B]/30" : "bg-[#00A86B]/10 text-[#00A86B] border border-[#00A86B]/20"}`} style={poppins}>
+          <MapPin className="w-3 h-3 inline mr-1" />
+          {hoveredCity}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ScrollToTopButton() {
   const [visible, setVisible] = useState(false);
 
@@ -1444,6 +1597,58 @@ export default function Home() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ===== SECTION 7.4b: CARTE INTERACTIVE ZONES D'INTERVENTION ===== */}
+      <section id="zones" className={`py-20 lg:py-28 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-[#0A1628]" : "bg-[#F0F4F8]"}`}>
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `url(${TOPO_IMG})`, backgroundSize: "cover" }} />
+        <div className="container mx-auto px-6 lg:px-12 relative z-10">
+          <Reveal>
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <Navigation className="w-5 h-5 text-[#00A86B]" />
+                <span className="text-[#00A86B] font-semibold text-sm uppercase tracking-wider" style={poppins}>Couverture Géographique</span>
+              </div>
+              <h2 className={`text-3xl lg:text-4xl font-bold mb-4 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>Nos Zones d'Intervention</h2>
+              <p className={`text-lg ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>Présents sur l'ensemble du territoire ivoirien, nous accompagnons vos projets d'aménagement dans les principales zones de développement urbain.</p>
+            </div>
+          </Reveal>
+
+          <Reveal delay={200}>
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Carte SVG interactive */}
+              <div className={`relative rounded-2xl p-8 ${isDark ? "bg-[#0F1D32] border border-white/10" : "bg-white border border-gray-100 shadow-xl"}`}>
+                <InteractiveMap isDark={isDark} />
+              </div>
+
+              {/* Liste des zones */}
+              <div className="space-y-4">
+                {[
+                  { city: "Abidjan", type: "Siège social", desc: "District autonome — Lotissements résidentiels, mixtes et commerciaux", active: true },
+                  { city: "Grand-Bassam", type: "Zone active", desc: "Projets balnéaires et résidentiels en périphérie Est", active: true },
+                  { city: "Bingerville", type: "Zone active", desc: "Extension urbaine et lotissements périurbains", active: true },
+                  { city: "Jacqueville", type: "Zone active", desc: "Aménagements touristiques et résidentiels côtiers", active: true },
+                  { city: "Yamoussoukro", type: "Zone active", desc: "Capitale politique — Projets d'urbanisation", active: true },
+                  { city: "Bouaké", type: "Zone active", desc: "Deuxième ville — Restructuration et extension urbaine", active: true },
+                  { city: "Korhogo", type: "Zone active", desc: "Pôle Nord — Développement urbain et foncier", active: true },
+                ].map((zone, i) => (
+                  <div key={i} className={`flex items-start gap-4 p-4 rounded-xl transition-all duration-300 hover:scale-[1.02] ${isDark ? "bg-[#0F1D32] border border-white/10 hover:border-[#00A86B]/30" : "bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-[#00A86B]/30"}`}>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${zone.active ? "bg-[#00A86B]/20" : "bg-[#0047AB]/20"}`}>
+                      <MapPin className={`w-5 h-5 ${zone.active ? "text-[#00A86B]" : "text-[#0047AB]"}`} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className={`font-bold ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{zone.city}</h4>
+                        <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${zone.city === "Abidjan" ? "bg-[#0047AB]/20 text-[#0047AB]" : "bg-[#00A86B]/20 text-[#00A86B]"}`}>{zone.type}</span>
+                      </div>
+                      <p className={`text-sm mt-1 ${isDark ? "text-white/50" : "text-[#4A5568]"}`}>{zone.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
         </div>
       </section>
 
