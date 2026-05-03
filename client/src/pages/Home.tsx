@@ -221,176 +221,279 @@ function LoadingScreen() {
 // ─── PARTICLE CANVAS COMPONENT ──────────────
 function ParticleCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const particlesRef = useRef<{
-    x: number; y: number; size: number;
-    speedX: number; speedY: number;
-    color: string; alpha: number;
-  }[]>([]);
   const animFrameRef = useRef<number>(0);
   const mouseRef = useRef<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    // Skip on mobile for performance
-    if (window.innerWidth < 768) return;
+    // Adaptive particle count based on device capability
+    const isMobile = window.innerWidth < 768;
+    const isTablet = window.innerWidth < 1024;
+    if (isMobile) return; // Skip entirely on mobile
 
+    // Performance: detect low-end devices via hardware concurrency
+    const isLowEnd = (navigator.hardwareConcurrency || 4) <= 2;
+    const PARTICLE_COUNT = isLowEnd ? 50 : isTablet ? 70 : 100;
+    const CONNECTION_DISTANCE = isLowEnd ? 100 : 150;
+    const CONNECTION_DISTANCE_SQ = CONNECTION_DISTANCE * CONNECTION_DISTANCE; // Avoid sqrt
+    const MOUSE_RADIUS = 120;
+    const MOUSE_RADIUS_SQ = MOUSE_RADIUS * MOUSE_RADIUS;
+    const MOUSE_FORCE = 3;
+    const MOUSE_LINE_RADIUS = MOUSE_RADIUS * 1.5;
+    const MOUSE_LINE_RADIUS_SQ = MOUSE_LINE_RADIUS * MOUSE_LINE_RADIUS;
+
+    let w = 0, h = 0;
     const resize = () => {
-      canvas.width = canvas.parentElement?.clientWidth || window.innerWidth;
-      canvas.height = canvas.parentElement?.clientHeight || window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap DPR at 2 for perf
+      w = canvas.parentElement?.clientWidth || window.innerWidth;
+      h = canvas.parentElement?.clientHeight || window.innerHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + "px";
+      canvas.style.height = h + "px";
+      ctx.scale(dpr, dpr);
     };
     resize();
-    window.addEventListener("resize", resize);
 
-    // Mouse tracking on the parent section (not canvas since pointer-events-none)
+    // Debounced resize for performance
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 150);
+    };
+    window.addEventListener("resize", debouncedResize);
+
+    // Mouse tracking with passive listener
     const parent = canvas.parentElement;
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      mouseRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-        active: true,
-      };
+      mouseRef.current.x = e.clientX - rect.left;
+      mouseRef.current.y = e.clientY - rect.top;
+      mouseRef.current.active = true;
     };
     const handleMouseLeave = () => {
       mouseRef.current.active = false;
     };
     if (parent) {
-      parent.addEventListener("mousemove", handleMouseMove);
-      parent.addEventListener("mouseleave", handleMouseLeave);
+      parent.addEventListener("mousemove", handleMouseMove, { passive: true });
+      parent.addEventListener("mouseleave", handleMouseLeave, { passive: true });
     }
 
-    // Initialize 100 particles
-    const PARTICLE_COUNT = 100;
-    const CONNECTION_DISTANCE = 150;
-    const MOUSE_RADIUS = 120; // Repulsion radius around cursor
-    const MOUSE_FORCE = 3; // Repulsion strength
+    // Initialize particles with typed arrays for better memory layout
+    const px = new Float32Array(PARTICLE_COUNT);
+    const py = new Float32Array(PARTICLE_COUNT);
+    const psx = new Float32Array(PARTICLE_COUNT);
+    const psy = new Float32Array(PARTICLE_COUNT);
+    const psize = new Float32Array(PARTICLE_COUNT);
+    const palpha = new Float32Array(PARTICLE_COUNT);
+    const pcolor: string[] = [];
 
-    particlesRef.current = Array.from({ length: PARTICLE_COUNT }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      size: Math.random() * 3 + 1.5,
-      speedX: (Math.random() - 0.5) * 0.8,
-      speedY: (Math.random() - 0.5) * 0.8,
-      color: Math.random() > 0.5 ? "#4D9FFF" : "#00E88F",
-      alpha: Math.random() * 0.25 + 0.2,
-    }));
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      px[i] = Math.random() * w;
+      py[i] = Math.random() * h;
+      psize[i] = Math.random() * 3 + 1.5;
+      psx[i] = (Math.random() - 0.5) * 0.8;
+      psy[i] = (Math.random() - 0.5) * 0.8;
+      palpha[i] = Math.random() * 0.25 + 0.2;
+      pcolor.push(Math.random() > 0.5 ? "#4D9FFF" : "#00E88F");
+    }
 
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const ps = particlesRef.current;
+    // Spatial grid for O(n) neighbor lookup instead of O(n²)
+    const cellSize = CONNECTION_DISTANCE;
+    let gridCols = 0, gridRows = 0;
+    let grid: Int16Array[] = [];
+    let gridCount: Int16Array;
+
+    const rebuildGrid = () => {
+      gridCols = Math.ceil(w / cellSize) || 1;
+      gridRows = Math.ceil(h / cellSize) || 1;
+      const totalCells = gridCols * gridRows;
+      grid = new Array(totalCells);
+      for (let i = 0; i < totalCells; i++) {
+        grid[i] = new Int16Array(20); // max 20 particles per cell
+      }
+      gridCount = new Int16Array(totalCells);
+    };
+    rebuildGrid();
+
+    // FPS throttle: target 60fps, skip frames if behind
+    let lastTime = 0;
+    const targetInterval = 1000 / 60;
+
+    // Visibility API: pause when tab is hidden
+    let isVisible = true;
+    const handleVisibility = () => {
+      isVisible = !document.hidden;
+      if (isVisible) {
+        lastTime = performance.now();
+        animFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    const animate = (timestamp: number = 0) => {
+      if (!isVisible) return;
+
+      // Frame rate control
+      const delta = timestamp - lastTime;
+      if (delta < targetInterval * 0.8) {
+        animFrameRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastTime = timestamp;
+
+      ctx.clearRect(0, 0, w, h);
       const mouse = mouseRef.current;
 
-      // Update & draw particles
-      for (const p of ps) {
-        // Mouse repulsion effect
+      // Reset spatial grid
+      const totalCells = gridCols * gridRows;
+      for (let i = 0; i < totalCells; i++) gridCount[i] = 0;
+
+      // Update particles & populate grid
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        // Mouse repulsion (use squared distance to avoid sqrt)
         if (mouse.active) {
-          const dx = p.x - mouse.x;
-          const dy = p.y - mouse.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < MOUSE_RADIUS && dist > 0) {
+          const dx = px[i] - mouse.x;
+          const dy = py[i] - mouse.y;
+          const distSq = dx * dx + dy * dy;
+          if (distSq < MOUSE_RADIUS_SQ && distSq > 0) {
+            const dist = Math.sqrt(distSq);
             const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS * MOUSE_FORCE;
-            p.speedX += (dx / dist) * force * 0.1;
-            p.speedY += (dy / dist) * force * 0.1;
+            psx[i] += (dx / dist) * force * 0.1;
+            psy[i] += (dy / dist) * force * 0.1;
           }
         }
 
-        // Apply friction to prevent infinite acceleration
-        p.speedX *= 0.98;
-        p.speedY *= 0.98;
+        // Friction
+        psx[i] *= 0.98;
+        psy[i] *= 0.98;
 
-        // Maintain minimum speed so particles keep moving
-        const speed = Math.sqrt(p.speedX * p.speedX + p.speedY * p.speedY);
-        if (speed < 0.3) {
-          p.speedX += (Math.random() - 0.5) * 0.1;
-          p.speedY += (Math.random() - 0.5) * 0.1;
+        // Maintain minimum speed
+        const speedSq = psx[i] * psx[i] + psy[i] * psy[i];
+        if (speedSq < 0.09) { // 0.3²
+          psx[i] += (Math.random() - 0.5) * 0.1;
+          psy[i] += (Math.random() - 0.5) * 0.1;
         }
 
-        p.x += p.speedX;
-        p.y += p.speedY;
+        px[i] += psx[i];
+        py[i] += psy[i];
 
-        // Bounce off edges
-        if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
-        p.x = Math.max(0, Math.min(canvas.width, p.x));
-        p.y = Math.max(0, Math.min(canvas.height, p.y));
+        // Bounce
+        if (px[i] < 0) { px[i] = 0; psx[i] *= -1; }
+        else if (px[i] > w) { px[i] = w; psx[i] *= -1; }
+        if (py[i] < 0) { py[i] = 0; psy[i] *= -1; }
+        else if (py[i] > h) { py[i] = h; psy[i] *= -1; }
 
+        // Insert into spatial grid
+        const col = Math.min(Math.floor(px[i] / cellSize), gridCols - 1);
+        const row = Math.min(Math.floor(py[i] / cellSize), gridRows - 1);
+        const cellIdx = row * gridCols + col;
+        const count = gridCount[cellIdx];
+        if (count < 20) {
+          grid[cellIdx][count] = i;
+          gridCount[cellIdx] = count + 1;
+        }
+
+        // Draw particle (batch by color to reduce state changes)
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.alpha;
+        ctx.arc(px[i], py[i], psize[i], 0, Math.PI * 2);
+        ctx.fillStyle = pcolor[i];
+        ctx.globalAlpha = palpha[i];
         ctx.fill();
       }
 
-      // Draw cursor glow + lines from cursor to nearby particles
+      // Draw cursor glow
       if (mouse.active) {
-        // Pulsating glow effect around cursor
-        const time = Date.now() * 0.003;
-        const pulse = 0.5 + Math.sin(time) * 0.3; // oscillates 0.2 - 0.8
+        const time = timestamp * 0.003;
+        const pulse = 0.5 + Math.sin(time) * 0.3;
         const glowRadius = MOUSE_RADIUS * (0.6 + Math.sin(time * 0.7) * 0.15);
 
-        // Outer glow ring
         const gradient = ctx.createRadialGradient(
-          mouse.x, mouse.y, 0,
-          mouse.x, mouse.y, glowRadius
+          mouse.x, mouse.y, 0, mouse.x, mouse.y, glowRadius
         );
         gradient.addColorStop(0, `rgba(77, 159, 255, ${0.12 * pulse})`);
         gradient.addColorStop(0.4, `rgba(0, 232, 143, ${0.06 * pulse})`);
         gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = gradient;
         ctx.beginPath();
         ctx.arc(mouse.x, mouse.y, glowRadius, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
-        ctx.globalAlpha = 1;
         ctx.fill();
 
-        // Inner bright core
-        const coreGradient = ctx.createRadialGradient(
-          mouse.x, mouse.y, 0,
-          mouse.x, mouse.y, 8
+        // Core
+        const coreGrad = ctx.createRadialGradient(
+          mouse.x, mouse.y, 0, mouse.x, mouse.y, 8
         );
-        coreGradient.addColorStop(0, `rgba(255, 255, 255, ${0.4 * pulse})`);
-        coreGradient.addColorStop(0.5, `rgba(77, 159, 255, ${0.2 * pulse})`);
-        coreGradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+        coreGrad.addColorStop(0, `rgba(255, 255, 255, ${0.4 * pulse})`);
+        coreGrad.addColorStop(0.5, `rgba(77, 159, 255, ${0.2 * pulse})`);
+        coreGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = coreGrad;
         ctx.beginPath();
         ctx.arc(mouse.x, mouse.y, 8, 0, Math.PI * 2);
-        ctx.fillStyle = coreGradient;
-        ctx.globalAlpha = 1;
         ctx.fill();
 
         // Lines from cursor to nearby particles
-        for (const p of ps) {
-          const dx = p.x - mouse.x;
-          const dy = p.y - mouse.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < MOUSE_RADIUS * 1.5) {
+        ctx.lineWidth = 0.6;
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const dx = px[i] - mouse.x;
+          const dy = py[i] - mouse.y;
+          const distSq = dx * dx + dy * dy;
+          if (distSq < MOUSE_LINE_RADIUS_SQ) {
+            const dist = Math.sqrt(distSq);
             ctx.beginPath();
             ctx.moveTo(mouse.x, mouse.y);
-            ctx.lineTo(p.x, p.y);
-            ctx.strokeStyle = p.color;
-            ctx.globalAlpha = ((MOUSE_RADIUS * 1.5 - dist) / (MOUSE_RADIUS * 1.5)) * 0.25;
-            ctx.lineWidth = 0.6;
+            ctx.lineTo(px[i], py[i]);
+            ctx.strokeStyle = pcolor[i];
+            ctx.globalAlpha = ((MOUSE_LINE_RADIUS - dist) / MOUSE_LINE_RADIUS) * 0.25;
             ctx.stroke();
           }
         }
       }
 
-      // Connect nearby particles with lines (distance < 150px)
-      for (let i = 0; i < ps.length; i++) {
-        for (let j = i + 1; j < ps.length; j++) {
-          const dx = ps[i].x - ps[j].x;
-          const dy = ps[i].y - ps[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < CONNECTION_DISTANCE) {
-            ctx.beginPath();
-            ctx.moveTo(ps[i].x, ps[i].y);
-            ctx.lineTo(ps[j].x, ps[j].y);
-            ctx.strokeStyle = ps[i].color;
-            ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.4;
-            ctx.lineWidth = 1;
-            ctx.stroke();
+      // Connect nearby particles using spatial grid (O(n) instead of O(n²))
+      ctx.lineWidth = 1;
+      for (let row = 0; row < gridRows; row++) {
+        for (let col = 0; col < gridCols; col++) {
+          const cellIdx = row * gridCols + col;
+          const count = gridCount[cellIdx];
+          if (count === 0) continue;
+
+          // Check current cell + right + bottom + bottom-right neighbors
+          for (let nc = 0; nc < 4; nc++) {
+            let nRow = row, nCol = col;
+            if (nc === 1) nCol++;
+            else if (nc === 2) nRow++;
+            else if (nc === 3) { nRow++; nCol++; }
+            if (nRow >= gridRows || nCol >= gridCols) continue;
+
+            const nCellIdx = nRow * gridCols + nCol;
+            const nCount = gridCount[nCellIdx];
+            if (nCount === 0) continue;
+
+            const startJ = (nc === 0) ? 0 : 0; // For same cell, avoid duplicates below
+            for (let a = 0; a < count; a++) {
+              const i = grid[cellIdx][a];
+              const jStart = (nc === 0) ? a + 1 : 0;
+              for (let b = jStart; b < nCount; b++) {
+                const j = grid[nCellIdx][b];
+                const dx = px[i] - px[j];
+                const dy = py[i] - py[j];
+                const distSq = dx * dx + dy * dy;
+                if (distSq < CONNECTION_DISTANCE_SQ) {
+                  const dist = Math.sqrt(distSq);
+                  ctx.beginPath();
+                  ctx.moveTo(px[i], py[i]);
+                  ctx.lineTo(px[j], py[j]);
+                  ctx.strokeStyle = pcolor[i];
+                  ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.4;
+                  ctx.stroke();
+                }
+              }
+            }
           }
         }
       }
@@ -398,19 +501,21 @@ function ParticleCanvas() {
 
       animFrameRef.current = requestAnimationFrame(animate);
     };
-    animate();
+    animFrameRef.current = requestAnimationFrame(animate);
 
     return () => {
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", debouncedResize);
+      document.removeEventListener("visibilitychange", handleVisibility);
       if (parent) {
         parent.removeEventListener("mousemove", handleMouseMove);
         parent.removeEventListener("mouseleave", handleMouseLeave);
       }
       cancelAnimationFrame(animFrameRef.current);
+      clearTimeout(resizeTimer);
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 z-[5] pointer-events-none" />;
+  return <canvas ref={canvasRef} className="absolute inset-0 z-[5] pointer-events-none" style={{ willChange: "transform" }} />;
 }
 
 // ─── TYPEWRITER COMPONENT ──────────────────────
