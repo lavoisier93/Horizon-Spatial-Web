@@ -1226,26 +1226,58 @@ function LeafletMap({ isDark }: { isDark: boolean }) {
 
   return (
     <div className="relative">
-      <div className="text-center mb-4">
-        <h4 className={`text-sm font-semibold uppercase tracking-wider ${isDark ? "text-white/40" : "text-[#4A5568]"}`} style={poppins}>Côte d'Ivoire</h4>
+      {/* Indicateur d'échelle géographique : Afrique → CEDEAO → Côte d'Ivoire */}
+      <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
+        <div className="flex items-center gap-1.5">
+          <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5 text-[#0047AB] opacity-40" fill="currentColor">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M12 2C8 2 5 5 5 9c0 4 3 7 7 11 4-4 7-7 7-11 0-4-3-7-7-7z" opacity="0.3" />
+          </svg>
+          <span className={`text-[10px] sm:text-xs font-medium uppercase tracking-wider ${isDark ? "text-white/30" : "text-[#4A5568]/50"}`} style={poppins}>Afrique</span>
+        </div>
+        <svg viewBox="0 0 8 8" className={`w-2 h-2 ${isDark ? "text-white/20" : "text-[#4A5568]/30"}`} fill="currentColor">
+          <path d="M2 4l3-2v4z" />
+        </svg>
+        <div className="flex items-center gap-1.5">
+          <div className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-sm border ${isDark ? "border-[#00A86B]/40" : "border-[#00A86B]/30"}`} style={{ background: isDark ? "rgba(0,168,107,0.1)" : "rgba(0,168,107,0.08)" }} />
+          <span className={`text-[10px] sm:text-xs font-medium uppercase tracking-wider ${isDark ? "text-white/40" : "text-[#4A5568]/60"}`} style={poppins}>CEDEAO</span>
+        </div>
+        <svg viewBox="0 0 8 8" className={`w-2 h-2 ${isDark ? "text-white/20" : "text-[#4A5568]/30"}`} fill="currentColor">
+          <path d="M2 4l3-2v4z" />
+        </svg>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-sm bg-[#0047AB]/20 border border-[#0047AB]/50" />
+          <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${isDark ? "text-white/70" : "text-[#0A1628]/70"}`} style={poppins}>Côte d'Ivoire</span>
+        </div>
       </div>
+
       <div
         ref={mapRef}
         className="w-full rounded-xl overflow-hidden h-[300px] sm:h-[400px] lg:h-[500px]"
       />
-      {/* Légende */}
-      <div className={`flex flex-wrap items-center gap-3 sm:gap-6 mt-4 justify-center text-[10px] sm:text-xs ${isDark ? "text-white/50" : "text-[#4A5568]"}`} style={poppins}>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full bg-[#0047AB] border-2 border-white shadow-md" />
-          <span>Siège social</span>
+
+      {/* Légende + Indicateur marché */}
+      <div className="mt-4 space-y-3">
+        <div className={`flex flex-wrap items-center gap-3 sm:gap-6 justify-center text-[10px] sm:text-xs ${isDark ? "text-white/50" : "text-[#4A5568]"}`} style={poppins}>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-[#0047AB] border-2 border-white shadow-md" />
+            <span>Siège social</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-[#00A86B] border-2 border-white shadow-md" />
+            <span>Zone d'intervention</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-0 border-t-2 border-dashed border-[#00A86B] opacity-60" />
+            <span>Liaison siège</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#00A86B] border-2 border-white shadow-md" />
-          <span>Zone d'intervention</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-0 border-t-2 border-dashed border-[#00A86B] opacity-60" />
-          <span>Liaison siège</span>
+        {/* Marché cible */}
+        <div className={`text-center text-[10px] sm:text-xs ${isDark ? "text-white/30" : "text-[#4A5568]/50"}`} style={poppins}>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: isDark ? "rgba(0,71,171,0.1)" : "rgba(0,71,171,0.05)", border: `1px solid ${isDark ? "rgba(0,71,171,0.2)" : "rgba(0,71,171,0.1)"}` }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00A86B] animate-pulse" />
+            Marché : Côte d'Ivoire & Afrique de l'Ouest (UEMOA/CEDEAO)
+          </span>
         </div>
       </div>
     </div>
