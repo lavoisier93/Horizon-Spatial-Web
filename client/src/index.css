@@ -178,6 +178,20 @@ html {
   animation: heroFadeUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
+/* ─── Typewriter cursor ─── */
+.typewriter-cursor {
+  display: inline-block;
+  color: #00A86B;
+  font-weight: 300;
+  animation: typewriterBlink 0.75s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes typewriterBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 /* ─── Reveal elements - scroll fade-in ─── */
 .reveal-element {
   opacity: 0;
@@ -225,6 +239,11 @@ html {
   /* Hide scroll indicator */
   .animate-bounce {
     animation: none;
+  }
+
+  /* Hide typewriter cursor in print */
+  .typewriter-cursor {
+    display: none !important;
   }
 
   /* Optimize images for print */

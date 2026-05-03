@@ -120,6 +120,72 @@ function useParallax(speed: number = 0.3) {
   return ref;
 }
 
+// ─── TYPEWRITER COMPONENT ──────────────────────
+function TypewriterText({
+  phrases,
+  typingSpeed = 70,
+  deletingSpeed = 40,
+  pauseDuration = 2500,
+  className = "",
+  style,
+}: {
+  phrases: string[];
+  typingSpeed?: number;
+  deletingSpeed?: number;
+  pauseDuration?: number;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const [displayText, setDisplayText] = useState("");
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    const currentPhrase = phrases[phraseIndex];
+
+    if (isPaused) {
+      const pauseTimer = setTimeout(() => {
+        setIsPaused(false);
+        setIsDeleting(true);
+      }, pauseDuration);
+      return () => clearTimeout(pauseTimer);
+    }
+
+    if (!isDeleting) {
+      // Typing
+      if (displayText.length < currentPhrase.length) {
+        const timer = setTimeout(() => {
+          setDisplayText(currentPhrase.slice(0, displayText.length + 1));
+        }, typingSpeed);
+        return () => clearTimeout(timer);
+      } else {
+        // Finished typing, pause
+        setIsPaused(true);
+      }
+    } else {
+      // Deleting
+      if (displayText.length > 0) {
+        const timer = setTimeout(() => {
+          setDisplayText(displayText.slice(0, -1));
+        }, deletingSpeed);
+        return () => clearTimeout(timer);
+      } else {
+        // Finished deleting, move to next phrase
+        setIsDeleting(false);
+        setPhraseIndex((prev) => (prev + 1) % phrases.length);
+      }
+    }
+  }, [displayText, isDeleting, isPaused, phraseIndex, phrases, typingSpeed, deletingSpeed, pauseDuration]);
+
+  return (
+    <span className={className} style={style}>
+      {displayText}
+      <span className="typewriter-cursor" aria-hidden="true">|</span>
+    </span>
+  );
+}
+
 // CDN URLs
 const LOGO_WHITE = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/gvCTmeZaVyxKdIeO.png";
 const HERO_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/1TrO5oX90s8Qy1dr4Oqoy5-img-1_1772151147000_na1fn_aGVyby1jb3Zlcg.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94LzFUck81b1g5MHM4UXkxZHI0T3FveTUtaW1nLTFfMTc3MjE1MTE0NzAwMF9uYTFmbl9hR1Z5YnkxamIzWmxjZy5qcGc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=nB-0WTFlA1pfxWkXetc~YxW4cfaXwWCZDuchJvLCLsHq1zlPw-HEoUxCp9Imt1~Xg1S~hslfjw5OgqjJD02u55bHSHOfJC5kVrE5BN6KZ2n4Tiexlyka8sdMVC-ZlY0WnudnB~dt9NZ~8MvkBcsNYoZnVEFIV7g~PaCqprv-AbIxnWZQ8bp7td5r6py~vsZlSeE9I3xBnAuQWeslxidNoHYIA-AWLCVhekI-veYlSUDtSeTS1o8mcj6RcWfCBQnf9UecTVfgQwcHXO5s7ycboy9~Dakmy0g9h~6fvgYO4E0QY6QvwSYFb3MTXZs4S7XClcYbEb2iTubBNwUx~SRntQ__";
@@ -1560,8 +1626,18 @@ export default function Home() {
                 style={{ ...poppins, animationDelay: "0.5s" }}
               >
                 Offre de Services{" "}
-                <span className="text-[#00A86B]">Aménageurs Fonciers</span>{" "}
-                & Promoteurs
+                <TypewriterText
+                  phrases={[
+                    "Aménageurs Fonciers",
+                    "Promoteurs Immobiliers",
+                    "Opérateurs Fonciers",
+                    "Collectivités Territoriales",
+                  ]}
+                  className="text-[#00A86B]"
+                  typingSpeed={65}
+                  deletingSpeed={35}
+                  pauseDuration={2800}
+                />
               </h1>
 
               <p className="text-lg md:text-xl text-white/80 leading-relaxed mb-8 max-w-2xl hero-fade" style={{ animationDelay: "0.7s" }}>
