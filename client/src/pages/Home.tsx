@@ -559,6 +559,7 @@ const navLinks = [
   { label: "Références", href: "#references" },
   { label: "FAQ", href: "#faq" },
   { label: "Partenaires", href: "#partenaires" },
+  { label: "Zones", href: "#zones" },
   { label: "Contact", href: "#contact" },
 ];
 
