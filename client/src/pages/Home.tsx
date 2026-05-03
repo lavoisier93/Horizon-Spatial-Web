@@ -416,7 +416,7 @@ function ParticleCanvas() {
 
       // Trail effect: instead of full clear, overlay a semi-transparent rect
       ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
       ctx.fillRect(0, 0, w, h);
       ctx.globalCompositeOperation = 'source-over';
       const mouse = mouseRef.current;
