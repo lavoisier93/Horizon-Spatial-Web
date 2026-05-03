@@ -283,6 +283,19 @@ function ParticleCanvas() {
       parent.addEventListener("mouseleave", handleMouseLeave, { passive: true });
     }
 
+    // Detect system theme and adapt particle colors
+    const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    let isDarkTheme = darkModeQuery.matches;
+
+    // Theme-adaptive color palettes
+    const getColors = (dark: boolean) => ({
+      primary: dark ? "#4D9FFF" : "#0047AB",   // Blue: lighter for dark, deeper for light
+      secondary: dark ? "#00E88F" : "#00875A", // Green: brighter for dark, deeper for light
+      glowPrimary: dark ? "rgba(77, 159, 255," : "rgba(0, 71, 171,",
+      glowSecondary: dark ? "rgba(0, 232, 143," : "rgba(0, 135, 90,",
+    });
+    let colors = getColors(isDarkTheme);
+
     // Initialize particles with typed arrays for better memory layout
     const px = new Float32Array(PARTICLE_COUNT);
     const py = new Float32Array(PARTICLE_COUNT);
@@ -299,8 +312,18 @@ function ParticleCanvas() {
       psx[i] = (Math.random() - 0.5) * 0.6;
       psy[i] = (Math.random() - 0.5) * 0.6;
       palpha[i] = Math.random() * 0.2 + 0.15;
-      pcolor.push(Math.random() > 0.5 ? "#4D9FFF" : "#00E88F");
+      pcolor.push(Math.random() > 0.5 ? colors.primary : colors.secondary);
     }
+
+    // Listen for theme changes and update particle colors in real-time
+    const handleThemeChange = (e: MediaQueryListEvent) => {
+      isDarkTheme = e.matches;
+      colors = getColors(isDarkTheme);
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        pcolor[i] = Math.random() > 0.5 ? colors.primary : colors.secondary;
+      }
+    };
+    darkModeQuery.addEventListener("change", handleThemeChange);
 
     // Spatial grid for O(n) neighbor lookup instead of O(n²)
     const cellSize = CONNECTION_DISTANCE;
@@ -506,6 +529,7 @@ function ParticleCanvas() {
     return () => {
       window.removeEventListener("resize", debouncedResize);
       document.removeEventListener("visibilitychange", handleVisibility);
+      darkModeQuery.removeEventListener("change", handleThemeChange);
       if (parent) {
         parent.removeEventListener("mousemove", handleMouseMove);
         parent.removeEventListener("mouseleave", handleMouseLeave);
