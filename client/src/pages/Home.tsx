@@ -19,6 +19,10 @@
  * V13: + Micro-animations scroll sur étapes méthodologie (bounce, slide-in, line grow, glow)
  * V14: + Micro-animations scroll sur section avantages (flip-up, pop-in, float, ring pulse, hover tilt)
  * V15: + Barre de progression de lecture en haut de page (scroll indicator)
+ * V16: + Lien Zones dans la navbar
+ * V17: + Optimisation responsive carte Leaflet (hauteur adaptative, marqueurs mobile)
+ * V18: + Animation d'entrée fondu progressif marqueurs et lignes Leaflet
+ * V19: + Effet parallaxe subtil sur hero et sections sombres
  */
 
 import {
@@ -73,6 +77,48 @@ import {
 import { useEffect, useRef, useState, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+
+// ─── PARALLAX HOOK ──────────────────────────────
+function useParallax(speed: number = 0.3) {
+  const ref = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef(0);
+  const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    // Disable parallax on mobile for performance
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) return;
+
+    const handleScroll = () => {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect();
+        const windowH = window.innerHeight;
+        // Only compute when section is near viewport
+        if (rect.bottom < -200 || rect.top > windowH + 200) return;
+        const sectionCenter = rect.top + rect.height / 2;
+        const viewportCenter = windowH / 2;
+        const delta = (sectionCenter - viewportCenter) * speed;
+        if (Math.abs(delta - offsetRef.current) > 0.5) {
+          offsetRef.current = delta;
+          el.style.transform = `translate3d(0, ${delta}px, 0)`;
+        }
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // initial position
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [speed]);
+
+  return ref;
+}
 
 // CDN URLs
 const LOGO_WHITE = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/gvCTmeZaVyxKdIeO.png";
@@ -1459,6 +1505,12 @@ function ContactForm() {
 export default function Home() {
   const [isDark, setIsDark] = useState(false);
 
+  // Parallax refs for dark sections background images
+  const heroParallax = useParallax(0.15);
+  const expertiseParallax = useParallax(0.2);
+  const methodoParallax = useParallax(0.2);
+  const contactParallax = useParallax(0.15);
+
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add("dark");
@@ -1487,7 +1539,9 @@ export default function Home() {
       {/* ===== SECTION 1: HERO / COVER ===== */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
         <div className="absolute inset-0">
-          <img src={HERO_IMG} alt="Vue aérienne d'un projet d'aménagement urbain" className="w-full h-full object-cover" />
+          <div ref={heroParallax} className="absolute inset-[-15%] will-change-transform">
+            <img src={HERO_IMG} alt="Vue aérienne d'un projet d'aménagement urbain" className="w-full h-full object-cover" />
+          </div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628]/90 via-[#0A1628]/75 to-[#0047AB]/40" />
         </div>
 
@@ -1632,7 +1686,7 @@ export default function Home() {
 
       {/* ===== SECTION 3: DOUBLE EXPERTISE ===== */}
       <section className="py-20 lg:py-28 bg-[#0A1628] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-[-10%] opacity-5 will-change-transform" ref={expertiseParallax}>
           <LazyImage src={TOPO_IMG} alt="" className="w-full h-full object-cover" />
         </div>
         <div className="container mx-auto px-6 lg:px-12 relative z-10">
@@ -1797,7 +1851,7 @@ export default function Home() {
 
       {/* ===== SECTION 5: PROCESSUS ===== */}
       <section id="methodologie" className="py-20 lg:py-28 bg-[#0047AB] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-[-10%] opacity-10 will-change-transform" ref={methodoParallax}>
           <LazyImage src={DRONE_IMG} alt="" className="w-full h-full object-cover" />
         </div>
         <div className="absolute inset-0 bg-[#0047AB]/90" />
@@ -2137,7 +2191,9 @@ export default function Home() {
       {/* ===== SECTION 8: CTA / CONTACT WITH FORM (UPDATED) ===== */}
       <section id="contact" className="relative py-20 lg:py-28 overflow-hidden">
         <div className="absolute inset-0">
-          <LazyImage src={LEGAL_IMG} alt="" className="w-full h-full object-cover" />
+          <div ref={contactParallax} className="absolute inset-[-15%] will-change-transform">
+            <LazyImage src={LEGAL_IMG} alt="" className="w-full h-full object-cover" />
+          </div>
           <div className="absolute inset-0 bg-gradient-to-br from-[#0A1628]/95 via-[#0A1628]/90 to-[#0047AB]/80" />
         </div>
 
