@@ -29,6 +29,7 @@
  * V23: + Grille animée en perspective (grid-bg) dans le Hero
  * V24: + Éléments géométriques flottants (losanges) dans le Hero
  * V25: + Animation SVG progressive du logo dans le loading screen
+ * V26: + Loading screen 2 phases : losanges tournants (1.5s) puis dessin SVG logo progressif
  */
 
 import {
@@ -127,67 +128,98 @@ function useParallax(speed: number = 0.3) {
 }
 
 // ─── LOADING SCREEN COMPONENT ───────────────
+// Phase 1: Spinning diamonds (1.5s) → Phase 2: SVG logo draw animation → Fade-out
 function LoadingScreen() {
   const [visible, setVisible] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
+  const [phase, setPhase] = useState<1 | 2>(1);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // Phase 1 lasts 1.5s, then switch to Phase 2
+    const t1 = setTimeout(() => setPhase(2), 1500);
+    // Phase 2 logo animation ~2.5s, then fade-out
+    const t2 = setTimeout(() => {
       setFadeOut(true);
       setTimeout(() => setVisible(false), 800);
-    }, 2800); // Wait for SVG animation to complete before fade-out
-    return () => clearTimeout(timer);
+    }, 4200);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
   if (!visible) return null;
 
   return (
     <div
-      className={`fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#050508]`}
+      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#050508]"
       style={{
         opacity: fadeOut ? 0 : 1,
         visibility: fadeOut ? "hidden" : "visible",
         transition: "opacity 0.8s ease, visibility 0.8s ease",
       }}
     >
-      {/* Animated SVG Logo */}
-      <svg
-        className="logo-svg-loader"
-        viewBox="0 0 400 180"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ width: "220px", height: "auto", filter: "drop-shadow(0 0 30px rgba(0, 71, 171, 0.5))" }}
+      {/* Phase 1: Spinning Diamonds */}
+      <div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{
+          opacity: phase === 1 ? 1 : 0,
+          transition: "opacity 0.5s ease",
+          pointerEvents: "none",
+        }}
       >
-        {/* Blue Diamond – stroke draw */}
-        <path className="loader-draw-blue" d="M60 90 L120 30 L180 90 L120 150 Z" />
-        {/* Blue Diamond – fill */}
-        <path className="loader-fill-blue" d="M60 90 L120 30 L180 90 L120 150 Z" />
+        <div className="relative w-[100px] h-[100px]">
+          <div className="loader-diamond absolute top-0 left-[20px] w-[40px] h-[40px] border-[3px] border-[#0047AB]" />
+          <div className="loader-diamond loader-diamond-2 absolute bottom-0 left-[40px] w-[40px] h-[40px] border-[3px] border-[#00A86B]" />
+        </div>
+      </div>
 
-        {/* Green Diamond – stroke draw */}
-        <path className="loader-draw-green" d="M150 90 L210 30 L270 90 L210 150 Z" />
-        {/* Green Diamond – fill */}
-        <path className="loader-fill-green" d="M150 90 L210 30 L270 90 L210 150 Z" />
+      {/* Phase 2: SVG Logo Draw Animation */}
+      <div
+        style={{
+          opacity: phase === 2 ? 1 : 0,
+          transform: phase === 2 ? "scale(1)" : "scale(0.8)",
+          transition: "opacity 0.5s ease, transform 0.5s ease",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <svg
+          viewBox="0 0 400 180"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ width: "220px", height: "auto", filter: "drop-shadow(0 0 30px rgba(0, 71, 171, 0.5))" }}
+          key={phase === 2 ? "logo-active" : "logo-hidden"}
+        >
+          {phase === 2 && (
+            <>
+              {/* Blue Diamond – stroke draw */}
+              <path className="loader-draw-blue" d="M60 90 L120 30 L180 90 L120 150 Z" />
+              <path className="loader-fill-blue" d="M60 90 L120 30 L180 90 L120 150 Z" />
 
-        {/* Intersection */}
-        <path
-          className="loader-intersection"
-          d="M150 90 L165 75 L180 90 L165 105 Z"
-          fill="rgba(0, 71, 171, 0.7)"
-        />
+              {/* Green Diamond – stroke draw */}
+              <path className="loader-draw-green" d="M150 90 L210 30 L270 90 L210 150 Z" />
+              <path className="loader-fill-green" d="M150 90 L210 30 L270 90 L210 150 Z" />
 
-        {/* Pixel accents */}
-        <g>
-          <rect className="loader-pixel" style={{ animationDelay: "1.8s" }} x="285" y="70" width="15" height="15" fill="#00A86B" />
-          <rect className="loader-pixel" style={{ animationDelay: "1.9s" }} x="305" y="55" width="12" height="12" fill="#0047AB" />
-          <rect className="loader-pixel" style={{ animationDelay: "2.0s" }} x="295" y="90" width="10" height="10" fill="#00A86B" />
-          <rect className="loader-pixel" style={{ animationDelay: "2.1s" }} x="320" y="75" width="8" height="8" fill="#0047AB" />
-          <rect className="loader-pixel" style={{ animationDelay: "2.2s" }} x="310" y="95" width="6" height="6" fill="#00A86B" />
-        </g>
-      </svg>
+              {/* Intersection */}
+              <path className="loader-intersection" d="M150 90 L165 75 L180 90 L165 105 Z" fill="rgba(0, 71, 171, 0.7)" />
 
-      {/* Brand text below logo */}
-      <div className="loader-brand-text" style={{ marginTop: "1.5rem", textAlign: "center" }}>
-        <span className="loader-text-horizon">HORIZON</span>{" "}
-        <span className="loader-text-spatial">SPATIAL</span>
+              {/* Pixel accents */}
+              <g>
+                <rect className="loader-pixel" style={{ animationDelay: "1.8s" }} x="285" y="70" width="15" height="15" fill="#00A86B" />
+                <rect className="loader-pixel" style={{ animationDelay: "1.9s" }} x="305" y="55" width="12" height="12" fill="#0047AB" />
+                <rect className="loader-pixel" style={{ animationDelay: "2.0s" }} x="295" y="90" width="10" height="10" fill="#00A86B" />
+                <rect className="loader-pixel" style={{ animationDelay: "2.1s" }} x="320" y="75" width="8" height="8" fill="#0047AB" />
+                <rect className="loader-pixel" style={{ animationDelay: "2.2s" }} x="310" y="95" width="6" height="6" fill="#00A86B" />
+              </g>
+            </>
+          )}
+        </svg>
+
+        {/* Brand text below logo */}
+        {phase === 2 && (
+          <div className="loader-brand-text" style={{ marginTop: "1.5rem", textAlign: "center" }}>
+            <span className="loader-text-horizon">HORIZON</span>{" "}
+            <span className="loader-text-spatial">SPATIAL</span>
+          </div>
+        )}
       </div>
     </div>
   );

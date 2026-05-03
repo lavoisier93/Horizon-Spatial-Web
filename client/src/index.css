@@ -283,7 +283,22 @@ html {
   }
 }
 
-/* ─── Loading Screen – SVG Logo Animation ─── */
+/* ─── Loading Screen – Phase 1: Spinning Diamonds ─── */
+.loader-diamond {
+  transform: rotate(45deg);
+  animation: loaderSpin 2s ease-in-out infinite;
+}
+
+.loader-diamond-2 {
+  animation-delay: 0.3s;
+}
+
+@keyframes loaderSpin {
+  0%, 100% { transform: rotate(45deg) scale(1); }
+  50% { transform: rotate(225deg) scale(1.1); }
+}
+
+/* ─── Loading Screen – Phase 2: SVG Logo Animation ─── */
 
 /* Stroke draw: blue diamond */
 .loader-draw-blue {
