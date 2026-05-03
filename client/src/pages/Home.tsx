@@ -295,11 +295,11 @@ function ParticleCanvas() {
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       px[i] = Math.random() * w;
       py[i] = Math.random() * h;
-      psize[i] = Math.random() * 3 + 2;
-      psx[i] = (Math.random() - 0.5) * 0.8;
-      psy[i] = (Math.random() - 0.5) * 0.8;
-      palpha[i] = Math.random() * 0.35 + 0.35;
-      pcolor.push(Math.random() > 0.5 ? "#4D9FFF" : "#00E88F");
+      psize[i] = Math.random() * 3 + 2.5;
+      psx[i] = (Math.random() - 0.5) * 1.0;
+      psy[i] = (Math.random() - 0.5) * 1.0;
+      palpha[i] = Math.random() * 0.4 + 0.5;
+      pcolor.push(Math.random() > 0.5 ? "#7FBFFF" : "#00FF9F");
     }
 
     // Spatial grid for O(n) neighbor lookup instead of O(n²)
@@ -455,7 +455,7 @@ function ParticleCanvas() {
       }
 
       // Connect nearby particles using spatial grid (O(n) instead of O(n²))
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1.5;
       for (let row = 0; row < gridRows; row++) {
         for (let col = 0; col < gridCols; col++) {
           const cellIdx = row * gridCols + col;
@@ -489,7 +489,7 @@ function ParticleCanvas() {
                   ctx.moveTo(px[i], py[i]);
                   ctx.lineTo(px[j], py[j]);
                   ctx.strokeStyle = pcolor[i];
-                  ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.6;
+                  ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.8;
                   ctx.stroke();
                 }
               }
@@ -2152,9 +2152,9 @@ export default function Home() {
       <section className="relative min-h-screen flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div ref={heroParallax} className="absolute inset-[-15%] will-change-transform">
-            <img src={HERO_IMG} alt="Vue aérienne d'un projet d'aménagement urbain" className="w-full h-full object-cover" />
+            <img src={HERO_IMG} alt="Vue aérienne d'un projet d'aménagement urbain" className="w-full h-full object-cover opacity-40" />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628]/85 via-[#0A1628]/65 to-[#0047AB]/30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628]/90 via-[#0A1628]/70 to-[#0047AB]/40" />
         </div>
 
         {/* Animated Perspective Grid */}
