@@ -26,6 +26,7 @@
  * V20: + Animation typewriter sur le titre du Hero
  * V21: + Effet flip 3D sur cartes de services avec détails (livrables, délai, outils)
  * V22: + Loading Screen (2 losanges tournants, fade-out 1.5s) + Système de particules Canvas Hero
+ * V23: + Grille animée en perspective (grid-bg) dans le Hero
  */
 
 import {
@@ -1775,6 +1776,9 @@ export default function Home() {
           </div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628]/90 via-[#0A1628]/75 to-[#0047AB]/40" />
         </div>
+
+        {/* Animated Perspective Grid */}
+        <div className="hero-grid-bg" />
 
         {/* Particle System */}
         <ParticleCanvas />
