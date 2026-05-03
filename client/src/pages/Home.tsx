@@ -515,7 +515,7 @@ function ParticleCanvas() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 z-[8] pointer-events-none" style={{ willChange: "transform" }} />;
+  return <canvas ref={canvasRef} className="absolute inset-0 z-[15] pointer-events-none" style={{ willChange: "transform" }} />;
 }
 
 // ─── TYPEWRITER COMPONENT ──────────────────────
@@ -2166,9 +2166,6 @@ export default function Home() {
         <div className="geo-element geo-diamond-3" />
         <div className="geo-element geo-diamond-4" />
 
-        {/* Particle System */}
-        <ParticleCanvas />
-
         <div className="relative z-10 w-full">
           <div className="container mx-auto px-6 lg:px-12 py-20">
             <div className="max-w-3xl hero-content">
@@ -2232,10 +2229,13 @@ export default function Home() {
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/50 hero-fade" style={{ animationDelay: "1.5s" }}>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/50 hero-fade z-[20]" style={{ animationDelay: "1.5s" }}>
           <span className="text-xs uppercase tracking-widest" style={poppins}>Défiler</span>
           <ChevronDown className="w-5 h-5 animate-bounce" />
         </div>
+
+        {/* Particle System - above everything except interactive elements */}
+        <ParticleCanvas />
       </section>
 
       {/* ===== SECTION 2: CADRE RÉGLEMENTAIRE ===== */}
