@@ -18,6 +18,7 @@
  * V12: + Micro-animations scroll sur icônes services (entrée, pulse, wobble, float)
  * V13: + Micro-animations scroll sur étapes méthodologie (bounce, slide-in, line grow, glow)
  * V14: + Micro-animations scroll sur section avantages (flip-up, pop-in, float, ring pulse, hover tilt)
+ * V15: + Barre de progression de lecture en haut de page (scroll indicator)
  */
 
 import {
@@ -970,6 +971,37 @@ const galleryItems = [
   },
 ];
 
+// ─── READING PROGRESS BAR ───────────────────────
+function ReadingProgressBar() {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight > 0) {
+        setProgress(Math.min((scrollTop / docHeight) * 100, 100));
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <div className="fixed top-0 left-0 w-full z-[9999] pointer-events-none">
+      <div
+        className="h-[3px] transition-[width] duration-100 ease-out"
+        style={{
+          width: `${progress}%`,
+          background: "linear-gradient(90deg, #0047AB 0%, #00A86B 100%)",
+          boxShadow: progress > 0 ? "0 0 8px rgba(0, 168, 107, 0.4)" : "none",
+        }}
+      />
+    </div>
+  );
+}
+
 // ─── URGENCY BANNER COMPONENT ───────────────────
 function UrgencyBanner() {
   const [visible, setVisible] = useState(true);
@@ -1394,6 +1426,9 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen overflow-x-hidden transition-colors duration-500 ${isDark ? "bg-[#0A1628]" : "bg-white"}`}>
+      {/* Reading Progress Bar */}
+      <ReadingProgressBar />
+
       {/* Urgency Banner */}
       <UrgencyBanner />
 
