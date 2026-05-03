@@ -283,14 +283,104 @@ html {
   }
 }
 
-/* ─── Loading Screen ─── */
-.loader-diamond {
-  transform: rotate(45deg);
+/* ─── Loading Screen – SVG Logo Animation ─── */
+
+/* Stroke draw: blue diamond */
+.loader-draw-blue {
+  fill: none;
+  stroke: #0047AB;
+  stroke-width: 8;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: loaderDrawDiamond 1.2s ease forwards;
 }
 
-@keyframes loaderSpin {
-  0%, 100% { transform: rotate(45deg) scale(1); }
-  50% { transform: rotate(225deg) scale(1.1); }
+/* Stroke draw: green diamond (delayed) */
+.loader-draw-green {
+  fill: none;
+  stroke: #00A86B;
+  stroke-width: 8;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: loaderDrawDiamond 1.2s ease 0.4s forwards;
+}
+
+@keyframes loaderDrawDiamond {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Fill-in: blue diamond */
+.loader-fill-blue {
+  fill: #0047AB;
+  opacity: 0;
+  animation: loaderFillIn 0.6s ease 1.0s forwards;
+}
+
+/* Fill-in: green diamond */
+.loader-fill-green {
+  fill: #00A86B;
+  opacity: 0;
+  animation: loaderFillIn 0.6s ease 1.3s forwards;
+}
+
+/* Intersection */
+.loader-intersection {
+  opacity: 0;
+  animation: loaderFillIn 0.5s ease 1.5s forwards;
+}
+
+@keyframes loaderFillIn {
+  to { opacity: 1; }
+}
+
+/* Pixel accents */
+.loader-pixel {
+  opacity: 0;
+  animation: loaderPixelAppear 0.4s ease forwards;
+}
+
+@keyframes loaderPixelAppear {
+  0%   { opacity: 0; transform: scale(0) rotate(45deg); }
+  50%  { opacity: 1; transform: scale(1.2) rotate(45deg); }
+  100% { opacity: 1; transform: scale(1) rotate(45deg); }
+}
+
+/* Brand text below logo */
+.loader-brand-text {
+  font-family: 'Montserrat', 'Poppins', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  overflow: hidden;
+}
+
+.loader-text-horizon {
+  display: inline-block;
+  background: linear-gradient(135deg, #0047AB, #1a5fc9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0;
+  transform: translateY(100%);
+  animation: loaderSlideUp 0.6s ease 2.0s forwards;
+}
+
+.loader-text-spatial {
+  display: inline-block;
+  background: linear-gradient(135deg, #00A86B, #00c97f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0;
+  transform: translateY(100%);
+  animation: loaderSlideUp 0.6s ease 2.2s forwards;
+}
+
+@keyframes loaderSlideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ─── Typewriter cursor ─── */

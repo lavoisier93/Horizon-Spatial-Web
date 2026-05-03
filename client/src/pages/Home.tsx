@@ -28,6 +28,7 @@
  * V22: + Loading Screen (2 losanges tournants, fade-out 1.5s) + Système de particules Canvas Hero
  * V23: + Grille animée en perspective (grid-bg) dans le Hero
  * V24: + Éléments géométriques flottants (losanges) dans le Hero
+ * V25: + Animation SVG progressive du logo dans le loading screen
  */
 
 import {
@@ -134,7 +135,7 @@ function LoadingScreen() {
     const timer = setTimeout(() => {
       setFadeOut(true);
       setTimeout(() => setVisible(false), 800);
-    }, 1500);
+    }, 2800); // Wait for SVG animation to complete before fade-out
     return () => clearTimeout(timer);
   }, []);
 
@@ -142,14 +143,51 @@ function LoadingScreen() {
 
   return (
     <div
-      className={`fixed inset-0 z-[10000] flex items-center justify-center bg-[#050508] transition-all duration-800 ${
-        fadeOut ? "opacity-0 invisible" : "opacity-100 visible"
-      }`}
-      style={{ transition: "opacity 0.8s ease, visibility 0.8s ease" }}
+      className={`fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#050508]`}
+      style={{
+        opacity: fadeOut ? 0 : 1,
+        visibility: fadeOut ? "hidden" : "visible",
+        transition: "opacity 0.8s ease, visibility 0.8s ease",
+      }}
     >
-      <div className="relative w-[100px] h-[100px]">
-        <div className="loader-diamond absolute top-0 left-[20px] w-[40px] h-[40px] border-[3px] border-[#0047AB]" style={{ animation: "loaderSpin 2s ease-in-out infinite" }} />
-        <div className="loader-diamond absolute bottom-0 left-[40px] w-[40px] h-[40px] border-[3px] border-[#00A86B]" style={{ animation: "loaderSpin 2s ease-in-out infinite 0.3s" }} />
+      {/* Animated SVG Logo */}
+      <svg
+        className="logo-svg-loader"
+        viewBox="0 0 400 180"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ width: "220px", height: "auto", filter: "drop-shadow(0 0 30px rgba(0, 71, 171, 0.5))" }}
+      >
+        {/* Blue Diamond – stroke draw */}
+        <path className="loader-draw-blue" d="M60 90 L120 30 L180 90 L120 150 Z" />
+        {/* Blue Diamond – fill */}
+        <path className="loader-fill-blue" d="M60 90 L120 30 L180 90 L120 150 Z" />
+
+        {/* Green Diamond – stroke draw */}
+        <path className="loader-draw-green" d="M150 90 L210 30 L270 90 L210 150 Z" />
+        {/* Green Diamond – fill */}
+        <path className="loader-fill-green" d="M150 90 L210 30 L270 90 L210 150 Z" />
+
+        {/* Intersection */}
+        <path
+          className="loader-intersection"
+          d="M150 90 L165 75 L180 90 L165 105 Z"
+          fill="rgba(0, 71, 171, 0.7)"
+        />
+
+        {/* Pixel accents */}
+        <g>
+          <rect className="loader-pixel" style={{ animationDelay: "1.8s" }} x="285" y="70" width="15" height="15" fill="#00A86B" />
+          <rect className="loader-pixel" style={{ animationDelay: "1.9s" }} x="305" y="55" width="12" height="12" fill="#0047AB" />
+          <rect className="loader-pixel" style={{ animationDelay: "2.0s" }} x="295" y="90" width="10" height="10" fill="#00A86B" />
+          <rect className="loader-pixel" style={{ animationDelay: "2.1s" }} x="320" y="75" width="8" height="8" fill="#0047AB" />
+          <rect className="loader-pixel" style={{ animationDelay: "2.2s" }} x="310" y="95" width="6" height="6" fill="#00A86B" />
+        </g>
+      </svg>
+
+      {/* Brand text below logo */}
+      <div className="loader-brand-text" style={{ marginTop: "1.5rem", textAlign: "center" }}>
+        <span className="loader-text-horizon">HORIZON</span>{" "}
+        <span className="loader-text-spatial">SPATIAL</span>
       </div>
     </div>
   );
