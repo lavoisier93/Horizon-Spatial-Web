@@ -284,6 +284,54 @@ select option {
 }
 
 /* ─── Carrousel logos footer ─── */
+/* Leaflet custom styles */
+.leaflet-tooltip-custom {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid #0047AB !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #0A1628 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.leaflet-label-custom {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #0A1628 !important;
+  text-shadow: 0 0 4px white, 0 0 4px white, 0 0 4px white !important;
+}
+
+.dark .leaflet-label-custom {
+  color: #e2e8f0 !important;
+  text-shadow: 0 0 4px #0A1628, 0 0 4px #0A1628, 0 0 4px #0A1628 !important;
+}
+
+.dark .leaflet-tooltip-custom {
+  background: rgba(15, 29, 50, 0.95) !important;
+  border-color: #2a5a8c !important;
+  color: #e2e8f0 !important;
+}
+
+.leaflet-popup-custom .leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.leaflet-popup-custom .leaflet-popup-tip {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.leaflet-container {
+  font-family: 'Poppins', sans-serif !important;
+}
+
 @keyframes scroll {
   0% {
     transform: translateX(0);

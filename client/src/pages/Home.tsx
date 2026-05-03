@@ -13,6 +13,7 @@
  * V7: + Lien Partenaires navbar + Carrousel logos footer + Liens cliquables sites officiels
  * V8: + Bouton retour en haut + Tracking UTM sur liens CTA
  * V9: + Carte interactive Côte d'Ivoire avec zones d'intervention
+ * V10: + Carte Leaflet/OpenStreetMap avec GeoJSON réel du shapefile CI
  */
 
 import {
@@ -64,7 +65,9 @@ import {
   Facebook,
   Navigation,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 // CDN URLs
 const LOGO_WHITE = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/gvCTmeZaVyxKdIeO.png";
@@ -95,6 +98,10 @@ const GALLERY_PLAN = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDs
 const GALLERY_MAQUETTE = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/ObYE2HNxqV6UNOr9igklvu-img-3_1772154313000_na1fn_Z2FsbGVyeS1tYXF1ZXR0ZS0zZA.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94L09iWUUySE54cVY2VU5PcjlpZ2tsdnUtaW1nLTNfMTc3MjE1NDMxMzAwMF9uYTFmbl9aMkZzYkdWeWVTMXRZWEYxWlhSMFpTMHpaQS5qcGc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=A1v2b51etsVUcAVv1w1mojRiSO3mDSU9dU9F05wNY6jpmghZrke~MryI4lKjT3n9bcC2kW4~O8eTGmunGD5RJjJ7ZcDbJX-6WGB2rgUACiJN0o4XuWYvvVndhx2~A5yFHLDj2O2Si8trWe75oQ7xl9h6rkGRN33CwqlvWKeEd5XuwATyBxh~JVOkVJikVWdG9QeM5MZoFS04PQJtwqFSpwvNpag1VjU-e2ohvKX33SSTI8kImG3AuZdFV2xmJjJ1PTAEXDHCKEbJ0Py~1qXgK7Zlc8KYqzH8aF5Pcp~lxk3QNQPfeUzVAITj2Ejp7KNUdW3mGBDAhOIwokielcvdQg__";
 
 const poppins = { fontFamily: "'Poppins', sans-serif" };
+
+// GeoJSON data URLs (via storage proxy)
+const CIV_OUTLINE_URL = "/manus-storage/civ_outline_d27819b9.geojson";
+const CIV_REGIONS_URL = "/manus-storage/civ_regions_555b60a5.geojson";
 
 // Intersection Observer hook for fade-in animations
 function useReveal() {
@@ -414,153 +421,204 @@ function Navbar({ isDark, onToggleDark }: { isDark: boolean; onToggleDark: () =>
 
 // ─── WHATSAPP FLOATING BUTTON ───────────────────
 // ─── SCROLL TO TOP BUTTON ──────────────────────
-// ─── INTERACTIVE MAP - CÔTE D'IVOIRE ────────────
-function InteractiveMap({ isDark }: { isDark: boolean }) {
-  const [hoveredCity, setHoveredCity] = useState<string | null>(null);
+// ─── INTERACTIVE MAP - LEAFLET / OPENSTREETMAP ────────
+const CITIES_DATA = [
+  { name: "Abidjan", lat: 5.3600, lng: -4.0083, isHQ: true, desc: "Siège social" },
+  { name: "Grand-Bassam", lat: 5.2139, lng: -3.7342, isHQ: false, desc: "Zone active" },
+  { name: "Bingerville", lat: 5.3531, lng: -3.8836, isHQ: false, desc: "Zone active" },
+  { name: "Jacqueville", lat: 5.2056, lng: -4.4167, isHQ: false, desc: "Zone active" },
+  { name: "Yamoussoukro", lat: 6.8276, lng: -5.2893, isHQ: false, desc: "Zone active" },
+  { name: "Bouaké", lat: 7.6881, lng: -5.0305, isHQ: false, desc: "Zone active" },
+  { name: "Korhogo", lat: 9.4580, lng: -5.6295, isHQ: false, desc: "Zone active" },
+];
 
-  // Coordonnées approximatives des villes sur la carte SVG (viewBox 0 0 400 420)
-  const cities = [
-    { name: "Abidjan", x: 230, y: 340, isHQ: true },
-    { name: "Grand-Bassam", x: 260, y: 345, isHQ: false },
-    { name: "Bingerville", x: 242, y: 335, isHQ: false },
-    { name: "Jacqueville", x: 195, y: 350, isHQ: false },
-    { name: "Yamoussoukro", x: 200, y: 270, isHQ: false },
-    { name: "Bouaké", x: 210, y: 220, isHQ: false },
-    { name: "Korhogo", x: 200, y: 100, isHQ: false },
-  ];
+function LeafletMap({ isDark }: { isDark: boolean }) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const layersRef = useRef<L.Layer[]>([]);
+
+  const initMap = useCallback(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    // Create map centered on Côte d'Ivoire
+    const map = L.map(mapRef.current, {
+      center: [7.54, -5.55],
+      zoom: 6,
+      zoomControl: true,
+      scrollWheelZoom: false,
+      attributionControl: true,
+    });
+
+    // Tile layer - use CartoDB for cleaner look
+    const tileUrl = isDark
+      ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+      : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+
+    L.tileLayer(tileUrl, {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 19,
+    }).addTo(map);
+
+    mapInstanceRef.current = map;
+
+    // Load GeoJSON regions
+    fetch(CIV_REGIONS_URL)
+      .then(r => r.json())
+      .then(data => {
+        const regionsLayer = L.geoJSON(data, {
+          style: () => ({
+            color: isDark ? "#2a5a8c" : "#0047AB",
+            weight: 1.5,
+            fillColor: isDark ? "#1a3a5c" : "#0047AB",
+            fillOpacity: isDark ? 0.15 : 0.08,
+            dashArray: "",
+          }),
+          onEachFeature: (feature, layer) => {
+            const name = feature.properties?.NAME_2 || feature.properties?.NAME_1 || "";
+            layer.bindTooltip(name, {
+              sticky: true,
+              className: "leaflet-tooltip-custom",
+              direction: "top",
+            });
+            layer.on({
+              mouseover: (e: L.LeafletMouseEvent) => {
+                const target = e.target;
+                target.setStyle({
+                  fillOpacity: isDark ? 0.35 : 0.2,
+                  weight: 2.5,
+                  color: "#00A86B",
+                });
+              },
+              mouseout: (e: L.LeafletMouseEvent) => {
+                regionsLayer.resetStyle(e.target);
+              },
+            });
+          },
+        }).addTo(map);
+        layersRef.current.push(regionsLayer);
+      })
+      .catch(() => {});
+
+    // Load outline for border emphasis
+    fetch(CIV_OUTLINE_URL)
+      .then(r => r.json())
+      .then(data => {
+        const outlineLayer = L.geoJSON(data, {
+          style: () => ({
+            color: isDark ? "#4a8abf" : "#0047AB",
+            weight: 3,
+            fillColor: "transparent",
+            fillOpacity: 0,
+          }),
+        }).addTo(map);
+        layersRef.current.push(outlineLayer);
+      })
+      .catch(() => {});
+
+    // Custom icon for HQ
+    const hqIcon = L.divIcon({
+      html: `<div style="background:#0047AB;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 12px rgba(0,71,171,0.6),0 0 24px rgba(0,71,171,0.3);"></div>`,
+      className: "",
+      iconSize: [20, 20],
+      iconAnchor: [10, 10],
+    });
+
+    // Custom icon for zones
+    const zoneIcon = L.divIcon({
+      html: `<div style="background:#00A86B;width:14px;height:14px;border-radius:50%;border:2.5px solid white;box-shadow:0 0 8px rgba(0,168,107,0.5);"></div>`,
+      className: "",
+      iconSize: [14, 14],
+      iconAnchor: [7, 7],
+    });
+
+    // Add city markers
+    CITIES_DATA.forEach(city => {
+      const marker = L.marker([city.lat, city.lng], {
+        icon: city.isHQ ? hqIcon : zoneIcon,
+      }).addTo(map);
+
+      const popupContent = `
+        <div style="font-family:'Poppins',sans-serif;padding:4px 0;">
+          <div style="font-weight:700;font-size:14px;color:#0A1628;margin-bottom:2px;">${city.name}</div>
+          <div style="font-size:11px;color:${city.isHQ ? '#0047AB' : '#00A86B'};font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${city.desc}</div>
+          ${city.isHQ ? '<div style="font-size:10px;color:#4A5568;margin-top:4px;">H-Spatial — Bureau d\'\u00c9tudes</div>' : ''}
+        </div>
+      `;
+      marker.bindPopup(popupContent, { className: "leaflet-popup-custom" });
+
+      // Tooltip with city name
+      marker.bindTooltip(city.name, {
+        permanent: true,
+        direction: city.isHQ ? "right" : "top",
+        offset: city.isHQ ? [14, 0] : [0, -10],
+        className: "leaflet-label-custom",
+      });
+
+      layersRef.current.push(marker);
+    });
+
+    // Draw dashed lines from HQ to other cities
+    const hq = CITIES_DATA.find(c => c.isHQ)!;
+    CITIES_DATA.filter(c => !c.isHQ).forEach(city => {
+      const line = L.polyline(
+        [[hq.lat, hq.lng], [city.lat, city.lng]],
+        {
+          color: "#00A86B",
+          weight: 1.5,
+          dashArray: "6 4",
+          opacity: 0.4,
+        }
+      ).addTo(map);
+      layersRef.current.push(line);
+    });
+
+    // Invalidate size after mount
+    setTimeout(() => map.invalidateSize(), 100);
+  }, [isDark]);
+
+  useEffect(() => {
+    // Cleanup previous map if theme changes
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
+      layersRef.current = [];
+    }
+    initMap();
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        layersRef.current = [];
+      }
+    };
+  }, [initMap]);
 
   return (
     <div className="relative">
-      {/* Titre de la carte */}
       <div className="text-center mb-4">
         <h4 className={`text-sm font-semibold uppercase tracking-wider ${isDark ? "text-white/40" : "text-[#4A5568]"}`} style={poppins}>Côte d'Ivoire</h4>
       </div>
-
-      <svg viewBox="0 0 400 420" className="w-full h-auto max-h-[500px]" xmlns="http://www.w3.org/2000/svg">
-        {/* Fond de la carte - contour simplifié de la Côte d'Ivoire */}
-        <defs>
-          <linearGradient id="mapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={isDark ? "#1a3a5c" : "#e8f4f8"} />
-            <stop offset="100%" stopColor={isDark ? "#0d2240" : "#d1e8f0"} />
-          </linearGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-            <feMerge>
-              <feMergeNode in="coloredBlur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-          <filter id="glowStrong">
-            <feGaussianBlur stdDeviation="5" result="coloredBlur" />
-            <feMerge>
-              <feMergeNode in="coloredBlur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        {/* Contour de la Côte d'Ivoire (simplifié) */}
-        <path
-          d="M 100 50 L 130 45 L 160 40 L 190 42 L 220 38 L 250 40 L 280 45 L 310 55 L 320 70 L 325 90 L 330 110 L 335 130 L 340 150 L 338 170 L 335 190 L 330 210 L 325 230 L 320 250 L 315 270 L 310 290 L 305 310 L 300 330 L 290 345 L 275 355 L 260 360 L 245 358 L 230 355 L 215 360 L 200 365 L 185 360 L 170 355 L 155 358 L 140 360 L 125 355 L 110 345 L 100 335 L 95 320 L 90 300 L 85 280 L 82 260 L 80 240 L 78 220 L 80 200 L 82 180 L 85 160 L 88 140 L 90 120 L 92 100 L 95 80 L 98 60 Z"
-          fill="url(#mapGradient)"
-          stroke={isDark ? "#2a5a8c" : "#90cdf4"}
-          strokeWidth="2"
-          className="transition-all duration-300"
-        />
-
-        {/* Lignes de connexion entre les villes */}
-        {cities.filter(c => !c.isHQ).map((city, i) => (
-          <line
-            key={`line-${i}`}
-            x1={cities[0].x}
-            y1={cities[0].y}
-            x2={city.x}
-            y2={city.y}
-            stroke={isDark ? "#00A86B" : "#0047AB"}
-            strokeWidth="0.8"
-            strokeDasharray="4 3"
-            opacity={hoveredCity === city.name ? 0.8 : 0.25}
-            className="transition-opacity duration-300"
-          />
-        ))}
-
-        {/* Marqueurs des villes */}
-        {cities.map((city, i) => (
-          <g
-            key={i}
-            onMouseEnter={() => setHoveredCity(city.name)}
-            onMouseLeave={() => setHoveredCity(null)}
-            className="cursor-pointer"
-          >
-            {/* Pulse animation pour le siège */}
-            {city.isHQ && (
-              <>
-                <circle cx={city.x} cy={city.y} r="18" fill="#0047AB" opacity="0.1" className="animate-ping" />
-                <circle cx={city.x} cy={city.y} r="12" fill="#0047AB" opacity="0.2" />
-              </>
-            )}
-
-            {/* Point principal */}
-            <circle
-              cx={city.x}
-              cy={city.y}
-              r={city.isHQ ? 8 : 5}
-              fill={city.isHQ ? "#0047AB" : "#00A86B"}
-              stroke="white"
-              strokeWidth="2"
-              filter={hoveredCity === city.name ? "url(#glowStrong)" : "url(#glow)"}
-              className="transition-all duration-300"
-              style={{ transform: hoveredCity === city.name ? "scale(1.3)" : "scale(1)", transformOrigin: `${city.x}px ${city.y}px` }}
-            />
-
-            {/* Label de la ville */}
-            <text
-              x={city.x + (city.isHQ ? 14 : 10)}
-              y={city.y + 4}
-              fill={isDark ? (hoveredCity === city.name ? "#ffffff" : "#94a3b8") : (hoveredCity === city.name ? "#0A1628" : "#4A5568")}
-              fontSize={city.isHQ ? "11" : "9"}
-              fontWeight={city.isHQ ? "bold" : "500"}
-              fontFamily="'Poppins', sans-serif"
-              className="transition-all duration-300"
-            >
-              {city.name}
-            </text>
-
-            {/* Badge siège */}
-            {city.isHQ && (
-              <text
-                x={city.x + 14}
-                y={city.y + 16}
-                fill="#0047AB"
-                fontSize="7"
-                fontWeight="600"
-                fontFamily="'Poppins', sans-serif"
-              >
-                SIÈGE
-              </text>
-            )}
-          </g>
-        ))}
-
-        {/* Légende */}
-        <g transform="translate(20, 380)">
-          <circle cx="8" cy="8" r="5" fill="#0047AB" stroke="white" strokeWidth="1.5" />
-          <text x="18" y="12" fill={isDark ? "#94a3b8" : "#4A5568"} fontSize="8" fontFamily="'Poppins', sans-serif">Siège social</text>
-          <circle cx="108" cy="8" r="4" fill="#00A86B" stroke="white" strokeWidth="1.5" />
-          <text x="118" y="12" fill={isDark ? "#94a3b8" : "#4A5568"} fontSize="8" fontFamily="'Poppins', sans-serif">Zone d'intervention</text>
-        </g>
-
-        {/* Océan Atlantique */}
-        <text x="140" y="400" fill={isDark ? "#2a5a8c" : "#90cdf4"} fontSize="10" fontStyle="italic" fontFamily="'Poppins', sans-serif" opacity="0.6">Océan Atlantique</text>
-      </svg>
-
-      {/* Info tooltip */}
-      {hoveredCity && (
-        <div className={`absolute top-4 right-4 px-4 py-2 rounded-lg text-xs font-medium ${isDark ? "bg-[#00A86B]/20 text-[#00A86B] border border-[#00A86B]/30" : "bg-[#00A86B]/10 text-[#00A86B] border border-[#00A86B]/20"}`} style={poppins}>
-          <MapPin className="w-3 h-3 inline mr-1" />
-          {hoveredCity}
+      <div
+        ref={mapRef}
+        className="w-full rounded-xl overflow-hidden"
+        style={{ height: "500px" }}
+      />
+      {/* Légende */}
+      <div className={`flex items-center gap-6 mt-4 justify-center text-xs ${isDark ? "text-white/50" : "text-[#4A5568]"}`} style={poppins}>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-full bg-[#0047AB] border-2 border-white shadow-md" />
+          <span>Siège social</span>
         </div>
-      )}
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-[#00A86B] border-2 border-white shadow-md" />
+          <span>Zone d'intervention</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-0 border-t-2 border-dashed border-[#00A86B] opacity-60" />
+          <span>Liaison siège</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1619,7 +1677,7 @@ export default function Home() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* Carte SVG interactive */}
               <div className={`relative rounded-2xl p-8 ${isDark ? "bg-[#0F1D32] border border-white/10" : "bg-white border border-gray-100 shadow-xl"}`}>
-                <InteractiveMap isDark={isDark} />
+                <LeafletMap isDark={isDark} />
               </div>
 
               {/* Liste des zones */}
