@@ -414,7 +414,11 @@ function ParticleCanvas() {
       // Smooth transition of opacity multiplier
       opacityMultiplier += (targetOpacityMultiplier - opacityMultiplier) * 0.05;
 
-      ctx.clearRect(0, 0, w, h);
+      // Trail effect: instead of full clear, overlay a semi-transparent rect
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+      ctx.fillRect(0, 0, w, h);
+      ctx.globalCompositeOperation = 'source-over';
       const mouse = mouseRef.current;
 
       // Reset spatial grid
