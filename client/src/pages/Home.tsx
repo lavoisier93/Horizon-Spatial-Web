@@ -23,6 +23,8 @@
  * V17: + Optimisation responsive carte Leaflet (hauteur adaptative, marqueurs mobile)
  * V18: + Animation d'entrée fondu progressif marqueurs et lignes Leaflet
  * V19: + Effet parallaxe subtil sur hero et sections sombres
+ * V20: + Animation typewriter sur le titre du Hero
+ * V21: + Effet flip 3D sur cartes de services avec détails (livrables, délai, outils)
  */
 
 import {
@@ -513,12 +515,54 @@ const risks = [
 ];
 
 const services = [
-  { icon: Target, title: "Étude de Faisabilité", desc: "Analyse du site, situation foncière, conformité avec les documents d'urbanisme (SDU, PUD), évaluation des contraintes techniques et réglementaires.", color: "#0047AB" },
-  { icon: Plane, title: "Cartographie par Drone", desc: "Acquisition de données précises via photogrammétrie par drone : orthophotographies et Modèles Numériques de Terrain (MNT).", color: "#00A86B" },
-  { icon: PenTool, title: "Conception du Plan", desc: "Découpage parcellaire optimisé, tracé des voiries, réservations pour équipements et espaces verts, conformité aux ratios réglementaires.", color: "#0047AB" },
-  { icon: FolderCheck, title: "Dossier Technique", desc: "Préparation complète du dossier d'approbation : plans techniques (AutoCAD/QGIS), notice descriptive, programme de viabilisation.", color: "#00A86B" },
-  { icon: Handshake, title: "Suivi d'Approbation", desc: "Accompagnement auprès du Ministère de la Construction. Gestion des échanges et corrections jusqu'à l'obtention de l'arrêté.", color: "#0047AB" },
-  { icon: Cuboid, title: "Maquette 3D & Vente", desc: "Modélisation 3D du lotissement, visuels professionnels et plans de vente pour accélérer la commercialisation de vos lots.", color: "#00A86B" },
+  {
+    icon: Target, title: "Étude de Faisabilité",
+    desc: "Analyse du site, situation foncière, conformité avec les documents d'urbanisme (SDU, PUD), évaluation des contraintes techniques et réglementaires.",
+    color: "#0047AB",
+    deliverables: ["Rapport de faisabilité", "Cartographie du site", "Note de conformité"],
+    duration: "2 à 3 semaines",
+    tools: "QGIS, AutoCAD, GPS",
+  },
+  {
+    icon: Plane, title: "Cartographie par Drone",
+    desc: "Acquisition de données précises via photogrammétrie par drone : orthophotographies et Modèles Numériques de Terrain (MNT).",
+    color: "#00A86B",
+    deliverables: ["Orthophoto HD", "MNT/MNS", "Nuage de points 3D"],
+    duration: "1 à 2 semaines",
+    tools: "DJI Phantom, Pix4D, Agisoft",
+  },
+  {
+    icon: PenTool, title: "Conception du Plan",
+    desc: "Découpage parcellaire optimisé, tracé des voiries, réservations pour équipements et espaces verts, conformité aux ratios réglementaires.",
+    color: "#0047AB",
+    deliverables: ["Plan de lotissement", "Tableau des surfaces", "Notice descriptive"],
+    duration: "3 à 4 semaines",
+    tools: "AutoCAD, QGIS, SketchUp",
+  },
+  {
+    icon: FolderCheck, title: "Dossier Technique",
+    desc: "Préparation complète du dossier d'approbation : plans techniques (AutoCAD/QGIS), notice descriptive, programme de viabilisation.",
+    color: "#00A86B",
+    deliverables: ["Dossier d'approbation", "Plans techniques", "Programme VRD"],
+    duration: "2 à 3 semaines",
+    tools: "AutoCAD, Word, Excel",
+  },
+  {
+    icon: Handshake, title: "Suivi d'Approbation",
+    desc: "Accompagnement auprès du Ministère de la Construction. Gestion des échanges et corrections jusqu'à l'obtention de l'arrêté.",
+    color: "#0047AB",
+    deliverables: ["Arrêté d'approbation", "PV de conformité", "Suivi administratif"],
+    duration: "4 à 8 semaines",
+    tools: "Suivi ministériel dédié",
+  },
+  {
+    icon: Cuboid, title: "Maquette 3D & Vente",
+    desc: "Modélisation 3D du lotissement, visuels professionnels et plans de vente pour accélérer la commercialisation de vos lots.",
+    color: "#00A86B",
+    deliverables: ["Maquette 3D interactive", "Visuels HD", "Plans de vente"],
+    duration: "2 à 3 semaines",
+    tools: "SketchUp, Lumion, Photoshop",
+  },
 ];
 
 const steps = [
@@ -1875,14 +1919,61 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, i) => (
               <Reveal key={service.title} delay={i * 80}>
-                <div className={`rounded-2xl p-8 border transition-all duration-500 h-full ${isDark ? "bg-white/5 border-white/10 hover:border-[#0047AB]/30 hover:bg-white/[0.08]" : "bg-white border-[#E2E8F0] hover:border-[#0047AB]/20 hover:shadow-xl hover:shadow-[#0047AB]/5"}`}>
-                  <AnimatedServiceIcon icon={service.icon} color={service.color} index={i} />
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs font-bold text-[#0047AB]/30" style={poppins}>0{i + 1}</span>
-                    <div className="w-6 h-px bg-[#E2E8F0]" />
+                <div className="service-card-container h-full" style={{ minHeight: "320px" }}>
+                  <div className="service-card-inner">
+                    {/* FRONT FACE */}
+                    <div className={`service-card-face service-card-front rounded-2xl p-8 border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-[#E2E8F0]"}`}>
+                      <AnimatedServiceIcon icon={service.icon} color={service.color} index={i} />
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs font-bold text-[#0047AB]/30" style={poppins}>0{i + 1}</span>
+                        <div className="w-6 h-px bg-[#E2E8F0]" />
+                      </div>
+                      <h3 className={`text-lg font-bold mb-3 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{service.title}</h3>
+                      <p className={`text-sm leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>{service.desc}</p>
+                      <div className="mt-4 flex items-center gap-1.5 text-xs font-medium" style={{ color: service.color }}>
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Survoler pour les détails</span>
+                      </div>
+                    </div>
+                    {/* BACK FACE */}
+                    <div
+                      className="service-card-face service-card-back rounded-2xl p-8 border"
+                      style={{
+                        background: `linear-gradient(135deg, ${service.color}18, ${service.color}08)`,
+                        borderColor: `${service.color}40`,
+                      }}
+                    >
+                      <div className="flex items-center gap-3 mb-5">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${service.color}20` }}>
+                          <service.icon className="w-5 h-5" style={{ color: service.color }} />
+                        </div>
+                        <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{service.title}</h3>
+                      </div>
+
+                      <div className="mb-4">
+                        <div className={`text-xs font-semibold uppercase tracking-wider mb-2 ${isDark ? "text-white/50" : "text-[#4A5568]"}`} style={poppins}>Livrables</div>
+                        <div className="space-y-1.5">
+                          {service.deliverables.map((d) => (
+                            <div key={d} className="flex items-center gap-2">
+                              <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: service.color }} />
+                              <span className={`text-sm ${isDark ? "text-white/80" : "text-[#0A1628]"}`}>{d}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className={`rounded-lg p-3 ${isDark ? "bg-white/5" : "bg-white/80"}`}>
+                          <div className={`text-[10px] uppercase tracking-wider mb-1 ${isDark ? "text-white/40" : "text-[#4A5568]"}`} style={poppins}>Délai</div>
+                          <div className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{service.duration}</div>
+                        </div>
+                        <div className={`rounded-lg p-3 ${isDark ? "bg-white/5" : "bg-white/80"}`}>
+                          <div className={`text-[10px] uppercase tracking-wider mb-1 ${isDark ? "text-white/40" : "text-[#4A5568]"}`} style={poppins}>Outils</div>
+                          <div className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{service.tools}</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className={`text-lg font-bold mb-3 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{service.title}</h3>
-                  <p className={`text-sm leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>{service.desc}</p>
                 </div>
               </Reveal>
             ))}
