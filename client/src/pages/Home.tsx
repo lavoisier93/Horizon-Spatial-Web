@@ -31,6 +31,9 @@
  * V25: + Animation SVG progressive du logo dans le loading screen
  * V26: + Loading screen 2 phases : losanges tournants (1.5s) puis dessin SVG logo progressif
  * V27: + Vrai logo SVG H-Spatial (icon.svg) dans la Phase 2 du loading screen
+ * V28: + Ancrage territorial (suppression Bingerville/Bassam/Jacqueville, ajout San-Pédro)
+ *       + Opacité particules géométriques augmentée (0.08→0.18)
+ *       + Loading screen Phase 2 = reproduction exacte du fichier HTML (pathReveal + pulse + progress)
  */
 
 import {
@@ -129,7 +132,7 @@ function useParallax(speed: number = 0.3) {
 }
 
 // ─── LOADING SCREEN COMPONENT ───────────────
-// Phase 1: Spinning diamonds (1.5s) → Phase 2: SVG logo draw animation → Fade-out
+// Phase 1: Spinning diamonds (1.5s) → Phase 2: Logo pathReveal + pulse + progress bar (like HTML file)
 function LoadingScreen() {
   const [visible, setVisible] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
@@ -138,11 +141,11 @@ function LoadingScreen() {
   useEffect(() => {
     // Phase 1 lasts 1.5s, then switch to Phase 2
     const t1 = setTimeout(() => setPhase(2), 1500);
-    // Phase 2 logo animation ~2.5s, then fade-out
+    // Phase 2 logo animation ~3s, then fade-out
     const t2 = setTimeout(() => {
       setFadeOut(true);
       setTimeout(() => setVisible(false), 800);
-    }, 4200);
+    }, 4800);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
@@ -172,83 +175,43 @@ function LoadingScreen() {
         </div>
       </div>
 
-      {/* Phase 2: Real H-Spatial Logo SVG Draw Animation */}
+      {/* Phase 2: Logo SVG with pathReveal animation (exact reproduction of HTML file) */}
       <div
+        className="loader-phase2"
         style={{
           opacity: phase === 2 ? 1 : 0,
-          transform: phase === 2 ? "scale(1)" : "scale(0.8)",
-          transition: "opacity 0.5s ease, transform 0.5s ease",
+          transition: "opacity 0.5s ease",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          gap: "1.75rem",
         }}
       >
-        <svg
-          viewBox="0 0 237.45 120"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ width: "280px", height: "auto", filter: "drop-shadow(0 0 30px rgba(0, 71, 171, 0.5))" }}
-          key={phase === 2 ? "logo-active" : "logo-hidden"}
-        >
-          {phase === 2 && (
-            <g transform="translate(0 0) scale(3.2297424049981 3.2297424049981)">
-              {/* Blue main shape – stroke draw then fill */}
-              <path
-                className="loader-draw-blue"
-                d="m8.605 18.568 9.961-9.963 9.963 9.963 4.302-4.302L18.566 0 0 18.568l18.566 18.567L28.99 26.709l10.428 10.428h4.52L31.25 24.451h.003l-4.302-4.305-8.385 8.383z"
-              />
-              <path
-                className="loader-fill-blue"
-                d="m8.605 18.568 9.961-9.963 9.963 9.963 4.302-4.302L18.566 0 0 18.568l18.566 18.567L28.99 26.709l10.428 10.428h4.52L31.25 24.451h.003l-4.302-4.305-8.385 8.383z"
-                fill="#0047ab"
-              />
-
-              {/* Blue intersection diamond */}
-              <path
-                className="loader-intersection"
-                d="m37.133 18.566-4.304 4.303-4.302-4.303 4.304-4.303z"
-                fill="#2b75b7"
-              />
-
-              {/* Green main shape – stroke draw then fill */}
-              <path
-                className="loader-draw-green"
-                d="m62.604 15.508-1.464-1.463-.8.799-.953-.953.799-.801L47.096 0 36.671 10.424 26.246 0h-4.521l7.25 7.25 5.437 5.438 4.302 4.301 8.383-8.383 9.963 9.963-9.963 9.961-9.962-9.963-4.304 4.303 14.266 14.266L62.605 21.63l-3.061-3.061 3.06-3.061z"
-              />
-              <path
-                className="loader-fill-green"
-                d="m62.604 15.508-1.464-1.463-.8.799-.953-.953.799-.801L47.096 0 36.671 10.424 26.246 0h-4.521l7.25 7.25 5.437 5.438 4.302 4.301 8.383-8.383 9.963 9.963-9.963 9.961-9.962-9.963-4.304 4.303 14.266 14.266L62.605 21.63l-3.061-3.061 3.06-3.061z"
-                fill="#00a86b"
-              />
-
-              {/* Green inner details */}
-              <path
-                className="loader-fill-green" style={{ animationDelay: "1.5s" }}
-                d="m56.221 15.371 1.266-1.266 1.266 1.266-1.266 1.266-1.266-1.266z"
-                fill="#00a86b"
-              />
-              <path
-                className="loader-fill-green" style={{ animationDelay: "1.6s" }}
-                d="m60.346 22.109-1.34 1.34-1.34-1.34 1.34-1.34 1.34 1.34z"
-                fill="#00a86b"
-              />
-
-              {/* Pixel accents – blue/green small diamonds */}
-              <path className="loader-pixel" style={{ animationDelay: "1.4s" }} d="m61.897 18.566 1.575 1.576 1.575-1.576-1.575-1.574-1.575 1.574z" fill="#2b75b7" />
-              <path className="loader-pixel" style={{ animationDelay: "1.5s" }} d="m65.519 21.273 1.229 1.23 1.229-1.23-1.229-1.229-1.229 1.229z" fill="#2b75b7" />
-              <path className="loader-pixel" style={{ animationDelay: "1.6s" }} d="m68.455 13.771-2.238 2.238 2.238 2.238 2.238-2.238-2.238-2.238z" fill="#2b75b7" />
-              <path className="loader-pixel" style={{ animationDelay: "1.7s" }} d="m62.053 25.938 2.555 2.557 2.556-2.557-2.556-2.555-2.555 2.555z" fill="#00a86b" />
-              <path className="loader-pixel" style={{ animationDelay: "1.8s" }} d="m71.508 18.459-2.012 2.012 2.012 2.01 2.01-2.01-2.01-2.012z" fill="#00a86b" />
-              <path className="loader-pixel" style={{ animationDelay: "1.9s" }} d="m66.311 12.883-1.293-1.293-1.294 1.293 1.294 1.295 1.293-1.295z" fill="#00a86b" />
-            </g>
-          )}
-        </svg>
-
-        {/* Brand text below logo */}
         {phase === 2 && (
-          <div className="loader-brand-text" style={{ marginTop: "1.5rem", textAlign: "center" }}>
-            <span className="loader-text-horizon">HORIZON</span>{" "}
-            <span className="loader-text-spatial">SPATIAL</span>
-          </div>
+          <>
+            <svg
+              className="loader-icon-svg"
+              viewBox="0 0 237.4442 119.9429"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ width: "220px", height: "auto" }}
+            >
+              <g transform="scale(3.2297424049981)">
+                <path className="loader-path path-blue-1" fill="#0047ab" d="m8.605 18.568 9.961-9.963 9.963 9.963 4.302-4.302L18.566 0 0 18.568l18.566 18.567L28.99 26.709l10.428 10.428h4.52L31.25 24.451h.003l-4.302-4.305-8.385 8.383z" />
+                <path className="loader-path path-blue-2" fill="#2b75b7" d="m37.133 18.566-4.304 4.303-4.302-4.303 4.304-4.303z" />
+                <path className="loader-path path-blue-3" fill="#2b75b7" d="m61.897 18.566 1.575 1.576 1.575-1.576-1.575-1.574-1.575 1.574zm3.622 2.707 1.229 1.23 1.229-1.23-1.229-1.229-1.229 1.229zm2.936-7.502-2.238 2.238 2.238 2.238 2.238-2.238-2.238-2.238z" />
+                <path className="loader-path path-green-1" fill="#00a86b" d="m62.604 15.508-1.464-1.463-.8.799-.953-.953.799-.801L47.096 0 36.671 10.424 26.246 0h-4.521l7.25 7.25 5.437 5.438 4.302 4.301 8.383-8.383 9.963 9.963-9.963 9.961-9.962-9.963-4.304 4.303 14.266 14.266L62.605 21.63l-3.061-3.061 3.06-3.061zm-6.383-.137 1.266-1.266 1.266 1.266-1.266 1.266-1.266-1.266zm4.125 6.738-1.34 1.34-1.34-1.34 1.34-1.34 1.34 1.34z" />
+                <path className="loader-path path-green-2" fill="#00a86b" d="m62.053 25.938 2.555 2.557 2.556-2.557-2.556-2.555-2.555 2.555zm9.455-7.479-2.012 2.012 2.012 2.01 2.01-2.01-2.01-2.012zm-5.197-5.576-1.293-1.293-1.294 1.293 1.294 1.295 1.293-1.295z" />
+              </g>
+            </svg>
+
+            {/* HORIZON SPATIAL text */}
+            <div className="loader-hs-text">HORIZON SPATIAL</div>
+
+            {/* Progress bar */}
+            <div className="loader-progress-container">
+              <div className="loader-progress-fill" />
+            </div>
+          </>
         )}
       </div>
     </div>
@@ -1049,9 +1012,7 @@ function Navbar({ isDark, onToggleDark }: { isDark: boolean; onToggleDark: () =>
 // ─── INTERACTIVE MAP - LEAFLET / OPENSTREETMAP ────────
 const CITIES_DATA = [
   { name: "Abidjan", lat: 5.3600, lng: -4.0083, isHQ: true, desc: "Siège social" },
-  { name: "Grand-Bassam", lat: 5.2139, lng: -3.7342, isHQ: false, desc: "Zone active" },
-  { name: "Bingerville", lat: 5.3531, lng: -3.8836, isHQ: false, desc: "Zone active" },
-  { name: "Jacqueville", lat: 5.2056, lng: -4.4167, isHQ: false, desc: "Zone active" },
+  { name: "San-Pédro", lat: 4.7485, lng: -6.6363, isHQ: false, desc: "Zone active" },
   { name: "Yamoussoukro", lat: 6.8276, lng: -5.2893, isHQ: false, desc: "Zone active" },
   { name: "Bouaké", lat: 7.6881, lng: -5.0305, isHQ: false, desc: "Zone active" },
   { name: "Korhogo", lat: 9.4580, lng: -5.6295, isHQ: false, desc: "Zone active" },
@@ -2421,8 +2382,8 @@ export default function Home() {
                 <Navigation className="w-5 h-5 text-[#00A86B]" />
                 <span className="text-[#00A86B] font-semibold text-sm uppercase tracking-wider" style={poppins}>Couverture Géographique</span>
               </div>
-              <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>Nos Zones d'Intervention</h2>
-              <p className={`text-base sm:text-lg ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>Présents sur l'ensemble du territoire ivoirien, nous accompagnons vos projets d'aménagement dans les principales zones de développement urbain.</p>
+              <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>Notre Ancrage Territorial</h2>
+              <p className={`text-base sm:text-lg ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>Basés en Côte d'Ivoire, nous intervenons sur l'ensemble du territoire national et à l'échelle de l'Afrique de l'Ouest (CEDEAO/UEMOA). Notre expertise couvre les principales zones de développement urbain du pays.</p>
             </div>
           </Reveal>
 
@@ -2437,9 +2398,7 @@ export default function Home() {
               <div className="space-y-3 sm:space-y-4">
                 {[
                   { city: "Abidjan", type: "Siège social", desc: "District autonome — Lotissements résidentiels, mixtes et commerciaux", active: true },
-                  { city: "Grand-Bassam", type: "Zone active", desc: "Projets balnéaires et résidentiels en périphérie Est", active: true },
-                  { city: "Bingerville", type: "Zone active", desc: "Extension urbaine et lotissements périurbains", active: true },
-                  { city: "Jacqueville", type: "Zone active", desc: "Aménagements touristiques et résidentiels côtiers", active: true },
+                  { city: "San-Pédro", type: "Zone active", desc: "Pôle économique Sud-Ouest — Aménagements portuaires et résidentiels", active: true },
                   { city: "Yamoussoukro", type: "Zone active", desc: "Capitale politique — Projets d'urbanisation", active: true },
                   { city: "Bouaké", type: "Zone active", desc: "Deuxième ville — Restructuration et extension urbaine", active: true },
                   { city: "Korhogo", type: "Zone active", desc: "Pôle Nord — Développement urbain et foncier", active: true },
