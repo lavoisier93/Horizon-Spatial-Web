@@ -227,6 +227,7 @@ function ParticleCanvas() {
     color: string; alpha: number;
   }[]>([]);
   const animFrameRef = useRef<number>(0);
+  const mouseRef = useRef<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -244,9 +245,30 @@ function ParticleCanvas() {
     resize();
     window.addEventListener("resize", resize);
 
-    // Initialize 100 particles as per hspatial-immersive.html specs
+    // Mouse tracking on the parent section (not canvas since pointer-events-none)
+    const parent = canvas.parentElement;
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+        active: true,
+      };
+    };
+    const handleMouseLeave = () => {
+      mouseRef.current.active = false;
+    };
+    if (parent) {
+      parent.addEventListener("mousemove", handleMouseMove);
+      parent.addEventListener("mouseleave", handleMouseLeave);
+    }
+
+    // Initialize 100 particles
     const PARTICLE_COUNT = 100;
     const CONNECTION_DISTANCE = 150;
+    const MOUSE_RADIUS = 120; // Repulsion radius around cursor
+    const MOUSE_FORCE = 3; // Repulsion strength
+
     particlesRef.current = Array.from({ length: PARTICLE_COUNT }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
@@ -254,27 +276,71 @@ function ParticleCanvas() {
       speedX: (Math.random() - 0.5) * 0.8,
       speedY: (Math.random() - 0.5) * 0.8,
       color: Math.random() > 0.5 ? "#4D9FFF" : "#00E88F",
-      // Particle opacity between 20% and 45% for visibility on dark bg
       alpha: Math.random() * 0.25 + 0.2,
     }));
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const ps = particlesRef.current;
+      const mouse = mouseRef.current;
 
       // Update & draw particles
       for (const p of ps) {
+        // Mouse repulsion effect
+        if (mouse.active) {
+          const dx = p.x - mouse.x;
+          const dy = p.y - mouse.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < MOUSE_RADIUS && dist > 0) {
+            const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS * MOUSE_FORCE;
+            p.speedX += (dx / dist) * force * 0.1;
+            p.speedY += (dy / dist) * force * 0.1;
+          }
+        }
+
+        // Apply friction to prevent infinite acceleration
+        p.speedX *= 0.98;
+        p.speedY *= 0.98;
+
+        // Maintain minimum speed so particles keep moving
+        const speed = Math.sqrt(p.speedX * p.speedX + p.speedY * p.speedY);
+        if (speed < 0.3) {
+          p.speedX += (Math.random() - 0.5) * 0.1;
+          p.speedY += (Math.random() - 0.5) * 0.1;
+        }
+
         p.x += p.speedX;
         p.y += p.speedY;
+
         // Bounce off edges
         if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
         if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+        p.x = Math.max(0, Math.min(canvas.width, p.x));
+        p.y = Math.max(0, Math.min(canvas.height, p.y));
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.globalAlpha = p.alpha;
         ctx.fill();
+      }
+
+      // Draw lines from cursor to nearby particles
+      if (mouse.active) {
+        for (const p of ps) {
+          const dx = p.x - mouse.x;
+          const dy = p.y - mouse.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < MOUSE_RADIUS * 1.5) {
+            ctx.beginPath();
+            ctx.moveTo(mouse.x, mouse.y);
+            ctx.lineTo(p.x, p.y);
+            ctx.strokeStyle = p.color;
+            ctx.globalAlpha = ((MOUSE_RADIUS * 1.5 - dist) / (MOUSE_RADIUS * 1.5)) * 0.25;
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+          }
+        }
       }
 
       // Connect nearby particles with lines (distance < 150px)
@@ -288,7 +354,6 @@ function ParticleCanvas() {
             ctx.moveTo(ps[i].x, ps[i].y);
             ctx.lineTo(ps[j].x, ps[j].y);
             ctx.strokeStyle = ps[i].color;
-            // Line opacity: proportional to proximity, capped at 40% for visibility
             ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.4;
             ctx.lineWidth = 1;
             ctx.stroke();
@@ -303,6 +368,10 @@ function ParticleCanvas() {
 
     return () => {
       window.removeEventListener("resize", resize);
+      if (parent) {
+        parent.removeEventListener("mousemove", handleMouseMove);
+        parent.removeEventListener("mouseleave", handleMouseLeave);
+      }
       cancelAnimationFrame(animFrameRef.current);
     };
   }, []);
