@@ -15,6 +15,7 @@
  * V9: + Carte interactive Côte d'Ivoire avec zones d'intervention
  * V10: + Carte Leaflet/OpenStreetMap avec GeoJSON réel du shapefile CI
  * V11: + Lazy loading images (IntersectionObserver + native) + Lazy carte Leaflet
+ * V12: + Micro-animations scroll sur icônes services (entrée, pulse, wobble, float)
  */
 
 import {
@@ -134,6 +135,47 @@ function Reveal({ children, className = "", delay = 0 }: { children: React.React
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
+    </div>
+  );
+}
+
+// ─── ANIMATED SERVICE ICON ────────────────────────────
+// Scroll-triggered micro-animation: scale+rotate entrance, pulse ring, hover wobble, gentle float
+function AnimatedServiceIcon({ icon: Icon, color, index }: { icon: React.ElementType; color: string; index: number }) {
+  const iconRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = iconRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={iconRef}
+      className={`service-icon-wrapper w-14 h-14 rounded-xl flex items-center justify-center mb-6 relative ${
+        isVisible ? "service-icon-pulse" : ""
+      }`}
+      style={{ backgroundColor: `${color}10` }}
+    >
+      <div
+        className={`service-icon-anim ${isVisible ? "icon-visible service-icon-float" : ""}`}
+        data-delay={index}
+        style={{ "--float-delay": `${index * 0.4}s` } as React.CSSProperties}
+      >
+        <Icon className="w-7 h-7 service-icon-svg" style={{ color }} />
+      </div>
     </div>
   );
 }
@@ -1508,9 +1550,7 @@ export default function Home() {
             {services.map((service, i) => (
               <Reveal key={service.title} delay={i * 80}>
                 <div className={`rounded-2xl p-8 border transition-all duration-500 h-full ${isDark ? "bg-white/5 border-white/10 hover:border-[#0047AB]/30 hover:bg-white/[0.08]" : "bg-white border-[#E2E8F0] hover:border-[#0047AB]/20 hover:shadow-xl hover:shadow-[#0047AB]/5"}`}>
-                  <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-6" style={{ backgroundColor: `${service.color}10` }}>
-                    <service.icon className="w-7 h-7" style={{ color: service.color }} />
-                  </div>
+                  <AnimatedServiceIcon icon={service.icon} color={service.color} index={i} />
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-xs font-bold text-[#0047AB]/30" style={poppins}>0{i + 1}</span>
                     <div className="w-6 h-px bg-[#E2E8F0]" />
