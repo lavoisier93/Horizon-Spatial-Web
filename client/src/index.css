@@ -300,24 +300,26 @@ html {
 
 /* ─── Loading Screen – Phase 2: SVG Logo Animation ─── */
 
-/* Stroke draw: blue diamond */
+/* Stroke draw: blue shape */
 .loader-draw-blue {
   fill: none;
   stroke: #0047AB;
-  stroke-width: 8;
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: loaderDrawDiamond 1.2s ease forwards;
+  stroke-width: 1.5;
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;
+  stroke-linejoin: miter;
+  animation: loaderDrawDiamond 1.4s ease forwards;
 }
 
-/* Stroke draw: green diamond (delayed) */
+/* Stroke draw: green shape (delayed) */
 .loader-draw-green {
   fill: none;
   stroke: #00A86B;
-  stroke-width: 8;
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: loaderDrawDiamond 1.2s ease 0.4s forwards;
+  stroke-width: 1.5;
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;
+  stroke-linejoin: miter;
+  animation: loaderDrawDiamond 1.4s ease 0.4s forwards;
 }
 
 @keyframes loaderDrawDiamond {
