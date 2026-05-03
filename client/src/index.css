@@ -213,6 +213,76 @@ html {
   }
 }
 
+/* ─── Floating Geometric Elements ─── */
+.geo-element {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.08;
+}
+
+@keyframes geoFloat {
+  0%, 100% { transform: rotate(45deg) translateY(0) scale(1); }
+  25%      { transform: rotate(50deg) translateY(-20px) scale(1.02); }
+  50%      { transform: rotate(45deg) translateY(10px) scale(0.98); }
+  75%      { transform: rotate(40deg) translateY(-10px) scale(1.01); }
+}
+
+/* Large blue diamond – top-left */
+.geo-diamond-1 {
+  width: 280px;
+  height: 280px;
+  border: 2px solid #0047AB;
+  top: 8%;
+  left: 3%;
+  animation: geoFloat 20s ease-in-out infinite;
+}
+
+/* Medium green diamond – bottom-right */
+.geo-diamond-2 {
+  width: 200px;
+  height: 200px;
+  border: 2px solid #00A86B;
+  bottom: 12%;
+  right: 8%;
+  animation: geoFloat 20s ease-in-out infinite -5s;
+}
+
+/* Small filled gradient diamond – mid-left */
+.geo-diamond-3 {
+  width: 140px;
+  height: 140px;
+  background: linear-gradient(45deg, rgba(0, 71, 171, 0.4), transparent);
+  top: 55%;
+  left: 12%;
+  animation: geoFloat 20s ease-in-out infinite -10s;
+}
+
+/* Tiny blue diamond – top-right accent */
+.geo-diamond-4 {
+  width: 90px;
+  height: 90px;
+  border: 1.5px solid #0047AB;
+  top: 18%;
+  right: 15%;
+  opacity: 0.05;
+  animation: geoFloat 18s ease-in-out infinite -7s;
+}
+
+/* Hide on small screens for cleaner mobile UX */
+@media (max-width: 768px) {
+  .geo-element {
+    display: none;
+  }
+}
+
+/* Hide in print */
+@media print {
+  .geo-element {
+    display: none !important;
+  }
+}
+
 /* ─── Loading Screen ─── */
 .loader-diamond {
   transform: rotate(45deg);

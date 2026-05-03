@@ -27,6 +27,7 @@
  * V21: + Effet flip 3D sur cartes de services avec détails (livrables, délai, outils)
  * V22: + Loading Screen (2 losanges tournants, fade-out 1.5s) + Système de particules Canvas Hero
  * V23: + Grille animée en perspective (grid-bg) dans le Hero
+ * V24: + Éléments géométriques flottants (losanges) dans le Hero
  */
 
 import {
@@ -1779,6 +1780,12 @@ export default function Home() {
 
         {/* Animated Perspective Grid */}
         <div className="hero-grid-bg" />
+
+        {/* Floating Geometric Elements */}
+        <div className="geo-element geo-diamond-1" />
+        <div className="geo-element geo-diamond-2" />
+        <div className="geo-element geo-diamond-3" />
+        <div className="geo-element geo-diamond-4" />
 
         {/* Particle System */}
         <ParticleCanvas />
