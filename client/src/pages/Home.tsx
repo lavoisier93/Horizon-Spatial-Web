@@ -250,12 +250,12 @@ function ParticleCanvas() {
     particlesRef.current = Array.from({ length: PARTICLE_COUNT }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      size: Math.random() * 2.5 + 1,
+      size: Math.random() * 3 + 1.5,
       speedX: (Math.random() - 0.5) * 0.8,
       speedY: (Math.random() - 0.5) * 0.8,
-      color: Math.random() > 0.5 ? "#0047AB" : "#00A86B",
-      // Particle opacity between 10% and 30%
-      alpha: Math.random() * 0.2 + 0.1,
+      color: Math.random() > 0.5 ? "#4D9FFF" : "#00E88F",
+      // Particle opacity between 20% and 45% for visibility on dark bg
+      alpha: Math.random() * 0.25 + 0.2,
     }));
 
     const animate = () => {
@@ -288,9 +288,9 @@ function ParticleCanvas() {
             ctx.moveTo(ps[i].x, ps[i].y);
             ctx.lineTo(ps[j].x, ps[j].y);
             ctx.strokeStyle = ps[i].color;
-            // Line opacity: proportional to proximity, capped at 30%
-            ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.3;
-            ctx.lineWidth = 0.8;
+            // Line opacity: proportional to proximity, capped at 40% for visibility
+            ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.4;
+            ctx.lineWidth = 1;
             ctx.stroke();
           }
         }
@@ -307,7 +307,7 @@ function ParticleCanvas() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 z-[1] pointer-events-none" />;
+  return <canvas ref={canvasRef} className="absolute inset-0 z-[5] pointer-events-none" />;
 }
 
 // ─── TYPEWRITER COMPONENT ──────────────────────
