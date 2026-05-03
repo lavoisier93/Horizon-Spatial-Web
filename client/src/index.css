@@ -178,6 +178,16 @@ html {
   animation: heroFadeUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
+/* ─── Loading Screen ─── */
+.loader-diamond {
+  transform: rotate(45deg);
+}
+
+@keyframes loaderSpin {
+  0%, 100% { transform: rotate(45deg) scale(1); }
+  50% { transform: rotate(225deg) scale(1.1); }
+}
+
 /* ─── Typewriter cursor ─── */
 .typewriter-cursor {
   display: inline-block;

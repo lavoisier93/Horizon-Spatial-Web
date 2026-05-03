@@ -25,6 +25,7 @@
  * V19: + Effet parallaxe subtil sur hero et sections sombres
  * V20: + Animation typewriter sur le titre du Hero
  * V21: + Effet flip 3D sur cartes de services avec détails (livrables, délai, outils)
+ * V22: + Loading Screen (2 losanges tournants, fade-out 1.5s) + Système de particules Canvas Hero
  */
 
 import {
@@ -120,6 +121,123 @@ function useParallax(speed: number = 0.3) {
   }, [speed]);
 
   return ref;
+}
+
+// ─── LOADING SCREEN COMPONENT ───────────────
+function LoadingScreen() {
+  const [visible, setVisible] = useState(true);
+  const [fadeOut, setFadeOut] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFadeOut(true);
+      setTimeout(() => setVisible(false), 800);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div
+      className={`fixed inset-0 z-[10000] flex items-center justify-center bg-[#050508] transition-all duration-800 ${
+        fadeOut ? "opacity-0 invisible" : "opacity-100 visible"
+      }`}
+      style={{ transition: "opacity 0.8s ease, visibility 0.8s ease" }}
+    >
+      <div className="relative w-[100px] h-[100px]">
+        <div className="loader-diamond absolute top-0 left-[20px] w-[40px] h-[40px] border-[3px] border-[#0047AB]" style={{ animation: "loaderSpin 2s ease-in-out infinite" }} />
+        <div className="loader-diamond absolute bottom-0 left-[40px] w-[40px] h-[40px] border-[3px] border-[#00A86B]" style={{ animation: "loaderSpin 2s ease-in-out infinite 0.3s" }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── PARTICLE CANVAS COMPONENT ──────────────
+function ParticleCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const particlesRef = useRef<{
+    x: number; y: number; size: number;
+    speedX: number; speedY: number;
+    color: string; alpha: number;
+  }[]>([]);
+  const animFrameRef = useRef<number>(0);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Skip on mobile for performance
+    if (window.innerWidth < 768) return;
+
+    const resize = () => {
+      canvas.width = canvas.parentElement?.clientWidth || window.innerWidth;
+      canvas.height = canvas.parentElement?.clientHeight || window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    // Initialize particles
+    const count = Math.min(80, Math.floor(canvas.width * canvas.height / 15000));
+    particlesRef.current = Array.from({ length: count }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 2 + 1,
+      speedX: (Math.random() - 0.5) * 0.5,
+      speedY: (Math.random() - 0.5) * 0.5,
+      color: Math.random() > 0.5 ? "#0047AB" : "#00A86B",
+      alpha: Math.random() * 0.5 + 0.1,
+    }));
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const ps = particlesRef.current;
+
+      // Update & draw particles
+      for (const p of ps) {
+        p.x += p.speedX;
+        p.y += p.speedY;
+        if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.fill();
+      }
+
+      // Connect nearby particles
+      for (let i = 0; i < ps.length; i++) {
+        for (let j = i + 1; j < ps.length; j++) {
+          const dx = ps[i].x - ps[j].x;
+          const dy = ps[i].y - ps[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 150) {
+            ctx.beginPath();
+            ctx.moveTo(ps[i].x, ps[i].y);
+            ctx.lineTo(ps[j].x, ps[j].y);
+            ctx.strokeStyle = ps[i].color;
+            ctx.globalAlpha = ((150 - dist) / 150) * 0.1;
+            ctx.stroke();
+          }
+        }
+      }
+      ctx.globalAlpha = 1;
+
+      animFrameRef.current = requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(animFrameRef.current);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 z-[1] pointer-events-none" />;
 }
 
 // ─── TYPEWRITER COMPONENT ──────────────────────
@@ -1631,6 +1749,9 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen overflow-x-hidden transition-colors duration-500 ${isDark ? "bg-[#0A1628]" : "bg-white"}`}>
+      {/* Loading Screen */}
+      <LoadingScreen />
+
       {/* Reading Progress Bar */}
       <ReadingProgressBar />
 
@@ -1654,6 +1775,9 @@ export default function Home() {
           </div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628]/90 via-[#0A1628]/75 to-[#0047AB]/40" />
         </div>
+
+        {/* Particle System */}
+        <ParticleCanvas />
 
         <div className="relative z-10 w-full">
           <div className="container mx-auto px-6 lg:px-12 py-20">
