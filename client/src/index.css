@@ -512,3 +512,89 @@ select option {
   transform: translateX(6px);
   background: rgba(255, 255, 255, 0.03);
 }
+
+/* ─── MICRO-ANIMATIONS SECTION AVANTAGES ─────────────── */
+
+/* Advantage card: flip-up entrance with staggered delays */
+.adv-card-anim {
+  opacity: 0;
+  transform: translateY(30px) rotateX(8deg);
+  transform-origin: bottom center;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.adv-card-anim.adv-visible {
+  opacity: 1;
+  transform: translateY(0) rotateX(0deg);
+}
+
+.adv-card-anim[data-adv="0"] { transition-delay: 0ms; }
+.adv-card-anim[data-adv="1"] { transition-delay: 120ms; }
+.adv-card-anim[data-adv="2"] { transition-delay: 240ms; }
+.adv-card-anim[data-adv="3"] { transition-delay: 360ms; }
+.adv-card-anim[data-adv="4"] { transition-delay: 480ms; }
+.adv-card-anim[data-adv="5"] { transition-delay: 600ms; }
+
+/* Advantage icon: pop-in with bounce */
+.adv-icon-anim {
+  opacity: 0;
+  transform: scale(0) rotate(-15deg);
+  transition: opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.adv-icon-anim.adv-visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.adv-icon-anim[data-adv="0"] { transition-delay: 150ms; }
+.adv-icon-anim[data-adv="1"] { transition-delay: 270ms; }
+.adv-icon-anim[data-adv="2"] { transition-delay: 390ms; }
+.adv-icon-anim[data-adv="3"] { transition-delay: 510ms; }
+.adv-icon-anim[data-adv="4"] { transition-delay: 630ms; }
+.adv-icon-anim[data-adv="5"] { transition-delay: 750ms; }
+
+/* Advantage icon: gentle float after entrance */
+@keyframes adv-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.adv-icon-float {
+  animation: adv-float 3s ease-in-out infinite;
+}
+
+.adv-icon-float[data-adv="0"] { animation-delay: 0s; }
+.adv-icon-float[data-adv="1"] { animation-delay: 0.5s; }
+.adv-icon-float[data-adv="2"] { animation-delay: 1s; }
+.adv-icon-float[data-adv="3"] { animation-delay: 1.5s; }
+.adv-icon-float[data-adv="4"] { animation-delay: 2s; }
+.adv-icon-float[data-adv="5"] { animation-delay: 2.5s; }
+
+/* Advantage icon: ring pulse on entrance */
+@keyframes adv-ring-pulse {
+  0% { box-shadow: 0 0 0 0 var(--ring-color, rgba(0, 71, 171, 0.3)); }
+  70% { box-shadow: 0 0 0 10px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.adv-icon-ring-pulse {
+  animation: adv-ring-pulse 0.8s ease-out;
+}
+
+/* Advantage card: hover tilt effect */
+.adv-card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.adv-card-hover:hover {
+  transform: translateY(-6px);
+}
+
+.adv-card-hover:hover .adv-icon-float {
+  animation-play-state: paused;
+  transform: scale(1.15);
+  transition: transform 0.3s ease;
+}
