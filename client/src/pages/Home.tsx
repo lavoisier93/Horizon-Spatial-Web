@@ -237,9 +237,9 @@ function ParticleCanvas() {
 
     // Performance: detect low-end devices via hardware concurrency
     const isLowEnd = (navigator.hardwareConcurrency || 4) <= 2;
-    const PARTICLE_COUNT = isLowEnd ? 50 : isTablet ? 70 : 100;
-    const CONNECTION_DISTANCE = isLowEnd ? 100 : 150;
-    const CONNECTION_DISTANCE_SQ = CONNECTION_DISTANCE * CONNECTION_DISTANCE; // Avoid sqrt
+    const PARTICLE_COUNT = isLowEnd ? 60 : isTablet ? 80 : 120;
+    const CONNECTION_DISTANCE = 150;
+    const CONNECTION_DISTANCE_SQ = CONNECTION_DISTANCE * CONNECTION_DISTANCE;
     const MOUSE_RADIUS = 120;
     const MOUSE_RADIUS_SQ = MOUSE_RADIUS * MOUSE_RADIUS;
     const MOUSE_FORCE = 3;
@@ -249,13 +249,13 @@ function ParticleCanvas() {
     let w = 0, h = 0;
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap DPR at 2 for perf
-      w = canvas.parentElement?.clientWidth || window.innerWidth;
-      h = canvas.parentElement?.clientHeight || window.innerHeight;
+      w = window.innerWidth;
+      h = window.innerHeight;
       canvas.width = w * dpr;
       canvas.height = h * dpr;
       canvas.style.width = w + "px";
       canvas.style.height = h + "px";
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
 
@@ -267,21 +267,17 @@ function ParticleCanvas() {
     };
     window.addEventListener("resize", debouncedResize);
 
-    // Mouse tracking with passive listener
-    const parent = canvas.parentElement;
+    // Mouse tracking with passive listener (global since canvas covers page)
     const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseRef.current.x = e.clientX - rect.left;
-      mouseRef.current.y = e.clientY - rect.top;
+      mouseRef.current.x = e.clientX;
+      mouseRef.current.y = e.clientY;
       mouseRef.current.active = true;
     };
     const handleMouseLeave = () => {
       mouseRef.current.active = false;
     };
-    if (parent) {
-      parent.addEventListener("mousemove", handleMouseMove, { passive: true });
-      parent.addEventListener("mouseleave", handleMouseLeave, { passive: true });
-    }
+    document.addEventListener("mousemove", handleMouseMove, { passive: true });
+    document.addEventListener("mouseleave", handleMouseLeave, { passive: true });
 
     // Detect system theme and adapt particle colors
     const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -308,10 +304,10 @@ function ParticleCanvas() {
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       px[i] = Math.random() * w;
       py[i] = Math.random() * h;
-      psize[i] = Math.random() * 2 + 1.5;
-      psx[i] = (Math.random() - 0.5) * 0.6;
-      psy[i] = (Math.random() - 0.5) * 0.6;
-      palpha[i] = Math.random() * 0.2 + 0.15;
+      psize[i] = Math.random() * 2 + 1; // 1-3px like HTML source
+      psx[i] = (Math.random() - 0.5) * 0.5; // speed like HTML source
+      psy[i] = (Math.random() - 0.5) * 0.5;
+      palpha[i] = Math.random() * 0.5 + 0.1; // 0.1-0.6 like HTML source
       pcolor.push(Math.random() > 0.5 ? colors.primary : colors.secondary);
     }
 
@@ -512,7 +508,7 @@ function ParticleCanvas() {
                   ctx.moveTo(px[i], py[i]);
                   ctx.lineTo(px[j], py[j]);
                   ctx.strokeStyle = pcolor[i];
-                  ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.3;
+                  ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.15;
                   ctx.stroke();
                 }
               }
@@ -530,16 +526,14 @@ function ParticleCanvas() {
       window.removeEventListener("resize", debouncedResize);
       document.removeEventListener("visibilitychange", handleVisibility);
       darkModeQuery.removeEventListener("change", handleThemeChange);
-      if (parent) {
-        parent.removeEventListener("mousemove", handleMouseMove);
-        parent.removeEventListener("mouseleave", handleMouseLeave);
-      }
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
       cancelAnimationFrame(animFrameRef.current);
       clearTimeout(resizeTimer);
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 z-[15] pointer-events-none" style={{ willChange: "transform" }} />;
+  return <canvas ref={canvasRef} className="fixed inset-0 z-[1] pointer-events-none" style={{ willChange: "transform" }} />;
 }
 
 // ─── TYPEWRITER COMPONENT ──────────────────────
@@ -2169,6 +2163,9 @@ export default function Home() {
       {/* WhatsApp Floating Button */}
       <WhatsAppButton />
 
+      {/* Particle System - fixed, covers entire page */}
+      <ParticleCanvas />
+
       {/* Scroll to Top Button */}
       <ScrollToTopButton />
 
@@ -2258,8 +2255,7 @@ export default function Home() {
           <ChevronDown className="w-5 h-5 animate-bounce" />
         </div>
 
-        {/* Particle System - above everything except interactive elements */}
-        <ParticleCanvas />
+
       </section>
 
       {/* ===== SECTION 2: CADRE RÉGLEMENTAIRE ===== */}
