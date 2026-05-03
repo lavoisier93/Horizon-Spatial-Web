@@ -388,7 +388,7 @@ function ParticleCanvas() {
         }
       });
 
-      targetOpacityMultiplier = foundDark ? 1.0 : 0.25;
+      targetOpacityMultiplier = foundDark ? 1.0 : 0.35;
     };
 
     // Check on scroll (throttled)
