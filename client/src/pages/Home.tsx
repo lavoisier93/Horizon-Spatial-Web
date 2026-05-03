@@ -325,8 +325,42 @@ function ParticleCanvas() {
         ctx.fill();
       }
 
-      // Draw lines from cursor to nearby particles
+      // Draw cursor glow + lines from cursor to nearby particles
       if (mouse.active) {
+        // Pulsating glow effect around cursor
+        const time = Date.now() * 0.003;
+        const pulse = 0.5 + Math.sin(time) * 0.3; // oscillates 0.2 - 0.8
+        const glowRadius = MOUSE_RADIUS * (0.6 + Math.sin(time * 0.7) * 0.15);
+
+        // Outer glow ring
+        const gradient = ctx.createRadialGradient(
+          mouse.x, mouse.y, 0,
+          mouse.x, mouse.y, glowRadius
+        );
+        gradient.addColorStop(0, `rgba(77, 159, 255, ${0.12 * pulse})`);
+        gradient.addColorStop(0.4, `rgba(0, 232, 143, ${0.06 * pulse})`);
+        gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, glowRadius, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.globalAlpha = 1;
+        ctx.fill();
+
+        // Inner bright core
+        const coreGradient = ctx.createRadialGradient(
+          mouse.x, mouse.y, 0,
+          mouse.x, mouse.y, 8
+        );
+        coreGradient.addColorStop(0, `rgba(255, 255, 255, ${0.4 * pulse})`);
+        coreGradient.addColorStop(0.5, `rgba(77, 159, 255, ${0.2 * pulse})`);
+        coreGradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, 8, 0, Math.PI * 2);
+        ctx.fillStyle = coreGradient;
+        ctx.globalAlpha = 1;
+        ctx.fill();
+
+        // Lines from cursor to nearby particles
         for (const p of ps) {
           const dx = p.x - mouse.x;
           const dy = p.y - mouse.y;
