@@ -244,16 +244,18 @@ function ParticleCanvas() {
     resize();
     window.addEventListener("resize", resize);
 
-    // Initialize particles
-    const count = Math.min(80, Math.floor(canvas.width * canvas.height / 15000));
-    particlesRef.current = Array.from({ length: count }, () => ({
+    // Initialize 100 particles as per hspatial-immersive.html specs
+    const PARTICLE_COUNT = 100;
+    const CONNECTION_DISTANCE = 150;
+    particlesRef.current = Array.from({ length: PARTICLE_COUNT }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      size: Math.random() * 2 + 1,
-      speedX: (Math.random() - 0.5) * 0.5,
-      speedY: (Math.random() - 0.5) * 0.5,
+      size: Math.random() * 2.5 + 1,
+      speedX: (Math.random() - 0.5) * 0.8,
+      speedY: (Math.random() - 0.5) * 0.8,
       color: Math.random() > 0.5 ? "#0047AB" : "#00A86B",
-      alpha: Math.random() * 0.5 + 0.1,
+      // Particle opacity between 10% and 30%
+      alpha: Math.random() * 0.2 + 0.1,
     }));
 
     const animate = () => {
@@ -264,6 +266,7 @@ function ParticleCanvas() {
       for (const p of ps) {
         p.x += p.speedX;
         p.y += p.speedY;
+        // Bounce off edges
         if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
         if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
 
@@ -274,18 +277,20 @@ function ParticleCanvas() {
         ctx.fill();
       }
 
-      // Connect nearby particles
+      // Connect nearby particles with lines (distance < 150px)
       for (let i = 0; i < ps.length; i++) {
         for (let j = i + 1; j < ps.length; j++) {
           const dx = ps[i].x - ps[j].x;
           const dy = ps[i].y - ps[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
+          if (dist < CONNECTION_DISTANCE) {
             ctx.beginPath();
             ctx.moveTo(ps[i].x, ps[i].y);
             ctx.lineTo(ps[j].x, ps[j].y);
             ctx.strokeStyle = ps[i].color;
-            ctx.globalAlpha = ((150 - dist) / 150) * 0.1;
+            // Line opacity: proportional to proximity, capped at 30%
+            ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.3;
+            ctx.lineWidth = 0.8;
             ctx.stroke();
           }
         }
