@@ -354,6 +354,52 @@ function ParticleCanvas() {
     };
     document.addEventListener("visibilitychange", handleVisibility);
 
+    // Adaptive opacity based on background brightness of visible section
+    // Dark sections → opacityMultiplier ~1.0 (full visibility)
+    // Light sections → opacityMultiplier ~0.3 (subtle)
+    let opacityMultiplier = 1.0;
+    let targetOpacityMultiplier = 1.0;
+
+    const detectBackgroundBrightness = () => {
+      const viewportCenter = window.innerHeight / 2;
+      const sections = document.querySelectorAll("section, [data-section]");
+      let foundDark = false;
+
+      sections.forEach((section) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= viewportCenter && rect.bottom >= viewportCenter) {
+          const el = section as HTMLElement;
+          const bg = window.getComputedStyle(el).backgroundColor;
+          const classes = el.className;
+
+          // Detect dark sections by class names or computed background
+          if (
+            classes.includes("bg-[#0A1628]") ||
+            classes.includes("bg-[#0B1A2F]") ||
+            classes.includes("bg-gradient-to") ||
+            classes.includes("from-[#0A1628]") ||
+            classes.includes("from-[#0B1A2F]") ||
+            bg.includes("10, 22, 40") ||
+            bg.includes("11, 26, 47") ||
+            el.id === "hero"
+          ) {
+            foundDark = true;
+          }
+        }
+      });
+
+      targetOpacityMultiplier = foundDark ? 1.0 : 0.25;
+    };
+
+    // Check on scroll (throttled)
+    let scrollTimer: ReturnType<typeof setTimeout>;
+    const handleScroll = () => {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(detectBackgroundBrightness, 100);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    detectBackgroundBrightness(); // Initial check
+
     const animate = (timestamp: number = 0) => {
       if (!isVisible) return;
 
@@ -364,6 +410,9 @@ function ParticleCanvas() {
         return;
       }
       lastTime = timestamp;
+
+      // Smooth transition of opacity multiplier
+      opacityMultiplier += (targetOpacityMultiplier - opacityMultiplier) * 0.05;
 
       ctx.clearRect(0, 0, w, h);
       const mouse = mouseRef.current;
@@ -421,7 +470,7 @@ function ParticleCanvas() {
         ctx.beginPath();
         ctx.arc(px[i], py[i], psize[i], 0, Math.PI * 2);
         ctx.fillStyle = pcolor[i];
-        ctx.globalAlpha = palpha[i];
+        ctx.globalAlpha = palpha[i] * opacityMultiplier;
         ctx.fill();
       }
 
@@ -508,7 +557,7 @@ function ParticleCanvas() {
                   ctx.moveTo(px[i], py[i]);
                   ctx.lineTo(px[j], py[j]);
                   ctx.strokeStyle = pcolor[i];
-                  ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.15;
+                  ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.15 * opacityMultiplier;
                   ctx.stroke();
                 }
               }
@@ -524,12 +573,14 @@ function ParticleCanvas() {
 
     return () => {
       window.removeEventListener("resize", debouncedResize);
+      window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("visibilitychange", handleVisibility);
       darkModeQuery.removeEventListener("change", handleThemeChange);
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseleave", handleMouseLeave);
       cancelAnimationFrame(animFrameRef.current);
       clearTimeout(resizeTimer);
+      clearTimeout(scrollTimer);
     };
   }, []);
 
