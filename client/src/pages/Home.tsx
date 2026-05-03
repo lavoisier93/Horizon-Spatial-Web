@@ -1404,7 +1404,11 @@ function CookieBanner() {
                   Ce site utilise des cookies pour améliorer votre expérience de navigation et analyser le trafic.
                 </p>
                 <p className="text-white/40 text-xs mt-1">
-                  En poursuivant, vous acceptez notre politique de confidentialité conformément au RGPD.
+                  En poursuivant, vous acceptez notre{" "}
+                  <a href="/politique-de-confidentialite" className="text-[#0047AB] hover:text-[#0055CC] underline transition-colors">
+                    politique de confidentialité
+                  </a>{" "}
+                  conformément au RGPD.
                 </p>
               </div>
             </div>
@@ -2805,6 +2809,9 @@ export default function Home() {
               <span className="text-white/20 text-xs">
                 RCCM : CI-ABJ-03-2026-B13-00264 | Abidjan, Côte d'Ivoire
               </span>
+              <a href="/politique-de-confidentialite" className="text-white/20 hover:text-white/50 text-xs underline transition-colors">
+                Politique de confidentialité
+              </a>
               <div className="flex gap-2">
                 <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-full bg-white/5 hover:bg-[#0077B5]/30 flex items-center justify-center transition-all" title="LinkedIn">
                   <Linkedin className="w-3.5 h-3.5 text-white/40 hover:text-white" />
