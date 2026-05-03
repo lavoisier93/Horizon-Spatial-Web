@@ -373,8 +373,7 @@ function LazyLeafletMap({ isDark }: { isDark: boolean }) {
         <LeafletMap isDark={isDark} />
       ) : (
         <div
-          className={`w-full rounded-xl flex items-center justify-center ${isDark ? "bg-[#0F1D32]" : "bg-gray-100"}`}
-          style={{ height: "500px" }}
+          className={`w-full rounded-xl flex items-center justify-center h-[300px] sm:h-[400px] lg:h-[500px] ${isDark ? "bg-[#0F1D32]" : "bg-gray-100"}`}
         >
           <div className="text-center">
             <MapPin className={`w-12 h-12 mx-auto mb-3 ${isDark ? "text-white/30" : "text-gray-300"}`} />
@@ -691,12 +690,15 @@ function LeafletMap({ isDark }: { isDark: boolean }) {
     if (!mapRef.current || mapInstanceRef.current) return;
 
     // Create map centered on Côte d'Ivoire
+    const isMobile = window.innerWidth < 640;
     const map = L.map(mapRef.current, {
       center: [7.54, -5.55],
-      zoom: 6,
-      zoomControl: true,
+      zoom: isMobile ? 5.5 : 6,
+      zoomControl: !isMobile,
       scrollWheelZoom: false,
       attributionControl: true,
+      dragging: true,
+      touchZoom: true,
     });
 
     // Tile layer - use CartoDB for cleaner look
@@ -767,19 +769,21 @@ function LeafletMap({ isDark }: { isDark: boolean }) {
       .catch(() => {});
 
     // Custom icon for HQ
+    const hqSize = isMobile ? 16 : 20;
     const hqIcon = L.divIcon({
-      html: `<div style="background:#0047AB;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 12px rgba(0,71,171,0.6),0 0 24px rgba(0,71,171,0.3);"></div>`,
+      html: `<div style="background:#0047AB;width:${hqSize}px;height:${hqSize}px;border-radius:50%;border:${isMobile ? 2 : 3}px solid white;box-shadow:0 0 12px rgba(0,71,171,0.6),0 0 24px rgba(0,71,171,0.3);"></div>`,
       className: "",
-      iconSize: [20, 20],
-      iconAnchor: [10, 10],
+      iconSize: [hqSize, hqSize],
+      iconAnchor: [hqSize / 2, hqSize / 2],
     });
 
     // Custom icon for zones
+    const zoneSize = isMobile ? 10 : 14;
     const zoneIcon = L.divIcon({
-      html: `<div style="background:#00A86B;width:14px;height:14px;border-radius:50%;border:2.5px solid white;box-shadow:0 0 8px rgba(0,168,107,0.5);"></div>`,
+      html: `<div style="background:#00A86B;width:${zoneSize}px;height:${zoneSize}px;border-radius:50%;border:2px solid white;box-shadow:0 0 8px rgba(0,168,107,0.5);"></div>`,
       className: "",
-      iconSize: [14, 14],
-      iconAnchor: [7, 7],
+      iconSize: [zoneSize, zoneSize],
+      iconAnchor: [zoneSize / 2, zoneSize / 2],
     });
 
     // Add city markers
@@ -797,9 +801,9 @@ function LeafletMap({ isDark }: { isDark: boolean }) {
       `;
       marker.bindPopup(popupContent, { className: "leaflet-popup-custom" });
 
-      // Tooltip with city name
+      // Tooltip with city name (permanent on desktop, hover-only on mobile)
       marker.bindTooltip(city.name, {
-        permanent: true,
+        permanent: !isMobile,
         direction: city.isHQ ? "right" : "top",
         offset: city.isHQ ? [14, 0] : [0, -10],
         className: "leaflet-label-custom",
@@ -815,9 +819,9 @@ function LeafletMap({ isDark }: { isDark: boolean }) {
         [[hq.lat, hq.lng], [city.lat, city.lng]],
         {
           color: "#00A86B",
-          weight: 1.5,
-          dashArray: "6 4",
-          opacity: 0.4,
+          weight: isMobile ? 1 : 1.5,
+          dashArray: isMobile ? "4 3" : "6 4",
+          opacity: isMobile ? 0.3 : 0.4,
         }
       ).addTo(map);
       layersRef.current.push(line);
@@ -851,11 +855,10 @@ function LeafletMap({ isDark }: { isDark: boolean }) {
       </div>
       <div
         ref={mapRef}
-        className="w-full rounded-xl overflow-hidden"
-        style={{ height: "500px" }}
+        className="w-full rounded-xl overflow-hidden h-[300px] sm:h-[400px] lg:h-[500px]"
       />
       {/* Légende */}
-      <div className={`flex items-center gap-6 mt-4 justify-center text-xs ${isDark ? "text-white/50" : "text-[#4A5568]"}`} style={poppins}>
+      <div className={`flex flex-wrap items-center gap-3 sm:gap-6 mt-4 justify-center text-[10px] sm:text-xs ${isDark ? "text-white/50" : "text-[#4A5568]"}`} style={poppins}>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded-full bg-[#0047AB] border-2 border-white shadow-md" />
           <span>Siège social</span>
@@ -1914,29 +1917,29 @@ export default function Home() {
       </section>
 
       {/* ===== SECTION 7.4b: CARTE INTERACTIVE ZONES D'INTERVENTION ===== */}
-      <section id="zones" className={`py-20 lg:py-28 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-[#0A1628]" : "bg-[#F0F4F8]"}`}>
+      <section id="zones" className={`py-12 sm:py-20 lg:py-28 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-[#0A1628]" : "bg-[#F0F4F8]"}`}>
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `url(${TOPO_IMG})`, backgroundSize: "cover" }} />
-        <div className="container mx-auto px-6 lg:px-12 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
           <Reveal>
-            <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-16">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Navigation className="w-5 h-5 text-[#00A86B]" />
                 <span className="text-[#00A86B] font-semibold text-sm uppercase tracking-wider" style={poppins}>Couverture Géographique</span>
               </div>
-              <h2 className={`text-3xl lg:text-4xl font-bold mb-4 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>Nos Zones d'Intervention</h2>
-              <p className={`text-lg ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>Présents sur l'ensemble du territoire ivoirien, nous accompagnons vos projets d'aménagement dans les principales zones de développement urbain.</p>
+              <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>Nos Zones d'Intervention</h2>
+              <p className={`text-base sm:text-lg ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>Présents sur l'ensemble du territoire ivoirien, nous accompagnons vos projets d'aménagement dans les principales zones de développement urbain.</p>
             </div>
           </Reveal>
 
           <Reveal delay={200}>
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
               {/* Carte SVG interactive */}
-              <div className={`relative rounded-2xl p-8 ${isDark ? "bg-[#0F1D32] border border-white/10" : "bg-white border border-gray-100 shadow-xl"}`}>
+              <div className={`relative rounded-2xl p-4 sm:p-6 lg:p-8 ${isDark ? "bg-[#0F1D32] border border-white/10" : "bg-white border border-gray-100 shadow-xl"}`}>
                 <LazyLeafletMap isDark={isDark} />
               </div>
 
               {/* Liste des zones */}
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {[
                   { city: "Abidjan", type: "Siège social", desc: "District autonome — Lotissements résidentiels, mixtes et commerciaux", active: true },
                   { city: "Grand-Bassam", type: "Zone active", desc: "Projets balnéaires et résidentiels en périphérie Est", active: true },
@@ -1946,7 +1949,7 @@ export default function Home() {
                   { city: "Bouaké", type: "Zone active", desc: "Deuxième ville — Restructuration et extension urbaine", active: true },
                   { city: "Korhogo", type: "Zone active", desc: "Pôle Nord — Développement urbain et foncier", active: true },
                 ].map((zone, i) => (
-                  <div key={i} className={`flex items-start gap-4 p-4 rounded-xl transition-all duration-300 hover:scale-[1.02] ${isDark ? "bg-[#0F1D32] border border-white/10 hover:border-[#00A86B]/30" : "bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-[#00A86B]/30"}`}>
+                  <div key={i} className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl transition-all duration-300 hover:scale-[1.02] ${isDark ? "bg-[#0F1D32] border border-white/10 hover:border-[#00A86B]/30" : "bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-[#00A86B]/30"}`}>
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${zone.active ? "bg-[#00A86B]/20" : "bg-[#0047AB]/20"}`}>
                       <MapPin className={`w-5 h-5 ${zone.active ? "text-[#00A86B]" : "text-[#0047AB]"}`} />
                     </div>
