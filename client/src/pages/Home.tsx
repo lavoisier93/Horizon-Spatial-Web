@@ -16,6 +16,7 @@
  * V10: + Carte Leaflet/OpenStreetMap avec GeoJSON réel du shapefile CI
  * V11: + Lazy loading images (IntersectionObserver + native) + Lazy carte Leaflet
  * V12: + Micro-animations scroll sur icônes services (entrée, pulse, wobble, float)
+ * V13: + Micro-animations scroll sur étapes méthodologie (bounce, slide-in, line grow, glow)
  */
 
 import {
@@ -175,6 +176,61 @@ function AnimatedServiceIcon({ icon: Icon, color, index }: { icon: React.Element
         style={{ "--float-delay": `${index * 0.4}s` } as React.CSSProperties}
       >
         <Icon className="w-7 h-7 service-icon-svg" style={{ color }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── ANIMATED STEP COMPONENT ─────────────────────────────
+// Scroll-triggered animation for methodology steps: circle bounce, content slide-in, line grow
+function AnimatedStep({ item, index, isLast }: { item: { title: string; desc: string }; index: number; isLast: boolean }) {
+  const stepRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = stepRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={stepRef} className="flex gap-6 mb-8 last:mb-0 step-row-hover">
+      <div className="flex flex-col items-center">
+        <div
+          className={`step-circle-anim w-14 h-14 rounded-full flex items-center justify-center shrink-0 border-2 ${
+            isVisible ? "step-visible" : ""
+          } ${isLast && isVisible ? "step-circle-glow" : ""}`}
+          data-step={index}
+          style={{
+            backgroundColor: isLast ? "#00A86B" : "transparent",
+            borderColor: isLast ? "#00A86B" : "rgba(255,255,255,0.2)",
+          }}
+        >
+          <span className="text-white font-bold text-sm" style={{ fontFamily: "'Poppins', sans-serif" }}>0{index + 1}</span>
+        </div>
+        {!isLast && (
+          <div
+            className={`step-line-anim w-px h-full min-h-[2rem] bg-white/10 my-2 ${isVisible ? "step-visible" : ""}`}
+            data-step={index}
+          />
+        )}
+      </div>
+      <div
+        className={`step-content-anim pb-4 ${isVisible ? "step-visible" : ""}`}
+        data-step={index}
+      >
+        <h3 className="text-lg font-bold text-white mb-2" style={{ fontFamily: "'Poppins', sans-serif" }}>{item.title}</h3>
+        <p className="text-white/60 text-sm leading-relaxed">{item.desc}</p>
       </div>
     </div>
   );
@@ -1627,26 +1683,7 @@ export default function Home() {
 
           <div className="max-w-4xl mx-auto">
             {steps.map((item, i) => (
-              <Reveal key={item.title} delay={i * 60}>
-                <div className="flex gap-6 mb-8 last:mb-0">
-                  <div className="flex flex-col items-center">
-                    <div
-                      className="w-14 h-14 rounded-full flex items-center justify-center shrink-0 border-2"
-                      style={{
-                        backgroundColor: i === 6 ? "#00A86B" : "transparent",
-                        borderColor: i === 6 ? "#00A86B" : "rgba(255,255,255,0.2)",
-                      }}
-                    >
-                      <span className="text-white font-bold text-sm" style={poppins}>0{i + 1}</span>
-                    </div>
-                    {i < 6 && <div className="w-px h-full min-h-[2rem] bg-white/10 my-2" />}
-                  </div>
-                  <div className="pb-4">
-                    <h3 className="text-lg font-bold text-white mb-2" style={poppins}>{item.title}</h3>
-                    <p className="text-white/60 text-sm leading-relaxed">{item.desc}</p>
-                  </div>
-                </div>
-              </Reveal>
+              <AnimatedStep key={item.title} item={item} index={i} isLast={i === steps.length - 1} />
             ))}
           </div>
         </div>

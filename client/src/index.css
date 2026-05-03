@@ -421,3 +421,94 @@ select option {
   animation: icon-float 3s ease-in-out infinite;
   animation-delay: var(--float-delay, 0s);
 }
+
+/* ─── MICRO-ANIMATIONS ÉTAPES MÉTHODOLOGIE ─────────────── */
+
+/* Step number circle: scale + bounce entrance */
+.step-circle-anim {
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.step-circle-anim.step-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Staggered delays for each step */
+.step-circle-anim[data-step="0"] { transition-delay: 0ms; }
+.step-circle-anim[data-step="1"] { transition-delay: 120ms; }
+.step-circle-anim[data-step="2"] { transition-delay: 240ms; }
+.step-circle-anim[data-step="3"] { transition-delay: 360ms; }
+.step-circle-anim[data-step="4"] { transition-delay: 480ms; }
+.step-circle-anim[data-step="5"] { transition-delay: 600ms; }
+.step-circle-anim[data-step="6"] { transition-delay: 720ms; }
+
+/* Step content: slide-in from left */
+.step-content-anim {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.5s ease-out,
+              transform 0.5s ease-out;
+}
+
+.step-content-anim.step-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.step-content-anim[data-step="0"] { transition-delay: 80ms; }
+.step-content-anim[data-step="1"] { transition-delay: 200ms; }
+.step-content-anim[data-step="2"] { transition-delay: 320ms; }
+.step-content-anim[data-step="3"] { transition-delay: 440ms; }
+.step-content-anim[data-step="4"] { transition-delay: 560ms; }
+.step-content-anim[data-step="5"] { transition-delay: 680ms; }
+.step-content-anim[data-step="6"] { transition-delay: 800ms; }
+
+/* Connecting line: grow from top */
+.step-line-anim {
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.6s ease-out;
+}
+
+.step-line-anim.step-visible {
+  transform: scaleY(1);
+}
+
+.step-line-anim[data-step="0"] { transition-delay: 200ms; }
+.step-line-anim[data-step="1"] { transition-delay: 320ms; }
+.step-line-anim[data-step="2"] { transition-delay: 440ms; }
+.step-line-anim[data-step="3"] { transition-delay: 560ms; }
+.step-line-anim[data-step="4"] { transition-delay: 680ms; }
+.step-line-anim[data-step="5"] { transition-delay: 800ms; }
+
+/* Pulse glow on the active/last step circle */
+@keyframes step-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 168, 107, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(0, 168, 107, 0);
+  }
+}
+
+.step-circle-glow {
+  animation: step-glow 2s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* Hover lift on step row */
+.step-row-hover {
+  transition: transform 0.3s ease, background 0.3s ease;
+  border-radius: 12px;
+  padding: 4px;
+  margin: -4px;
+}
+
+.step-row-hover:hover {
+  transform: translateX(6px);
+  background: rgba(255, 255, 255, 0.03);
+}
