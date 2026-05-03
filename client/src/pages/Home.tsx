@@ -14,6 +14,7 @@
  * V8: + Bouton retour en haut + Tracking UTM sur liens CTA
  * V9: + Carte interactive Côte d'Ivoire avec zones d'intervention
  * V10: + Carte Leaflet/OpenStreetMap avec GeoJSON réel du shapefile CI
+ * V11: + Lazy loading images (IntersectionObserver + native) + Lazy carte Leaflet
  */
 
 import {
@@ -133,6 +134,93 @@ function Reveal({ children, className = "", delay = 0 }: { children: React.React
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
+    </div>
+  );
+}
+
+// ─── LAZY IMAGE COMPONENT ──────────────────────────────
+// Uses IntersectionObserver to only load images when they enter the viewport
+// Shows a blurred placeholder until the image is loaded
+function LazyImage({ src, alt, className = "", style, onClick }: {
+  src: string;
+  alt: string;
+  className?: string;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+}) {
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [isInView, setIsInView] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const el = imgRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.unobserve(el);
+        }
+      },
+      { rootMargin: "200px" } // Start loading 200px before entering viewport
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <img
+      ref={imgRef}
+      src={isInView ? src : undefined}
+      data-src={src}
+      alt={alt}
+      className={`${className} transition-opacity duration-500 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+      style={style}
+      loading="lazy"
+      decoding="async"
+      onLoad={() => setIsLoaded(true)}
+      onClick={onClick}
+    />
+  );
+}
+
+// ─── LAZY LEAFLET MAP WRAPPER ──────────────────────────
+// Only initializes the heavy Leaflet map when the section enters the viewport
+function LazyLeafletMap({ isDark }: { isDark: boolean }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoad(true);
+          observer.unobserve(el);
+        }
+      },
+      { rootMargin: "300px" } // Start loading 300px before entering viewport
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={containerRef}>
+      {shouldLoad ? (
+        <LeafletMap isDark={isDark} />
+      ) : (
+        <div
+          className={`w-full rounded-xl flex items-center justify-center ${isDark ? "bg-[#0F1D32]" : "bg-gray-100"}`}
+          style={{ height: "500px" }}
+        >
+          <div className="text-center">
+            <MapPin className={`w-12 h-12 mx-auto mb-3 ${isDark ? "text-white/30" : "text-gray-300"}`} />
+            <p className={`text-sm ${isDark ? "text-white/40" : "text-gray-400"}`} style={poppins}>Chargement de la carte...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -777,7 +865,7 @@ function ProjectGallery() {
             onClick={() => setLightbox(i)}
           >
             <div className="aspect-[16/10] overflow-hidden">
-              <img
+              <LazyImage
                 src={item.img}
                 alt={item.title}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -1307,7 +1395,7 @@ export default function Home() {
       {/* ===== SECTION 3: DOUBLE EXPERTISE ===== */}
       <section className="py-20 lg:py-28 bg-[#0A1628] relative overflow-hidden">
         <div className="absolute inset-0 opacity-5">
-          <img src={TOPO_IMG} alt="" className="w-full h-full object-cover" />
+          <LazyImage src={TOPO_IMG} alt="" className="w-full h-full object-cover" />
         </div>
         <div className="container mx-auto px-6 lg:px-12 relative z-10">
           <Reveal>
@@ -1332,13 +1420,13 @@ export default function Home() {
               <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 h-full overflow-hidden">
                 {/* Photo de groupe O.N.U.C.I. en arrière-plan */}
                 <div className="relative h-36 overflow-hidden">
-                  <img src={LAVOISIER_ONUCI_IMG} alt="Cérémonie O.N.U.C.I." className="w-full h-full object-cover object-top" />
+                  <LazyImage src={LAVOISIER_ONUCI_IMG} alt="Cérémonie O.N.U.C.I." className="w-full h-full object-cover object-top" />
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0A1628]" />
                 </div>
                 {/* Portrait circulaire */}
                 <div className="flex flex-col items-center text-center px-8 pb-8 -mt-14 relative z-10">
                   <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-[#00A86B]/40 mb-5 shadow-xl shadow-black/30 ring-2 ring-white/10">
-                    <img src={LAVOISIER_IMG} alt="Lavoisier Ousmane" className="w-full h-full object-cover" />
+                    <LazyImage src={LAVOISIER_IMG} alt="Lavoisier Ousmane" className="w-full h-full object-cover" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-1" style={poppins}>Lavoisier Ousmane</h3>
                   <p className="text-[#00A86B] text-sm font-medium mb-4">Urbaniste & Expert SIG</p>
@@ -1462,7 +1550,7 @@ export default function Home() {
                 </div>
                 <div className="lg:col-span-3">
                   <div className={`rounded-xl overflow-hidden border shadow-lg ${isDark ? "border-white/10" : "border-[#E2E8F0]"}`}>
-                    <img src={PLAN_IMG} alt="Plan de lotissement - Aménagement 10ha" className="w-full h-auto" />
+                    <LazyImage src={PLAN_IMG} alt="Plan de lotissement - Aménagement 10ha" className="w-full h-auto" />
                   </div>
                 </div>
               </div>
@@ -1474,7 +1562,7 @@ export default function Home() {
       {/* ===== SECTION 5: PROCESSUS ===== */}
       <section id="methodologie" className="py-20 lg:py-28 bg-[#0047AB] relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <img src={DRONE_IMG} alt="" className="w-full h-full object-cover" />
+          <LazyImage src={DRONE_IMG} alt="" className="w-full h-full object-cover" />
         </div>
         <div className="absolute inset-0 bg-[#0047AB]/90" />
 
@@ -1677,7 +1765,7 @@ export default function Home() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* Carte SVG interactive */}
               <div className={`relative rounded-2xl p-8 ${isDark ? "bg-[#0F1D32] border border-white/10" : "bg-white border border-gray-100 shadow-xl"}`}>
-                <LeafletMap isDark={isDark} />
+                <LazyLeafletMap isDark={isDark} />
               </div>
 
               {/* Liste des zones */}
@@ -1778,7 +1866,7 @@ export default function Home() {
                     }`}
                   >
                     <div className="w-20 h-20 flex items-center justify-center mb-3 rounded-lg overflow-hidden">
-                      <img src={p.src} alt={p.name} className="max-w-full max-h-full object-contain" />
+                      <LazyImage src={p.src} alt={p.name} className="max-w-full max-h-full object-contain" />
                     </div>
                     <span className={`text-xs font-bold text-center ${isDark ? "text-white/80" : "text-[#0A1628]"}`} style={poppins}>{p.name}</span>
                     <span className={`text-[10px] text-center mt-0.5 ${isDark ? "text-white/40" : "text-[#4A5568]/70"}`}>{p.desc}</span>
@@ -1812,7 +1900,7 @@ export default function Home() {
                     }`}
                   >
                     <div className="w-20 h-20 flex items-center justify-center mb-3 rounded-lg overflow-hidden">
-                      <img src={p.src} alt={p.name} className="max-w-full max-h-full object-contain" />
+                      <LazyImage src={p.src} alt={p.name} className="max-w-full max-h-full object-contain" />
                     </div>
                     <span className={`text-xs font-bold text-center ${isDark ? "text-white/80" : "text-[#0A1628]"}`} style={poppins}>{p.name}</span>
                     <span className={`text-[10px] text-center mt-0.5 ${isDark ? "text-white/40" : "text-[#4A5568]/70"}`}>{p.desc}</span>
@@ -1840,7 +1928,7 @@ export default function Home() {
       {/* ===== SECTION 8: CTA / CONTACT WITH FORM (UPDATED) ===== */}
       <section id="contact" className="relative py-20 lg:py-28 overflow-hidden">
         <div className="absolute inset-0">
-          <img src={LEGAL_IMG} alt="" className="w-full h-full object-cover" />
+          <LazyImage src={LEGAL_IMG} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-br from-[#0A1628]/95 via-[#0A1628]/90 to-[#0047AB]/80" />
         </div>
 
@@ -1967,7 +2055,7 @@ export default function Home() {
                       className="flex flex-col items-center gap-1 opacity-40 hover:opacity-80 transition-opacity shrink-0"
                       title={p.name}
                     >
-                      <img src={p.src} alt={p.name} className="h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all" />
+                      <LazyImage src={p.src} alt={p.name} className="h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all" />
                       <span className="text-white/30 text-[8px]">{p.name}</span>
                     </a>
                   ))}
