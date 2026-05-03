@@ -332,6 +332,16 @@ select option {
   font-family: 'Poppins', sans-serif !important;
 }
 
+/* Fade-in animation for map tooltips */
+.leaflet-tooltip-fade {
+  opacity: 0 !important;
+  transition: opacity 0.5s ease-out !important;
+}
+
+.leaflet-tooltip-fade.leaflet-tooltip-visible {
+  opacity: 1 !important;
+}
+
 @keyframes scroll {
   0% {
     transform: translateX(0);
