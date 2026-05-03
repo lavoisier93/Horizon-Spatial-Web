@@ -377,6 +377,18 @@ html {
   to { transform: translateX(0); }
 }
 
+/* ─── Cookie Banner slide-up animation ─── */
+@keyframes slideUpCookie {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ─── Typewriter cursor ─── */
 .typewriter-cursor {
   display: inline-block;
