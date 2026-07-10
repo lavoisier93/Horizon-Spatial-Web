@@ -95,6 +95,7 @@ import { useCountUp } from "../hooks/useCountUp";
 import { HeroParticles } from "../components/HeroParticles";
 import { LazyImage } from "../components/LazyImage";
 import { LoadingScreen } from "../components/LoadingScreen";
+import { Methodology } from "../components/sections/Methodology";
 import { Hero } from "../components/sections/Hero";
 import { DoubleExpertise } from "../components/sections/DoubleExpertise";
 import { RegulatoryFrame } from "../components/sections/RegulatoryFrame";
@@ -119,7 +120,6 @@ import { founder } from "../data/founder";
 const LOGO_WHITE = assets.logoWhite;
 // Images locales (rapatriement issue #14 — finies les URLs Manus CDN signées
 // qui expiraient le 31 décembre 2026). Sources : client/public/assets/images/
-const DRONE_IMG = "/assets/images/drone-survey.jpg";
 const OFFICE_IMG = "/assets/images/urbanist-work.jpg";
 const LEGAL_IMG = "/assets/images/legal-compliance.jpg";
 const TOPO_IMG = "/assets/images/topo-pattern.png";
@@ -155,59 +155,6 @@ const CIV_REGIONS_URL = "/geo/civ-regions.geojson";
 
 // ─── ANIMATED STEP COMPONENT ─────────────────────────────
 // Scroll-triggered animation for methodology steps: circle bounce, content slide-in, line grow
-function AnimatedStep({ item, index, isLast }: { item: { title: string; desc: string }; index: number; isLast: boolean }) {
-  const stepRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const el = stepRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.2 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={stepRef} className="flex gap-6 mb-8 last:mb-0 step-row-hover">
-      <div className="flex flex-col items-center">
-        <div
-          className={`step-circle-anim w-14 h-14 rounded-full flex items-center justify-center shrink-0 border-2 ${
-            isVisible ? "step-visible" : ""
-          } ${isLast && isVisible ? "step-circle-glow" : ""}`}
-          data-step={index}
-          style={{
-            backgroundColor: isLast ? "#00A86B" : "transparent",
-            borderColor: isLast ? "#00A86B" : "rgba(255,255,255,0.2)",
-          }}
-        >
-          <span className="text-white font-bold text-sm" style={{ fontFamily: "'Poppins', sans-serif" }}>0{index + 1}</span>
-        </div>
-        {!isLast && (
-          <div
-            className={`step-line-anim w-px h-full min-h-[2rem] bg-white/10 my-2 ${isVisible ? "step-visible" : ""}`}
-            data-step={index}
-          />
-        )}
-      </div>
-      <div
-        className={`step-content-anim pb-4 ${isVisible ? "step-visible" : ""}`}
-        data-step={index}
-      >
-        <h3 className="text-lg font-bold text-white mb-2" style={{ fontFamily: "'Poppins', sans-serif" }}>{item.title}</h3>
-        <p className="text-white/60 text-sm leading-relaxed">{item.desc}</p>
-      </div>
-    </div>
-  );
-}
-
 // ─── ANIMATED ADVANTAGE CARD ─────────────────────────────
 // Scroll-triggered animation for advantage cards: flip-up entrance, icon pop-in, float, ring pulse
 function AnimatedAdvantageCard({ adv, index, isDark }: {
@@ -310,16 +257,6 @@ function LazyLeafletMap({ isDark }: { isDark: boolean }) {
 }
 
 // ─── DATA ─────────────────────────────────────────────
-const steps = [
-  { title: "Prise de Contact", desc: "Réunion de cadrage, analyse de vos besoins, visite du site, évaluation préliminaire de faisabilité." },
-  { title: "Proposition Technique", desc: "Offre technique et financière détaillée, méthodologie, planning prévisionnel, équipe dédiée." },
-  { title: "Analyse de Terrain", desc: "Acquisition et analyse des données géospatiales par photogrammétrie drone sur site." },
-  { title: "Conception", desc: "Élaboration du plan de lotissement, calcul des surfaces et ratios réglementaires." },
-  { title: "Validation Interne", desc: "Présentation du projet, ajustements selon vos retours, finalisation des plans techniques." },
-  { title: "Dépôt du Dossier", desc: "Constitution et dépôt du dossier complet auprès du Ministère de la Construction." },
-  { title: "Approbation", desc: "Suivi de la procédure, gestion des observations, obtention de l'arrêté d'approbation." },
-];
-
 const advantages = [
   { icon: Shield, title: "Conformité Légale Garantie", desc: "Urbaniste Agréé inscrit à l'O.N.U.C.I., seule habilitation reconnue par la loi pour concevoir vos lotissements.", accent: "#0047AB" },
   { icon: Layers, title: "Double Expertise Unique", desc: "Seul bureau ivoirien combinant urbanisme certifié ET géomatique avancée (SIG, drone, GPS de précision).", accent: "#00A86B" },
@@ -1205,7 +1142,6 @@ export default function Home() {
   const isDark = theme === "dark";
 
   // Parallax refs for dark sections background images
-  const methodoParallax = useParallax(0.2);
   const contactParallax = useParallax(0.15);
 
   // Lorsque l'utilisateur arrive depuis une autre page avec une ancre dans l'URL
@@ -1241,39 +1177,7 @@ export default function Home() {
 
       <ServicesGrid isDark={isDark} />
 
-      {/* ===== SECTION 5: PROCESSUS ===== */}
-      <section id="methodologie" className="py-20 lg:py-28 bg-[#0047AB] relative overflow-hidden">
-        <div className="absolute inset-[-10%] opacity-10 will-change-transform" ref={methodoParallax}>
-          <LazyImage src={DRONE_IMG} alt="" className="w-full h-full object-cover" />
-        </div>
-        <div className="absolute inset-0 bg-[#0047AB]/90" />
-
-        <div className="container mx-auto px-6 lg:px-12 relative z-10">
-          <Reveal>
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <div className="w-10 h-1 bg-white/40 rounded-full" />
-                <span className="text-white/70 font-semibold text-sm uppercase tracking-wider" style={poppins}>Notre Méthodologie</span>
-                <div className="w-10 h-1 bg-white/40 rounded-full" />
-              </div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-6" style={poppins}>
-                Un processus en{" "}
-                <span className="text-[#00A86B]">7 étapes</span> claires
-              </h2>
-              <p className="text-lg text-white/60 leading-relaxed">
-                Un accompagnement structuré et transparent pour garantir le succès
-                de votre projet d'aménagement.
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="max-w-4xl mx-auto">
-            {steps.map((item, i) => (
-              <AnimatedStep key={item.title} item={item} index={i} isLast={i === steps.length - 1} />
-            ))}
-          </div>
-        </div>
-      </section>
+      <Methodology />
 
       {/* ===== SECTION 6: POURQUOI NOUS CHOISIR ===== */}
       <section className={`py-20 lg:py-28 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-[#0F1D32]" : "bg-white"}`}>
