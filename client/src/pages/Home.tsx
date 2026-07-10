@@ -95,6 +95,7 @@ import { useCountUp } from "../hooks/useCountUp";
 import { HeroParticles } from "../components/HeroParticles";
 import { LazyImage } from "../components/LazyImage";
 import { LoadingScreen } from "../components/LoadingScreen";
+import { Advantages } from "../components/sections/Advantages";
 import { Methodology } from "../components/sections/Methodology";
 import { Hero } from "../components/sections/Hero";
 import { DoubleExpertise } from "../components/sections/DoubleExpertise";
@@ -157,65 +158,6 @@ const CIV_REGIONS_URL = "/geo/civ-regions.geojson";
 // Scroll-triggered animation for methodology steps: circle bounce, content slide-in, line grow
 // ─── ANIMATED ADVANTAGE CARD ─────────────────────────────
 // Scroll-triggered animation for advantage cards: flip-up entrance, icon pop-in, float, ring pulse
-function AnimatedAdvantageCard({ adv, index, isDark }: {
-  adv: { icon: React.ElementType; title: string; desc: string; accent: string };
-  index: number;
-  isDark: boolean;
-}) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const el = cardRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.15 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={cardRef}
-      className={`adv-card-anim adv-card-hover text-center p-8 rounded-2xl border h-full ${
-        isVisible ? "adv-visible" : ""
-      } ${isDark ? "bg-white/5 border-white/10 hover:bg-white/[0.08]" : "bg-[#F8FAFC] border-[#E2E8F0] hover:shadow-lg"}`}
-      data-adv={index}
-    >
-      <div
-        className={`adv-icon-anim w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-6 ${
-          isVisible ? "adv-visible adv-icon-ring-pulse" : ""
-        }`}
-        data-adv={index}
-        style={{ backgroundColor: `${adv.accent}10`, "--ring-color": `${adv.accent}40` } as React.CSSProperties}
-      >
-        <div
-          className={`${isVisible ? "adv-icon-float" : ""}`}
-          data-adv={index}
-        >
-          <adv.icon className="w-8 h-8" style={{ color: adv.accent }} />
-        </div>
-      </div>
-      <h3
-        className={`text-lg font-bold mb-3 ${isDark ? "text-white" : "text-[#0A1628]"}`}
-        style={{ fontFamily: "'Poppins', sans-serif" }}
-      >
-        {adv.title}
-      </h3>
-      <p className={`text-sm leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>
-        {adv.desc}
-      </p>
-    </div>
-  );
-}
-
 // ─── LAZY LEAFLET MAP WRAPPER ──────────────────────────
 // Only initializes the heavy Leaflet map when the section enters the viewport
 function LazyLeafletMap({ isDark }: { isDark: boolean }) {
@@ -256,15 +198,6 @@ function LazyLeafletMap({ isDark }: { isDark: boolean }) {
   );
 }
 
-// ─── DATA ─────────────────────────────────────────────
-const advantages = [
-  { icon: Shield, title: "Conformité Légale Garantie", desc: "Urbaniste Agréé inscrit à l'O.N.U.C.I., seule habilitation reconnue par la loi pour concevoir vos lotissements.", accent: "#0047AB" },
-  { icon: Layers, title: "Double Expertise Unique", desc: "Seul bureau ivoirien combinant urbanisme certifié ET géomatique avancée (SIG, drone, GPS de précision).", accent: "#00A86B" },
-  { icon: Clock, title: "Gain de Temps", desc: "Processus rodé et outils numériques performants pour des délais de livraison optimisés.", accent: "#0047AB" },
-  { icon: Users, title: "Accompagnement Complet", desc: "De l'étude préliminaire à l'approbation ministérielle, un interlocuteur unique pour votre projet.", accent: "#00A86B" },
-  { icon: FileCheck, title: "Tarification Compétitive", desc: "Des honoraires justes et transparents, adaptés à la taille de votre projet. Devis gratuit.", accent: "#0047AB" },
-  { icon: Cuboid, title: "Valeur Ajoutée Commerciale", desc: "Maquettes 3D, plans de vente professionnels et supports visuels pour accélérer vos ventes.", accent: "#00A86B" },
-];
 
 // ─── TÉMOIGNAGES / RÉFÉRENCES ─────────────────────────
 const references = [
@@ -587,110 +520,6 @@ function LeafletMap({ isDark }: { isDark: boolean }) {
         </div>
       </div>
     </div>
-  );
-}
-
-// ─── GALLERY DATA ──────────────────────────────
-const galleryItems = [
-  {
-    img: GALLERY_DRONE,
-    title: "Vue aérienne par drone",
-    desc: "Levé topographique et photogrammétrie par drone pour un lotissement résidentiel de 15 hectares",
-    tag: "Photogrammétrie",
-  },
-  {
-    img: GALLERY_PLAN,
-    title: "Plan de lotissement approuvé",
-    desc: "Plan d'aménagement détaillé avec tampons officiels, soumis au MCLU pour approbation",
-    tag: "Urbanisme",
-  },
-  {
-    img: GALLERY_MAQUETTE,
-    title: "Maquette 3D du projet",
-    desc: "Rendu 3D photoréaliste d'un projet de lotissement mixte avec équipements et espaces verts",
-    tag: "Modélisation 3D",
-  },
-];
-
-// ─── PROJECT GALLERY COMPONENT ──────────────────
-function ProjectGallery() {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [lightbox, setLightbox] = useState<number | null>(null);
-
-  return (
-    <>
-      <div className="grid md:grid-cols-3 gap-6">
-        {galleryItems.map((item, i) => (
-          <div
-            key={item.title}
-            className={`group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 ${
-              activeIdx === i ? "ring-2 ring-[#0047AB] shadow-xl shadow-[#0047AB]/10" : "hover:shadow-lg"
-            }`}
-            onMouseEnter={() => setActiveIdx(i)}
-            onClick={() => setLightbox(i)}
-          >
-            <div className="aspect-[16/10] overflow-hidden">
-              <LazyImage
-                src={item.img}
-                alt={item.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0A1628]/80 via-[#0A1628]/20 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6">
-              <span className="inline-block px-2.5 py-1 bg-[#0047AB]/80 backdrop-blur-sm text-white text-xs font-medium rounded-md mb-3" style={poppins}>
-                {item.tag}
-              </span>
-              <h4 className="text-white font-bold text-lg mb-1" style={poppins}>{item.title}</h4>
-              <p className="text-white/60 text-sm leading-relaxed">{item.desc}</p>
-            </div>
-            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Eye className="w-5 h-5 text-white" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Lightbox */}
-      {lightbox !== null && (
-        <div
-          className="fixed inset-0 z-[70] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setLightbox(null)}
-        >
-          <button
-            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-            onClick={() => setLightbox(null)}
-          >
-            <X className="w-6 h-6 text-white" />
-          </button>
-          <button
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-            onClick={(e) => { e.stopPropagation(); setLightbox((lightbox - 1 + galleryItems.length) % galleryItems.length); }}
-          >
-            <ChevronLeft className="w-6 h-6 text-white" />
-          </button>
-          <button
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-            onClick={(e) => { e.stopPropagation(); setLightbox((lightbox + 1) % galleryItems.length); }}
-          >
-            <ChevronRight className="w-6 h-6 text-white" />
-          </button>
-          <div className="max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={galleryItems[lightbox].img}
-              alt={galleryItems[lightbox].title}
-              className="w-full rounded-xl shadow-2xl"
-            />
-            <div className="mt-4 text-center">
-              <h4 className="text-white font-bold text-xl" style={poppins}>{galleryItems[lightbox].title}</h4>
-              <p className="text-white/60 text-sm mt-1">{galleryItems[lightbox].desc}</p>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
   );
 }
 
@@ -1179,46 +1008,7 @@ export default function Home() {
 
       <Methodology />
 
-      {/* ===== SECTION 6: POURQUOI NOUS CHOISIR ===== */}
-      <section className={`py-20 lg:py-28 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-[#0F1D32]" : "bg-white"}`}>
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `url(${TOPO_IMG})`, backgroundSize: "cover" }} />
-        <div className="container mx-auto px-6 lg:px-12 relative z-10">
-          <Reveal>
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
-                <span className="text-[#00A86B] font-semibold text-sm uppercase tracking-wider" style={poppins}>Nos Avantages</span>
-                <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
-              </div>
-              <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold leading-tight ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
-                Pourquoi choisir{" "}
-                <span className="text-[#0047AB]">H-Spatial</span> ?
-              </h2>
-            </div>
-          </Reveal>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {advantages.map((adv, i) => (
-              <AnimatedAdvantageCard key={adv.title} adv={adv} index={i} isDark={isDark} />
-            ))}
-          </div>
-
-          {/* Galerie de projets */}
-          <Reveal delay={200}>
-            <div className="mt-20">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
-                <span className="text-[#00A86B] font-semibold text-sm uppercase tracking-wider" style={poppins}>Galerie de Projets</span>
-                <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
-              </div>
-              <h3 className={`text-2xl md:text-3xl font-bold text-center mb-10 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
-                Nos réalisations en <span className="text-[#0047AB]">images</span>
-              </h3>
-              <ProjectGallery />
-            </div>
-          </Reveal>
-        </div>
-      </section>
+      <Advantages isDark={isDark} />
 
       {/* ===== SECTION 7: TÉMOIGNAGES & RÉFÉRENCES (NEW) ===== */}
       <section id="references" className={`py-20 lg:py-28 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-[#0A1628]" : "bg-[#F8FAFC]"}`}>
