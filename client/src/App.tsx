@@ -1,6 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
 import { lazy, Suspense } from "react";
 import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -12,10 +11,11 @@ import { WhatsAppButton } from "./components/floating/WhatsAppButton";
 import { Navbar } from "./components/Navbar";
 import { SiteFooter } from "./components/sections/Footer";
 import Home from "./pages/Home";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Lazy-loaded pages (code splitting)
 const About = lazy(() => import("./pages/About"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 function PageFallback() {
   return (
