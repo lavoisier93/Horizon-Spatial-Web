@@ -5,14 +5,11 @@ import { lazy, Suspense } from "react";
 import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home, {
-  CookieBanner,
-  Navbar,
-  ReadingProgressBar,
-  ScrollToTopButton,
-  SiteFooter,
-  WhatsAppButton,
-} from "./pages/Home";
+import { CookieBanner } from "./components/floating/CookieBanner";
+import { ReadingProgressBar } from "./components/floating/ReadingProgressBar";
+import { ScrollToTopButton } from "./components/floating/ScrollToTop";
+import { WhatsAppButton } from "./components/floating/WhatsAppButton";
+import Home, { Navbar, SiteFooter } from "./pages/Home";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Lazy-loaded pages (code splitting)
