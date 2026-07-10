@@ -10,7 +10,8 @@ import { ReadingProgressBar } from "./components/floating/ReadingProgressBar";
 import { ScrollToTopButton } from "./components/floating/ScrollToTop";
 import { WhatsAppButton } from "./components/floating/WhatsAppButton";
 import { Navbar } from "./components/Navbar";
-import Home, { SiteFooter } from "./pages/Home";
+import { SiteFooter } from "./components/sections/Footer";
+import Home from "./pages/Home";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Lazy-loaded pages (code splitting)
