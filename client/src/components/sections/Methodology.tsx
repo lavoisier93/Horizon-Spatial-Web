@@ -7,7 +7,7 @@ import { useParallax } from "../../hooks/useParallax";
 const poppins = { fontFamily: "'Poppins', sans-serif" };
 
 // Image locale (rapatriement issue #14).
-const DRONE_IMG = "/assets/images/drone-survey.jpg";
+const DRONE_IMG = "/assets/images/drone-survey.webp";
 
 // Scroll-triggered animation for methodology steps: circle bounce, content slide-in, line grow
 function AnimatedStep({ item, index, isLast }: { item: { title: string; desc: string }; index: number; isLast: boolean }) {

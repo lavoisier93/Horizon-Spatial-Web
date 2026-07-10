@@ -128,8 +128,8 @@ export const assets: CompanyAssets = {
   logoWhite: "/assets/images/logo-white.svg",
   logoColor: "/assets/images/logo-color.svg",
   founderPortrait: "/assets/images/lavoisier.jpg",
-  onuciCeremony: "/assets/images/onuci-ceremony.jpg",
-  topoPattern: "/assets/images/topo-pattern.png",
+  onuciCeremony: "/assets/images/onuci-ceremony.webp",
+  topoPattern: "/assets/images/topo-pattern.webp",
 };
 
 /* -------------------------------------------------------------------------- */

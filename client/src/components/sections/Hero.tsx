@@ -8,7 +8,7 @@ const poppins = { fontFamily: "'Poppins', sans-serif" };
 
 // Image locale (rapatriement issue #14 — finies les URLs Manus CDN signées
 // qui expiraient le 31 décembre 2026). Source : client/public/assets/images/
-const HERO_IMG = "/assets/images/hero-cover.jpg";
+const HERO_IMG = "/assets/images/hero-cover.webp";
 
 function TypewriterText({
   phrases,

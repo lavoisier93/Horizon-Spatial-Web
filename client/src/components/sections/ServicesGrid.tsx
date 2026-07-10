@@ -7,7 +7,7 @@ import { services } from "../../data/services";
 const poppins = { fontFamily: "'Poppins', sans-serif" };
 
 // Exemple de réalisation — image locale (rapatriement issue #14).
-const PLAN_IMG = "/assets/images/plan-img.png";
+const PLAN_IMG = "/assets/images/plan-img.webp";
 
 // Scroll-triggered micro-animation: scale+rotate entrance, pulse ring, hover wobble, gentle float
 function AnimatedServiceIcon({ icon: Icon, color, index }: { icon: React.ElementType; color: string; index: number }) {

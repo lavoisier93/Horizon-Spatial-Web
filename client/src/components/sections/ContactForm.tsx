@@ -11,7 +11,7 @@ import { addUtm } from "../../lib/utm";
 const poppins = { fontFamily: "'Poppins', sans-serif" };
 
 // Image locale (rapatriement issue #14).
-const LEGAL_IMG = "/assets/images/legal-compliance.jpg";
+const LEGAL_IMG = "/assets/images/legal-compliance.webp";
 
 // Schéma de validation : un seul schéma utilisé côté client (et plus tard côté
 // serveur si on bascule de Formspree à Express+Resend).

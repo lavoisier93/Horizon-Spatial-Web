@@ -6,9 +6,9 @@ export interface GalleryItem {
 }
 
 // Images locales (rapatriement issue #14).
-const GALLERY_DRONE = "/assets/images/gallery-drone-lotissement.jpg";
-const GALLERY_PLAN = "/assets/images/gallery-plan-approuve.jpg";
-const GALLERY_MAQUETTE = "/assets/images/gallery-maquette-3d.jpg";
+const GALLERY_DRONE = "/assets/images/gallery-drone-lotissement.webp";
+const GALLERY_PLAN = "/assets/images/gallery-plan-approuve.webp";
+const GALLERY_MAQUETTE = "/assets/images/gallery-maquette-3d.webp";
 
 export const galleryItems: GalleryItem[] = [
   {
