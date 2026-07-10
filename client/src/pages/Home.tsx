@@ -38,6 +38,9 @@
 
 import { useEffect } from "react";
 import { useTheme } from "../contexts/ThemeContext";
+import { address, assets, company, contact, credentials, social } from "../data/company";
+import { useJsonLd } from "../hooks/useJsonLd";
+import { usePageSeo } from "../hooks/usePageSeo";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { Advantages } from "../components/sections/Advantages";
 import { ContactSection } from "../components/sections/ContactForm";
@@ -51,10 +54,71 @@ import { RegulatoryFrame } from "../components/sections/RegulatoryFrame";
 import { ServicesGrid } from "../components/sections/ServicesGrid";
 import { Testimonials } from "../components/sections/Testimonials";
 
+// ─── SEO ──────────────────────────────────────────────
+const HOME_URL = "https://www.horizonspatial.ci/";
+const HOME_TITLE = "H-Spatial | Bureau d'Études d'Urbaniste Agréé O.N.U.C.I. — Côte d'Ivoire";
+const HOME_DESCRIPTION = "Horizon Spatial : urbaniste agréé O.N.U.C.I. spécialisé en lotissements, aménagement foncier, géomatique et cartographie par drone en Côte d'Ivoire. Conformité légale garantie, devis gratuit.";
+const HOME_IMAGE = "https://www.horizonspatial.ci/assets/images/hero-cover.webp";
+
 // ─── COMPONENT ────────────────────────────────────────
 export default function Home() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
+  usePageSeo({
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    url: HOME_URL,
+    image: HOME_IMAGE,
+  });
+
+  // JSON-LD Organization + LocalBusiness (adresse, horaires, contact) —
+  // éligibilité rich snippets / Knowledge Panel Google.
+  useJsonLd({
+    "@context": "https://schema.org",
+    "@type": ["Organization", "LocalBusiness"],
+    name: company.legalName,
+    alternateName: company.shortName,
+    legalName: company.legalName,
+    slogan: company.slogan,
+    description: company.description,
+    url: "https://www.horizonspatial.ci",
+    logo: `https://www.horizonspatial.ci${assets.logoColor}`,
+    image: HOME_IMAGE,
+    telephone: contact.phonePrimary.replace(/\s/g, ""),
+    email: contact.emailPro,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: address.district,
+      addressLocality: address.city,
+      addressCountry: "CI",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: address.geo.lat,
+      longitude: address.geo.lng,
+    },
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        opens: "08:00",
+        closes: "18:00",
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Saturday"],
+        opens: "09:00",
+        closes: "13:00",
+      },
+    ],
+    sameAs: [social.linkedin, social.facebook],
+    areaServed: "CI",
+    memberOf: {
+      "@type": "Organization",
+      name: credentials.onuciFull,
+    },
+  });
 
   // Lorsque l'utilisateur arrive depuis une autre page avec une ancre dans l'URL
   // (ex. `/a-propos` → clic « Contact » → `/#contact`), le navigateur tente de

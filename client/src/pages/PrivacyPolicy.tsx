@@ -5,10 +5,18 @@
 
 import { ArrowLeft, Shield, Lock, Eye, Database, UserCheck, Mail } from "lucide-react";
 import { Link } from "wouter";
+import { usePageSeo } from "@/hooks/usePageSeo";
 
 const poppins = { fontFamily: "'Poppins', 'Montserrat', sans-serif" };
 
 export default function PrivacyPolicy() {
+  usePageSeo({
+    title: "Politique de Confidentialité | H-Spatial",
+    description: "HORIZON SPATIAL s'engage à protéger vos données personnelles conformément au RGPD et à la législation ivoirienne en vigueur.",
+    url: "https://www.horizonspatial.ci/politique-de-confidentialite",
+    image: "https://www.horizonspatial.ci/assets/images/hero-cover.webp",
+  });
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       {/* Header */}
