@@ -31,6 +31,8 @@ import {
 } from "lucide-react";
 
 import { useCountUp } from "@/hooks/useCountUp";
+import { useJsonLd } from "@/hooks/useJsonLd";
+import { usePageSeo } from "@/hooks/usePageSeo";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -1056,104 +1058,39 @@ function CTASection() {
 /* SEO injection                                                               */
 /* -------------------------------------------------------------------------- */
 
+const ABOUT_URL = "https://www.horizonspatial.ci/a-propos";
+const ABOUT_TITLE = `Le Fondateur — ${founder.fullName} | ${company.legalName}`;
+const ABOUT_DESCRIPTION = `${founder.fullName}, fondateur d'${company.brandName} : urbaniste inscrit à l'O.N.U.C.I., expert en sécurisation foncière, SIG et solutions numériques territoriales en Côte d'Ivoire.`;
+const ABOUT_IMAGE = `https://www.horizonspatial.ci${founder.photo.src}`;
+
 function useSeo() {
-  useEffect(() => {
-    const previousTitle = document.title;
-    const pageTitle = `Le Fondateur — ${founder.fullName} | ${company.legalName}`;
-    const pageDescription = `${founder.fullName}, fondateur d'${company.brandName} : urbaniste inscrit à l'O.N.U.C.I., expert en sécurisation foncière, SIG et solutions numériques territoriales en Côte d'Ivoire.`;
-    const pageUrl = "https://www.horizonspatial.ci/a-propos";
-    const ogImage = `https://www.horizonspatial.ci${founder.photo.src}`;
+  usePageSeo({
+    title: ABOUT_TITLE,
+    description: ABOUT_DESCRIPTION,
+    url: ABOUT_URL,
+    image: ABOUT_IMAGE,
+    ogType: "profile",
+  });
 
-    document.title = pageTitle;
-
-    const setMeta = (selector: string, attrName: string, attrValue: string, content: string) => {
-      let el = document.querySelector(selector) as HTMLMetaElement | null;
-      if (!el) {
-        el = document.createElement("meta");
-        el.setAttribute(attrName, attrValue);
-        document.head.appendChild(el);
-      }
-      el.setAttribute("content", content);
-      return el;
-    };
-
-    const setLink = (rel: string, href: string) => {
-      let el = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
-      if (!el) {
-        el = document.createElement("link");
-        el.setAttribute("rel", rel);
-        document.head.appendChild(el);
-      }
-      el.setAttribute("href", href);
-      return el;
-    };
-
-    // Standard meta
-    const desc = setMeta('meta[name="description"]', "name", "description", pageDescription);
-
-    // Canonical
-    const canonical = setLink("canonical", pageUrl);
-
-    // Open Graph (Facebook, LinkedIn, WhatsApp share previews)
-    const ogTitle = setMeta('meta[property="og:title"]', "property", "og:title", pageTitle);
-    const ogDesc = setMeta('meta[property="og:description"]', "property", "og:description", pageDescription);
-    const ogUrl = setMeta('meta[property="og:url"]', "property", "og:url", pageUrl);
-    const ogType = setMeta('meta[property="og:type"]', "property", "og:type", "profile");
-    const ogImg = setMeta('meta[property="og:image"]', "property", "og:image", ogImage);
-    const ogSite = setMeta('meta[property="og:site_name"]', "property", "og:site_name", company.brandName);
-    const ogLocale = setMeta('meta[property="og:locale"]', "property", "og:locale", "fr_CI");
-
-    // Twitter card
-    const twCard = setMeta('meta[name="twitter:card"]', "name", "twitter:card", "summary_large_image");
-    const twTitle = setMeta('meta[name="twitter:title"]', "name", "twitter:title", pageTitle);
-    const twDesc = setMeta('meta[name="twitter:description"]', "name", "twitter:description", pageDescription);
-    const twImg = setMeta('meta[name="twitter:image"]', "name", "twitter:image", ogImage);
-
-    // JSON-LD Person + ProfilePage
-    const ld = document.createElement("script");
-    ld.type = "application/ld+json";
-    ld.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "ProfilePage",
-      mainEntity: {
-        "@type": "Person",
-        name: founder.fullName,
-        jobTitle: founder.longRole,
-        worksFor: {
-          "@type": "Organization",
-          name: company.legalName,
-          url: "https://www.horizonspatial.ci",
-        },
-        email: `mailto:${founder.channels.emailPro}`,
-        sameAs: [founder.channels.linkedin, founder.channels.facebook].filter(
-          Boolean
-        ),
+  // JSON-LD Person + ProfilePage
+  useJsonLd({
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    mainEntity: {
+      "@type": "Person",
+      name: founder.fullName,
+      jobTitle: founder.longRole,
+      worksFor: {
+        "@type": "Organization",
+        name: company.legalName,
+        url: "https://www.horizonspatial.ci",
       },
-    });
-    document.head.appendChild(ld);
-
-    return () => {
-      document.title = previousTitle;
-      // On laisse les balises injectées en place : si l'utilisateur revient
-      // sur Home, Home pourrait à terme injecter ses propres OG tags qui les
-      // écraseront. Supprimer ici causerait un flash sans OG entre les routes.
-      // Seuls les tags spécifiques à About sont retirés.
-      desc.remove();
-      canonical.remove();
-      ogTitle.remove();
-      ogDesc.remove();
-      ogUrl.remove();
-      ogType.remove();
-      ogImg.remove();
-      ogSite.remove();
-      ogLocale.remove();
-      twCard.remove();
-      twTitle.remove();
-      twDesc.remove();
-      twImg.remove();
-      ld.remove();
-    };
-  }, []);
+      email: `mailto:${founder.channels.emailPro}`,
+      sameAs: [founder.channels.linkedin, founder.channels.facebook].filter(
+        Boolean
+      ),
+    },
+  });
 }
 
 /* -------------------------------------------------------------------------- */
