@@ -56,6 +56,8 @@ export interface CompanyAssets {
   founderPortrait: string;
   /** Photo de groupe O.N.U.C.I. */
   onuciCeremony: string;
+  /** Motif topographique utilisé en filigrane de fond sur plusieurs sections. */
+  topoPattern: string;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -127,6 +129,7 @@ export const assets: CompanyAssets = {
   logoColor: "/assets/images/logo-color.svg",
   founderPortrait: "/assets/images/lavoisier.jpg",
   onuciCeremony: "/assets/images/onuci-ceremony.jpg",
+  topoPattern: "/assets/images/topo-pattern.png",
 };
 
 /* -------------------------------------------------------------------------- */
