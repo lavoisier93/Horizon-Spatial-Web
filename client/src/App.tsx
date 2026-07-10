@@ -9,7 +9,8 @@ import { CookieBanner } from "./components/floating/CookieBanner";
 import { ReadingProgressBar } from "./components/floating/ReadingProgressBar";
 import { ScrollToTopButton } from "./components/floating/ScrollToTop";
 import { WhatsAppButton } from "./components/floating/WhatsAppButton";
-import Home, { Navbar, SiteFooter } from "./pages/Home";
+import { Navbar } from "./components/Navbar";
+import Home, { SiteFooter } from "./pages/Home";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Lazy-loaded pages (code splitting)
