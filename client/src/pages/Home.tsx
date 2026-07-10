@@ -36,93 +36,24 @@
  *       + Loading screen Phase 2 = reproduction exacte du fichier HTML (pathReveal + pulse + progress)
  */
 
-import {
-  Shield,
-  AlertTriangle,
-  CheckCircle2,
-  MapPin,
-  Plane,
-  FileCheck,
-  Building2,
-  Phone,
-  Mail,
-  Globe,
-  ChevronDown,
-  Scale,
-  Target,
-  Clock,
-  Users,
-  BadgeCheck,
-  Layers,
-  PenTool,
-  FolderCheck,
-  Handshake,
-  Cuboid,
-  ArrowRight,
-  Send,
-  Star,
-  Quote,
-  MapPinned,
-  TreePine,
-  Ruler,
-  User,
-  MessageSquare,
-  Briefcase,
-  Menu,
-  X,
-  Camera,
-  Eye,
-  ChevronLeft,
-  ChevronRight,
-  Moon,
-  Sun,
-  HelpCircle,
-  Plus,
-  Minus,
-  Linkedin,
-  Facebook,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "wouter";
-import { toast } from "sonner";
-import { z } from "zod";
+import { useEffect } from "react";
 import { useTheme } from "../contexts/ThemeContext";
-import { loadUmami } from "../lib/analytics";
-import { useCountUp } from "../hooks/useCountUp";
-import { HeroParticles } from "../components/HeroParticles";
-import { LazyImage } from "../components/LazyImage";
 import { LoadingScreen } from "../components/LoadingScreen";
-import { InteractiveMap } from "../components/sections/InteractiveMap";
-import { Testimonials } from "../components/sections/Testimonials";
 import { Advantages } from "../components/sections/Advantages";
-import { Methodology } from "../components/sections/Methodology";
-import { Hero } from "../components/sections/Hero";
 import { ContactSection } from "../components/sections/ContactForm";
 import { DoubleExpertise } from "../components/sections/DoubleExpertise";
 import { FAQ } from "../components/sections/FAQ";
+import { Hero } from "../components/sections/Hero";
+import { InteractiveMap } from "../components/sections/InteractiveMap";
+import { Methodology } from "../components/sections/Methodology";
 import { Partners } from "../components/sections/Partners";
 import { RegulatoryFrame } from "../components/sections/RegulatoryFrame";
 import { ServicesGrid } from "../components/sections/ServicesGrid";
-import { Reveal } from "../components/Reveal";
-import { useParallax } from "../hooks/useParallax";
-import { addUtm } from "../lib/utm";
-import {
-  address,
-  assets,
-  buildMailtoUrl,
-  buildWhatsAppUrl,
-  company,
-  contact,
-  credentials,
-  social,
-} from "../data/company";
-import { founder } from "../data/founder";
-
-const poppins = { fontFamily: "'Poppins', sans-serif" };
+import { Testimonials } from "../components/sections/Testimonials";
 
 // ─── COMPONENT ────────────────────────────────────────
 export default function Home() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const isDark = theme === "dark";
 
   // Lorsque l'utilisateur arrive depuis une autre page avec une ancre dans l'URL
