@@ -15,7 +15,7 @@ export function DoubleExpertise() {
   return (
     <section className="py-20 lg:py-28 bg-[#0A1628] relative overflow-hidden">
       <div className="absolute inset-[-10%] opacity-5 will-change-transform" ref={expertiseParallax}>
-        <LazyImage src={assets.topoPattern} alt="" className="w-full h-full object-cover" />
+        <LazyImage src={assets.topoPattern} alt="" width={960} height={536} className="w-full h-full object-cover" />
       </div>
       <div className="container mx-auto px-6 lg:px-12 relative z-10">
         <Reveal>
@@ -40,13 +40,13 @@ export function DoubleExpertise() {
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 h-full overflow-hidden">
               {/* Photo de groupe O.N.U.C.I. en arrière-plan */}
               <div className="relative h-36 overflow-hidden">
-                <LazyImage src={assets.onuciCeremony} alt="Cérémonie O.N.U.C.I." className="w-full h-full object-cover object-top" />
+                <LazyImage src={assets.onuciCeremony} alt="Cérémonie O.N.U.C.I." width={800} height={527} className="w-full h-full object-cover object-top" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0A1628]" />
               </div>
               {/* Portrait circulaire */}
               <div className="flex flex-col items-center text-center px-8 pb-8 -mt-14 relative z-10">
                 <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-[#00A86B]/40 mb-5 shadow-xl shadow-black/30 ring-2 ring-white/10">
-                  <LazyImage src={assets.founderPortrait} alt="Lavoisier Ousmane" className="w-full h-full object-cover" />
+                  <LazyImage src={assets.founderPortrait} alt="Lavoisier Ousmane" width={480} height={480} className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-1" style={poppins}>{founder.fullName}</h3>
                 <p className="text-[#00A86B] text-sm font-medium mb-4">{founder.shortRole}</p>

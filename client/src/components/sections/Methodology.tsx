@@ -69,7 +69,7 @@ export function Methodology() {
   return (
     <section id="methodologie" className="py-20 lg:py-28 bg-[#0047AB] relative overflow-hidden">
       <div className="absolute inset-[-10%] opacity-10 will-change-transform" ref={methodoParallax}>
-        <LazyImage src={DRONE_IMG} alt="" className="w-full h-full object-cover" />
+        <LazyImage src={DRONE_IMG} alt="" width={2200} height={1229} className="w-full h-full object-cover" />
       </div>
       <div className="absolute inset-0 bg-[#0047AB]/90" />
 

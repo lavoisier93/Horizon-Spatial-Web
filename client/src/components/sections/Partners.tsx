@@ -44,7 +44,7 @@ export function Partners({ isDark }: { isDark: boolean }) {
                   }`}
                 >
                   <div className="w-20 h-20 flex items-center justify-center mb-3 rounded-lg overflow-hidden">
-                    <LazyImage src={p.src} alt={p.name} className="max-w-full max-h-full object-contain" />
+                    <LazyImage src={p.src} alt={p.name} width={80} height={80} className="max-w-full max-h-full object-contain" />
                   </div>
                   <span className={`text-xs font-bold text-center ${isDark ? "text-white/80" : "text-[#0A1628]"}`} style={poppins}>{p.name}</span>
                   <span className={`text-[10px] text-center mt-0.5 ${isDark ? "text-white/40" : "text-[#4A5568]/70"}`}>{p.desc}</span>
@@ -73,7 +73,7 @@ export function Partners({ isDark }: { isDark: boolean }) {
                   }`}
                 >
                   <div className="w-20 h-20 flex items-center justify-center mb-3 rounded-lg overflow-hidden">
-                    <LazyImage src={p.src} alt={p.name} className="max-w-full max-h-full object-contain" />
+                    <LazyImage src={p.src} alt={p.name} width={80} height={80} className="max-w-full max-h-full object-contain" />
                   </div>
                   <span className={`text-xs font-bold text-center ${isDark ? "text-white/80" : "text-[#0A1628]"}`} style={poppins}>{p.name}</span>
                   <span className={`text-[10px] text-center mt-0.5 ${isDark ? "text-white/40" : "text-[#4A5568]/70"}`}>{p.desc}</span>

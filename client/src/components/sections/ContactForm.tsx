@@ -378,7 +378,7 @@ export function ContactSection() {
     <section id="contact" className="relative py-20 lg:py-28 overflow-hidden">
       <div className="absolute inset-0">
         <div ref={contactParallax} className="absolute inset-[-15%] will-change-transform">
-          <LazyImage src={LEGAL_IMG} alt="" className="w-full h-full object-cover" />
+          <LazyImage src={LEGAL_IMG} alt="" width={2000} height={1118} className="w-full h-full object-cover" />
         </div>
         <div className="absolute inset-0 bg-gradient-to-br from-[#0A1628]/95 via-[#0A1628]/90 to-[#0047AB]/80" />
       </div>
@@ -388,7 +388,7 @@ export function ContactSection() {
           {/* Left: Info */}
           <Reveal>
             <div>
-              <img src={assets.logoWhite} alt="Horizon Spatial" className="h-16 mb-10" />
+              <img src={assets.logoWhite} alt="Horizon Spatial" width={292} height={197} className="h-16 mb-10" />
 
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-6" style={poppins}>
                 Prêt à sécuriser votre prochain{" "}

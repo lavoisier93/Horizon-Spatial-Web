@@ -115,7 +115,15 @@ export function Hero() {
     <section className="relative min-h-screen flex items-center overflow-hidden">
       <div className="absolute inset-0 z-0">
         <div ref={heroParallax} className="absolute inset-[-15%] will-change-transform">
-          <img src={HERO_IMG} alt="Vue aérienne d'un projet d'aménagement urbain" className="w-full h-full object-cover opacity-60" />
+          <img
+            src={HERO_IMG}
+            alt="Vue aérienne d'un projet d'aménagement urbain"
+            width={2400}
+            height={1341}
+            fetchPriority="high"
+            decoding="async"
+            className="w-full h-full object-cover opacity-60"
+          />
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628]/90 via-[#0A1628]/70 to-[#0047AB]/40" />
       </div>

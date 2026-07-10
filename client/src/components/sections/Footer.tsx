@@ -45,6 +45,8 @@ export function SiteFooter() {
           <img
             src={assets.logoWhite}
             alt={company.shortName}
+            width={292}
+            height={197}
             className="h-12 w-auto mb-4"
           />
           <p className="text-sm text-white/65 leading-relaxed">

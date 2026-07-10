@@ -25,6 +25,8 @@ export function ProjectGallery() {
               <LazyImage
                 src={item.img}
                 alt={item.title}
+                width={900}
+                height={563}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
             </div>
@@ -73,6 +75,8 @@ export function ProjectGallery() {
             <img
               src={galleryItems[lightbox].img}
               alt={galleryItems[lightbox].title}
+              width={900}
+              height={563}
               className="w-full rounded-xl shadow-2xl"
             />
             <div className="mt-4 text-center">

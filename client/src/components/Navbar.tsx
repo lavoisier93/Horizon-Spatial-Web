@@ -134,6 +134,8 @@ export function Navbar() {
           <img
             src={scrolled ? (isDark ? assets.logoWhite : assets.logoColor) : assets.logoWhite}
             alt={company.shortName}
+            width={292}
+            height={197}
             className="h-10 transition-all duration-300"
           />
         </Link>

@@ -137,7 +137,7 @@ export function ServicesGrid({ isDark }: { isDark: boolean }) {
               </div>
               <div className="lg:col-span-3">
                 <div className={`rounded-xl overflow-hidden border shadow-lg ${isDark ? "border-white/10" : "border-[#E2E8F0]"}`}>
-                  <LazyImage src={PLAN_IMG} alt="Plan de lotissement - Aménagement 10ha" className="w-full h-auto" />
+                  <LazyImage src={PLAN_IMG} alt="Plan de lotissement - Aménagement 10ha" width={1500} height={1061} className="w-full h-auto" />
                 </div>
               </div>
             </div>
