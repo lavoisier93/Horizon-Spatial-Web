@@ -94,6 +94,7 @@ import { loadUmami } from "../lib/analytics";
 import { useCountUp } from "../hooks/useCountUp";
 import { HeroParticles } from "../components/HeroParticles";
 import { LazyImage } from "../components/LazyImage";
+import { Reveal } from "../components/Reveal";
 import {
   address,
   assets,
@@ -349,40 +350,6 @@ const poppins = { fontFamily: "'Poppins', sans-serif" };
 // GeoJSON data URLs — fichiers locaux (source : geoBoundaries.org, CIV ADM0/ADM1)
 const CIV_OUTLINE_URL = "/geo/civ-outline.geojson";
 const CIV_REGIONS_URL = "/geo/civ-regions.geojson";
-
-// Intersection Observer hook for fade-in animations
-function useReveal() {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add("revealed");
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.08 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-  return ref;
-}
-
-function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
-  const ref = useReveal();
-  return (
-    <div
-      ref={ref}
-      className={`reveal-element ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </div>
-  );
-}
 
 // ─── ANIMATED SERVICE ICON ────────────────────────────
 // Scroll-triggered micro-animation: scale+rotate entrance, pulse ring, hover wobble, gentle float
