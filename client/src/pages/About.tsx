@@ -144,8 +144,7 @@ function FounderAvatar() {
           src={founder.photo.src}
           alt={founder.photo.alt}
           loading="eager"
-          // @ts-expect-error — fetchPriority n'est pas encore typé dans React 19
-          fetchpriority="high"
+          fetchPriority="high"
           decoding="async"
           width={192}
           height={192}
