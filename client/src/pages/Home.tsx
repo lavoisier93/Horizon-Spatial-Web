@@ -59,7 +59,6 @@ import {
   Handshake,
   Cuboid,
   ArrowRight,
-  Download,
   Send,
   Star,
   Quote,
@@ -75,7 +74,6 @@ import {
   Eye,
   ChevronLeft,
   ChevronRight,
-  AlertCircle,
   Moon,
   Sun,
   HelpCircle,
@@ -86,8 +84,26 @@ import {
   Navigation,
 } from "lucide-react";
 import { useEffect, useRef, useState, useCallback } from "react";
+import { Link, useLocation } from "wouter";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { toast } from "sonner";
+import { z } from "zod";
+import { useTheme } from "../contexts/ThemeContext";
+import { loadUmami } from "../lib/analytics";
+import { useCountUp } from "../hooks/useCountUp";
+import { HeroParticles } from "../components/HeroParticles";
+import {
+  address,
+  assets,
+  buildMailtoUrl,
+  buildWhatsAppUrl,
+  company,
+  contact,
+  credentials,
+  social,
+} from "../data/company";
+import { founder } from "../data/founder";
 
 // ─── PARALLAX HOOK ──────────────────────────────
 function useParallax(speed: number = 0.3) {
@@ -132,22 +148,28 @@ function useParallax(speed: number = 0.3) {
 }
 
 // ─── LOADING SCREEN COMPONENT ───────────────
-// Phase 1: Spinning diamonds (1.5s) → Phase 2: Logo pathReveal + pulse + progress bar (like HTML file)
+// Phase 1 : losanges tournants (1,5 s) — première impression dynamique.
+// Phase 2 : logo SVG pathReveal + pulse + texte + progress bar (2,4 s)
+//           reproduction fidèle du fichier référence `hspatial-immersive.html`.
+// Total ≈ 3,9 s + fadeOut 0,8 s. Skip via sessionStorage aux visites suivantes.
 function LoadingScreen() {
-  const [visible, setVisible] = useState(true);
+  const alreadySeen = typeof sessionStorage !== "undefined" && sessionStorage.getItem("hs_loading_seen") === "1";
+  const [visible, setVisible] = useState(!alreadySeen);
   const [fadeOut, setFadeOut] = useState(false);
   const [phase, setPhase] = useState<1 | 2>(1);
 
   useEffect(() => {
-    // Phase 1 lasts 1.5s, then switch to Phase 2
+    if (alreadySeen) return;
     const t1 = setTimeout(() => setPhase(2), 1500);
-    // Phase 2 logo animation ~3s, then fade-out
     const t2 = setTimeout(() => {
       setFadeOut(true);
-      setTimeout(() => setVisible(false), 800);
-    }, 4800);
+      setTimeout(() => {
+        setVisible(false);
+        try { sessionStorage.setItem("hs_loading_seen", "1"); } catch {}
+      }, 800);
+    }, 1500 + 2400);
     return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, []);
+  }, [alreadySeen]);
 
   if (!visible) return null;
 
@@ -159,8 +181,11 @@ function LoadingScreen() {
         visibility: fadeOut ? "hidden" : "visible",
         transition: "opacity 0.8s ease, visibility 0.8s ease",
       }}
+      role="status"
+      aria-live="polite"
+      aria-label="Chargement du site Horizon Spatial"
     >
-      {/* Phase 1: Spinning Diamonds */}
+      {/* Phase 1 : losanges tournants */}
       <div
         className="absolute inset-0 flex items-center justify-center"
         style={{
@@ -168,6 +193,7 @@ function LoadingScreen() {
           transition: "opacity 0.5s ease",
           pointerEvents: "none",
         }}
+        aria-hidden="true"
       >
         <div className="relative w-[100px] h-[100px]">
           <div className="loader-diamond absolute top-0 left-[20px] w-[40px] h-[40px] border-[3px] border-[#0047AB]" />
@@ -175,9 +201,8 @@ function LoadingScreen() {
         </div>
       </div>
 
-      {/* Phase 2: Logo SVG with pathReveal animation (exact reproduction of HTML file) */}
+      {/* Phase 2 : logo SVG + texte + barre de progression */}
       <div
-        className="loader-phase2"
         style={{
           opacity: phase === 2 ? 1 : 0,
           transition: "opacity 0.5s ease",
@@ -194,6 +219,7 @@ function LoadingScreen() {
               viewBox="0 0 237.4442 119.9429"
               xmlns="http://www.w3.org/2000/svg"
               style={{ width: "220px", height: "auto" }}
+              aria-hidden="true"
             >
               <g transform="scale(3.2297424049981)">
                 <path className="loader-path path-blue-1" fill="#0047ab" d="m8.605 18.568 9.961-9.963 9.963 9.963 4.302-4.302L18.566 0 0 18.568l18.566 18.567L28.99 26.709l10.428 10.428h4.52L31.25 24.451h.003l-4.302-4.305-8.385 8.383z" />
@@ -204,10 +230,8 @@ function LoadingScreen() {
               </g>
             </svg>
 
-            {/* HORIZON SPATIAL text */}
             <div className="loader-hs-text">HORIZON SPATIAL</div>
 
-            {/* Progress bar */}
             <div className="loader-progress-container">
               <div className="loader-progress-fill" />
             </div>
@@ -218,378 +242,6 @@ function LoadingScreen() {
   );
 }
 
-// ─── PARTICLE CANVAS COMPONENT ──────────────
-function ParticleCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animFrameRef = useRef<number>(0);
-  const mouseRef = useRef<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d", { alpha: true });
-    if (!ctx) return;
-
-    // Adaptive particle count based on device capability
-    const isMobile = window.innerWidth < 768;
-    const isTablet = window.innerWidth < 1024;
-    if (isMobile) return; // Skip entirely on mobile
-
-    // Performance: detect low-end devices via hardware concurrency
-    const isLowEnd = (navigator.hardwareConcurrency || 4) <= 2;
-    const PARTICLE_COUNT = isLowEnd ? 60 : isTablet ? 80 : 120;
-    const CONNECTION_DISTANCE = 150;
-    const CONNECTION_DISTANCE_SQ = CONNECTION_DISTANCE * CONNECTION_DISTANCE;
-    const MOUSE_RADIUS = 120;
-    const MOUSE_RADIUS_SQ = MOUSE_RADIUS * MOUSE_RADIUS;
-    const MOUSE_FORCE = 3;
-    const MOUSE_LINE_RADIUS = MOUSE_RADIUS * 1.5;
-    const MOUSE_LINE_RADIUS_SQ = MOUSE_LINE_RADIUS * MOUSE_LINE_RADIUS;
-
-    let w = 0, h = 0;
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap DPR at 2 for perf
-      w = window.innerWidth;
-      h = window.innerHeight;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.width = w + "px";
-      canvas.style.height = h + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    resize();
-
-    // Debounced resize for performance
-    let resizeTimer: ReturnType<typeof setTimeout>;
-    const debouncedResize = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(resize, 150);
-    };
-    window.addEventListener("resize", debouncedResize);
-
-    // Mouse tracking with passive listener (global since canvas covers page)
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current.x = e.clientX;
-      mouseRef.current.y = e.clientY;
-      mouseRef.current.active = true;
-    };
-    const handleMouseLeave = () => {
-      mouseRef.current.active = false;
-    };
-    document.addEventListener("mousemove", handleMouseMove, { passive: true });
-    document.addEventListener("mouseleave", handleMouseLeave, { passive: true });
-
-    // Detect system theme and adapt particle colors
-    const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    let isDarkTheme = darkModeQuery.matches;
-
-    // Theme-adaptive color palettes
-    const getColors = (dark: boolean) => ({
-      primary: dark ? "#4D9FFF" : "#0047AB",   // Blue: lighter for dark, deeper for light
-      secondary: dark ? "#00E88F" : "#00875A", // Green: brighter for dark, deeper for light
-      glowPrimary: dark ? "rgba(77, 159, 255," : "rgba(0, 71, 171,",
-      glowSecondary: dark ? "rgba(0, 232, 143," : "rgba(0, 135, 90,",
-    });
-    let colors = getColors(isDarkTheme);
-
-    // Initialize particles with typed arrays for better memory layout
-    const px = new Float32Array(PARTICLE_COUNT);
-    const py = new Float32Array(PARTICLE_COUNT);
-    const psx = new Float32Array(PARTICLE_COUNT);
-    const psy = new Float32Array(PARTICLE_COUNT);
-    const psize = new Float32Array(PARTICLE_COUNT);
-    const palpha = new Float32Array(PARTICLE_COUNT);
-    const pcolor: string[] = [];
-
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      px[i] = Math.random() * w;
-      py[i] = Math.random() * h;
-      psize[i] = Math.random() * 2 + 1; // 1-3px like HTML source
-      psx[i] = (Math.random() - 0.5) * 0.5; // speed like HTML source
-      psy[i] = (Math.random() - 0.5) * 0.5;
-      palpha[i] = Math.random() * 0.5 + 0.1; // 0.1-0.6 like HTML source
-      pcolor.push(Math.random() > 0.5 ? colors.primary : colors.secondary);
-    }
-
-    // Listen for theme changes and update particle colors in real-time
-    const handleThemeChange = (e: MediaQueryListEvent) => {
-      isDarkTheme = e.matches;
-      colors = getColors(isDarkTheme);
-      for (let i = 0; i < PARTICLE_COUNT; i++) {
-        pcolor[i] = Math.random() > 0.5 ? colors.primary : colors.secondary;
-      }
-    };
-    darkModeQuery.addEventListener("change", handleThemeChange);
-
-    // Spatial grid for O(n) neighbor lookup instead of O(n²)
-    const cellSize = CONNECTION_DISTANCE;
-    let gridCols = 0, gridRows = 0;
-    let grid: Int16Array[] = [];
-    let gridCount: Int16Array;
-
-    const rebuildGrid = () => {
-      gridCols = Math.ceil(w / cellSize) || 1;
-      gridRows = Math.ceil(h / cellSize) || 1;
-      const totalCells = gridCols * gridRows;
-      grid = new Array(totalCells);
-      for (let i = 0; i < totalCells; i++) {
-        grid[i] = new Int16Array(20); // max 20 particles per cell
-      }
-      gridCount = new Int16Array(totalCells);
-    };
-    rebuildGrid();
-
-    // FPS throttle: target 60fps, skip frames if behind
-    let lastTime = 0;
-    const targetInterval = 1000 / 60;
-
-    // Visibility API: pause when tab is hidden
-    let isVisible = true;
-    const handleVisibility = () => {
-      isVisible = !document.hidden;
-      if (isVisible) {
-        lastTime = performance.now();
-        animFrameRef.current = requestAnimationFrame(animate);
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-
-    // Adaptive opacity based on background brightness of visible section
-    // Dark sections → opacityMultiplier ~1.0 (full visibility)
-    // Light sections → opacityMultiplier ~0.3 (subtle)
-    let opacityMultiplier = 1.0;
-    let targetOpacityMultiplier = 1.0;
-
-    const detectBackgroundBrightness = () => {
-      const viewportCenter = window.innerHeight / 2;
-      const sections = document.querySelectorAll("section, [data-section]");
-      let foundDark = false;
-
-      sections.forEach((section) => {
-        const rect = section.getBoundingClientRect();
-        if (rect.top <= viewportCenter && rect.bottom >= viewportCenter) {
-          const el = section as HTMLElement;
-          const bg = window.getComputedStyle(el).backgroundColor;
-          const classes = el.className;
-
-          // Detect dark sections by class names or computed background
-          if (
-            classes.includes("bg-[#0A1628]") ||
-            classes.includes("bg-[#0B1A2F]") ||
-            classes.includes("bg-gradient-to") ||
-            classes.includes("from-[#0A1628]") ||
-            classes.includes("from-[#0B1A2F]") ||
-            bg.includes("10, 22, 40") ||
-            bg.includes("11, 26, 47") ||
-            el.id === "hero"
-          ) {
-            foundDark = true;
-          }
-        }
-      });
-
-      targetOpacityMultiplier = foundDark ? 1.0 : 0.35;
-    };
-
-    // Check on scroll (throttled)
-    let scrollTimer: ReturnType<typeof setTimeout>;
-    const handleScroll = () => {
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(detectBackgroundBrightness, 100);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    detectBackgroundBrightness(); // Initial check
-
-    const animate = (timestamp: number = 0) => {
-      if (!isVisible) return;
-
-      // Frame rate control
-      const delta = timestamp - lastTime;
-      if (delta < targetInterval * 0.8) {
-        animFrameRef.current = requestAnimationFrame(animate);
-        return;
-      }
-      lastTime = timestamp;
-
-      // Smooth transition of opacity multiplier
-      opacityMultiplier += (targetOpacityMultiplier - opacityMultiplier) * 0.05;
-
-      // Trail effect: instead of full clear, overlay a semi-transparent rect
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-      ctx.fillRect(0, 0, w, h);
-      ctx.globalCompositeOperation = 'source-over';
-      const mouse = mouseRef.current;
-
-      // Reset spatial grid
-      const totalCells = gridCols * gridRows;
-      for (let i = 0; i < totalCells; i++) gridCount[i] = 0;
-
-      // Update particles & populate grid
-      for (let i = 0; i < PARTICLE_COUNT; i++) {
-        // Mouse repulsion (use squared distance to avoid sqrt)
-        if (mouse.active) {
-          const dx = px[i] - mouse.x;
-          const dy = py[i] - mouse.y;
-          const distSq = dx * dx + dy * dy;
-          if (distSq < MOUSE_RADIUS_SQ && distSq > 0) {
-            const dist = Math.sqrt(distSq);
-            const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS * MOUSE_FORCE;
-            psx[i] += (dx / dist) * force * 0.1;
-            psy[i] += (dy / dist) * force * 0.1;
-          }
-        }
-
-        // Friction
-        psx[i] *= 0.98;
-        psy[i] *= 0.98;
-
-        // Maintain minimum speed
-        const speedSq = psx[i] * psx[i] + psy[i] * psy[i];
-        if (speedSq < 0.09) { // 0.3²
-          psx[i] += (Math.random() - 0.5) * 0.1;
-          psy[i] += (Math.random() - 0.5) * 0.1;
-        }
-
-        px[i] += psx[i];
-        py[i] += psy[i];
-
-        // Bounce
-        if (px[i] < 0) { px[i] = 0; psx[i] *= -1; }
-        else if (px[i] > w) { px[i] = w; psx[i] *= -1; }
-        if (py[i] < 0) { py[i] = 0; psy[i] *= -1; }
-        else if (py[i] > h) { py[i] = h; psy[i] *= -1; }
-
-        // Insert into spatial grid
-        const col = Math.min(Math.floor(px[i] / cellSize), gridCols - 1);
-        const row = Math.min(Math.floor(py[i] / cellSize), gridRows - 1);
-        const cellIdx = row * gridCols + col;
-        const count = gridCount[cellIdx];
-        if (count < 20) {
-          grid[cellIdx][count] = i;
-          gridCount[cellIdx] = count + 1;
-        }
-
-        // Draw particle (batch by color to reduce state changes)
-        ctx.beginPath();
-        ctx.arc(px[i], py[i], psize[i], 0, Math.PI * 2);
-        ctx.fillStyle = pcolor[i];
-        ctx.globalAlpha = palpha[i] * opacityMultiplier;
-        ctx.fill();
-      }
-
-      // Draw cursor glow
-      if (mouse.active) {
-        const time = timestamp * 0.003;
-        const pulse = 0.5 + Math.sin(time) * 0.3;
-        const glowRadius = MOUSE_RADIUS * (0.6 + Math.sin(time * 0.7) * 0.15);
-
-        const gradient = ctx.createRadialGradient(
-          mouse.x, mouse.y, 0, mouse.x, mouse.y, glowRadius
-        );
-        gradient.addColorStop(0, `rgba(77, 159, 255, ${0.12 * pulse})`);
-        gradient.addColorStop(0.4, `rgba(0, 232, 143, ${0.06 * pulse})`);
-        gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, glowRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Core
-        const coreGrad = ctx.createRadialGradient(
-          mouse.x, mouse.y, 0, mouse.x, mouse.y, 8
-        );
-        coreGrad.addColorStop(0, `rgba(255, 255, 255, ${0.4 * pulse})`);
-        coreGrad.addColorStop(0.5, `rgba(77, 159, 255, ${0.2 * pulse})`);
-        coreGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.fillStyle = coreGrad;
-        ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 8, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Lines from cursor to nearby particles
-        ctx.lineWidth = 0.6;
-        for (let i = 0; i < PARTICLE_COUNT; i++) {
-          const dx = px[i] - mouse.x;
-          const dy = py[i] - mouse.y;
-          const distSq = dx * dx + dy * dy;
-          if (distSq < MOUSE_LINE_RADIUS_SQ) {
-            const dist = Math.sqrt(distSq);
-            ctx.beginPath();
-            ctx.moveTo(mouse.x, mouse.y);
-            ctx.lineTo(px[i], py[i]);
-            ctx.strokeStyle = pcolor[i];
-            ctx.globalAlpha = ((MOUSE_LINE_RADIUS - dist) / MOUSE_LINE_RADIUS) * 0.25;
-            ctx.stroke();
-          }
-        }
-      }
-
-      // Connect nearby particles using spatial grid (O(n) instead of O(n²))
-      ctx.lineWidth = 0.8;
-      for (let row = 0; row < gridRows; row++) {
-        for (let col = 0; col < gridCols; col++) {
-          const cellIdx = row * gridCols + col;
-          const count = gridCount[cellIdx];
-          if (count === 0) continue;
-
-          // Check current cell + right + bottom + bottom-right neighbors
-          for (let nc = 0; nc < 4; nc++) {
-            let nRow = row, nCol = col;
-            if (nc === 1) nCol++;
-            else if (nc === 2) nRow++;
-            else if (nc === 3) { nRow++; nCol++; }
-            if (nRow >= gridRows || nCol >= gridCols) continue;
-
-            const nCellIdx = nRow * gridCols + nCol;
-            const nCount = gridCount[nCellIdx];
-            if (nCount === 0) continue;
-
-            const startJ = (nc === 0) ? 0 : 0; // For same cell, avoid duplicates below
-            for (let a = 0; a < count; a++) {
-              const i = grid[cellIdx][a];
-              const jStart = (nc === 0) ? a + 1 : 0;
-              for (let b = jStart; b < nCount; b++) {
-                const j = grid[nCellIdx][b];
-                const dx = px[i] - px[j];
-                const dy = py[i] - py[j];
-                const distSq = dx * dx + dy * dy;
-                if (distSq < CONNECTION_DISTANCE_SQ) {
-                  const dist = Math.sqrt(distSq);
-                  ctx.beginPath();
-                  ctx.moveTo(px[i], py[i]);
-                  ctx.lineTo(px[j], py[j]);
-                  ctx.strokeStyle = pcolor[i];
-                  ctx.globalAlpha = ((CONNECTION_DISTANCE - dist) / CONNECTION_DISTANCE) * 0.15 * opacityMultiplier;
-                  ctx.stroke();
-                }
-              }
-            }
-          }
-        }
-      }
-      ctx.globalAlpha = 1;
-
-      animFrameRef.current = requestAnimationFrame(animate);
-    };
-    animFrameRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      window.removeEventListener("resize", debouncedResize);
-      window.removeEventListener("scroll", handleScroll);
-      document.removeEventListener("visibilitychange", handleVisibility);
-      darkModeQuery.removeEventListener("change", handleThemeChange);
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseleave", handleMouseLeave);
-      cancelAnimationFrame(animFrameRef.current);
-      clearTimeout(resizeTimer);
-      clearTimeout(scrollTimer);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="fixed inset-0 z-[1] pointer-events-none" style={{ willChange: "transform" }} />;
-}
 
 // ─── TYPEWRITER COMPONENT ──────────────────────
 function TypewriterText({
@@ -658,38 +310,44 @@ function TypewriterText({
 }
 
 // CDN URLs
-const LOGO_WHITE = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/gvCTmeZaVyxKdIeO.png";
-const HERO_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/1TrO5oX90s8Qy1dr4Oqoy5-img-1_1772151147000_na1fn_aGVyby1jb3Zlcg.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94LzFUck81b1g5MHM4UXkxZHI0T3FveTUtaW1nLTFfMTc3MjE1MTE0NzAwMF9uYTFmbl9hR1Z5YnkxamIzWmxjZy5qcGc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=nB-0WTFlA1pfxWkXetc~YxW4cfaXwWCZDuchJvLCLsHq1zlPw-HEoUxCp9Imt1~Xg1S~hslfjw5OgqjJD02u55bHSHOfJC5kVrE5BN6KZ2n4Tiexlyka8sdMVC-ZlY0WnudnB~dt9NZ~8MvkBcsNYoZnVEFIV7g~PaCqprv-AbIxnWZQ8bp7td5r6py~vsZlSeE9I3xBnAuQWeslxidNoHYIA-AWLCVhekI-veYlSUDtSeTS1o8mcj6RcWfCBQnf9UecTVfgQwcHXO5s7ycboy9~Dakmy0g9h~6fvgYO4E0QY6QvwSYFb3MTXZs4S7XClcYbEb2iTubBNwUx~SRntQ__";
-const DRONE_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/1TrO5oX90s8Qy1dr4Oqoy5-img-2_1772151154000_na1fn_ZHJvbmUtc3VydmV5.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94LzFUck81b1g5MHM4UXkxZHI0T3FveTUtaW1nLTJfMTc3MjE1MTE1NDAwMF9uYTFmbl9aSEp2Ym1VdGMzVnlkbVY1LmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=X~Y1ltGRPTGMecfHiABxo6PTriOBxBMYCLgpl1gc2YmiilB13hFXpxh0bdx7aon2HqMHjexyItaDdTvEAYG7dxK681x8wLFesMVcwUR8SFzLHpnW9VyODj74rHF4C-8wQOjp282DEhXa~14E0IqshQcz4fNYtXi8-qrERx19y8-977ScVDqQmM98Wx0m5R1FE-tfQR5vbTH7~Fq6AZ1ijoo4P66ckzMVOj1ry0ik7Nh995qkJrIeu078U50A1~bDAF1kRqsVGJ8yfkeMmT06bkaOQVGYECBOcxl~uTleIoAkcW-UiP~IhZ1Tr3mJywx5bn-t3yxxR3pMGznQhNEIdQ__";
-const OFFICE_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/1TrO5oX90s8Qy1dr4Oqoy5-img-3_1772151169000_na1fn_dXJiYW5pc3Qtd29yaw.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94LzFUck81b1g5MHM4UXkxZHI0T3FveTUtaW1nLTNfMTc3MjE1MTE2OTAwMF9uYTFmbl9kWEppWVc1cGMzUXRkMjl5YXcuanBnP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=v5CNvW6mplnS~2gM-~h5UnCNzJbQ~S~sMV0pHw8vQ7plgQ2pw6uDzvazPJTXbd03Qpzi2TFcE9rZvfyux1ZOOLEnW-VXfmcSSCZY-IlHuNsVlExlWGais7ZC7UA04w9fLfDeflx3t5LPt1Arqqb4SSDrgewreygT2xEX4b0CYP1yZpq~sMjkdDYy9wWYRmFvVH7IRsxnkL3O5SdAqomL2NtjuuRrqYvGYlWsGRW17i-4dxZYLvoqdtVKOpECESCJ~TEnQGMWv5N76o3lccICyCJmE600v6OpouQTn-tXI1yTyqleKJqVLqHb8cgnfH5AhGuWkirgW7a8L7SepG0MZA__";
-const LEGAL_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/1TrO5oX90s8Qy1dr4Oqoy5-img-4_1772151146000_na1fn_bGVnYWwtY29tcGxpYW5jZQ.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94LzFUck81b1g5MHM4UXkxZHI0T3FveTUtaW1nLTRfMTc3MjE1MTE0NjAwMF9uYTFmbl9iR1ZuWVd3dFkyOXRjR3hwWVc1alpRLmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=LcxV98B9g1ksDwQCJGC2hI4YTcTXEZL4sU50AdzJJZEgwMJ~p7MBKxqTBIT2AFCKpms4bsXOaPVfISu7xH5n8QL6N7KqZhMm0kFgHcc3Ha9QO0EGfVRrOkJOCkfJ5VUxNMYH1kf7B7rH7F4oG8pM9idKt7mU9-4xPzgsKudp~du3I1VulDezAUz07scI3JNjsoSnQgQFg5uVmJCrlHx7bSjHX2cPX58ZymNmOcBPjRvkuqk4GIBCA-vCq0kSv95Vupj1sNCN84UHW0u6mi6S5F-rM2AxaBEBpjzRCRiSJHuBLbT~w-9xMYInOPhNlcOyB7rfd5y5DQCWwdDrfOqkpg__";
-const TOPO_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/1TrO5oX90s8Qy1dr4Oqoy5-img-5_1772151172000_na1fn_dG9wby1wYXR0ZXJu.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94LzFUck81b1g5MHM4UXkxZHI0T3FveTUtaW1nLTVfMTc3MjE1MTE3MjAwMF9uYTFmbl9kRzl3Ynkxd1lYUjBaWEp1LnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=gKwZ1k6Nc2~9wd663cVE51kJSwGyU50QQoDOho9psivHmrU9TCYLLFGJxyVWYSnOk7bZ3hlTI3iVfIPP4fa98FOWPRAx8a1swapmHB59NECN~fzl2oDYqlUAuobu719dB4CIv3tbKhuKcRwDNqp6c~5PaFN35~pus3b7CAIFFYOhClpFpCl~SDqj1KXUsYaA1Wujj7dSdo2tKkjsUSqkjC9rlMZAJ2XRJxzx5rTUPvkjYVNrowEVzuhq2tLKNxIdQ7IzUVcDAfWXCYDEBCW0CTcPVQDs22nmRK9-0fSg14E19UG7rOhQk7RUNgjJ2IAGjzhlb4i01m5Zj~rQ7FJTRw__";
-const PLAN_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/yIyJWJSLuFtsFAez.png";
-const LAVOISIER_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/wTZkjIfvofzfEdGe.png";
-const LAVOISIER_ONUCI_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/txpCQkaXHRfFEpEb.jpg";
-const LOGO_COLOR = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/iMiXhhfBFkffYFqG.png";
-const WHATSAPP_NUMBER = "2250143430505";
-const LINKEDIN_URL = "https://www.linkedin.com/company/horizon-spatial/?viewAsMember=true";
-const FACEBOOK_URL = "https://www.facebook.com/profile.php?id=100091959134098&sk=about";
+// Logos & portraits — alimentés par client/src/data/company.ts (source unique).
+const LOGO_WHITE = assets.logoWhite;
+// Images locales (rapatriement issue #14 — finies les URLs Manus CDN signées
+// qui expiraient le 31 décembre 2026). Sources : client/public/assets/images/
+const HERO_IMG = "/assets/images/hero-cover.jpg";
+const DRONE_IMG = "/assets/images/drone-survey.jpg";
+const OFFICE_IMG = "/assets/images/urbanist-work.jpg";
+const LEGAL_IMG = "/assets/images/legal-compliance.jpg";
+const TOPO_IMG = "/assets/images/topo-pattern.png";
+const PLAN_IMG = "/assets/images/plan-img.png";
+const LAVOISIER_IMG = assets.founderPortrait;
+const LAVOISIER_ONUCI_IMG = assets.onuciCeremony;
+const LOGO_COLOR = assets.logoColor;
+const WHATSAPP_NUMBER = contact.whatsappE164;
+const LINKEDIN_URL = social.linkedin;
+const FACEBOOK_URL = social.facebook;
 
 // Logos partenaires institutionnels
-const LOGO_MCLU = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/rtgqWktgGTrElydU.png";
-const LOGO_GEOMETRES = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/kTHTCWAldhRQrGUs.png";
-const LOGO_BNETD = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/xbLNosfwBJlegNVB.jpg";
-const LOGO_OACI = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/MfzGwWlTIFyWqLjI.jpg";
-const LOGO_IGNFI = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/CfXlumoRUdVoCOaG.jpg";
-const LOGO_AFOR = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/zSphuRsFWmQkEIeY.png";
-const LOGO_GEOFIT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/MISETdlKHwxopnBt.png";
-const LOGO_DISTRICT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663216073427/eCjjxsKqeNdNcKhJ.jpg";
-const GALLERY_DRONE = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/ObYE2HNxqV6UNOr9igklvu-img-1_1772154316000_na1fn_Z2FsbGVyeS1kcm9uZS1sb3Rpc3NlbWVudA.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94L09iWUUySE54cVY2VU5PcjlpZ2tsdnUtaW1nLTFfMTc3MjE1NDMxNjAwMF9uYTFmbl9aMkZzYkdWeWVTMWtjbTl1WlMxc2IzUnBjM05sYldWdWRBLmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=K08ALPhID2S2hE2uVAcx5zrRCLmcFoGCtHLcZu24PQCRSSbar9ikNs5E0Y~g0hyxuho~PukDBI~yD5OecG1Xmxksv8kBnrdj-T1phWmJRJ7anmFttyAk7txAWXiatPsRzWutyG962nTzpiv78O5-b-ONClB-RT3r3zyQYTag8KYEu-fiC5SWSK3A0AQyPWUNi151Y3lFYhUOp4-xpQouVFql8fy2aB45B04Z4fGRzI8x0Mslh-Rnhry-lahtUsl-EqSkyVlZGH4RoU2iwUzjloaKYOyDDrvuv9PGORF9nSz0952qlBraRptYkkVKnHdjDA0x8hMh5~fv37Ow1I0FcA__";
-const GALLERY_PLAN = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/ObYE2HNxqV6UNOr9igklvu-img-2_1772154312000_na1fn_Z2FsbGVyeS1wbGFuLWFwcHJvdXZl.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94L09iWUUySE54cVY2VU5PcjlpZ2tsdnUtaW1nLTJfMTc3MjE1NDMxMjAwMF9uYTFmbl9aMkZzYkdWeWVTMXdiR0Z1TFdGd2NISnZkWFpsLmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=PabrNXNEe90ud2lnzoW-RvDcgmDxns3gfXhytPh6Slf9J~mU4JLg-bgsF6ZrlJar-xp2wMVB0vQgaiQqBs31FPZQpIaQAJa1wxG2MFq9Dh7RT3uL355rL1riMBEzswXYOUpvMCkFhHxFrP-OyW1ZDMuRldMQ8XVAO1aewjAzlkpiYP0UdZfnr~arDhgAzKfl6L03bhZGO1guTAYk3yWxoHDbSi601eZoTOcmxmK8GE~OhXaEyMCCDCjnOq9w42wy~lvrcQKZp4EyibjFWODKS8E7sEg32SaTcgVz42fqsRFLSBuoDbNnABje1VGwcMFiQDWFpSbAXVNFaGGw-UZ2QA__";
-const GALLERY_MAQUETTE = "https://private-us-east-1.manuscdn.com/sessionFile/4rsTkDsQIii0DgENQepfSU/sandbox/ObYE2HNxqV6UNOr9igklvu-img-3_1772154313000_na1fn_Z2FsbGVyeS1tYXF1ZXR0ZS0zZA.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvNHJzVGtEc1FJaWkwRGdFTlFlcGZTVS9zYW5kYm94L09iWUUySE54cVY2VU5PcjlpZ2tsdnUtaW1nLTNfMTc3MjE1NDMxMzAwMF9uYTFmbl9aMkZzYkdWeWVTMXRZWEYxWlhSMFpTMHpaQS5qcGc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=A1v2b51etsVUcAVv1w1mojRiSO3mDSU9dU9F05wNY6jpmghZrke~MryI4lKjT3n9bcC2kW4~O8eTGmunGD5RJjJ7ZcDbJX-6WGB2rgUACiJN0o4XuWYvvVndhx2~A5yFHLDj2O2Si8trWe75oQ7xl9h6rkGRN33CwqlvWKeEd5XuwATyBxh~JVOkVJikVWdG9QeM5MZoFS04PQJtwqFSpwvNpag1VjU-e2ohvKX33SSTI8kImG3AuZdFV2xmJjJ1PTAEXDHCKEbJ0Py~1qXgK7Zlc8KYqzH8aF5Pcp~lxk3QNQPfeUzVAITj2Ejp7KNUdW3mGBDAhOIwokielcvdQg__";
+const LOGO_MCLU = "/assets/images/logo-mclu.png";
+const LOGO_GEOMETRES = "/assets/images/logo-geometres.png";
+const LOGO_BNETD = "/assets/images/logo-bnetd.jpg";
+const LOGO_OACI = "/assets/images/logo-oaci.jpg"
+const LOGO_IGNFI = "/assets/images/logo-ignfi.jpg";
+const LOGO_AFOR = "/assets/images/logo-afor.png";
+const LOGO_GEOFIT = "/assets/images/logo-geofit.png";
+const LOGO_DISTRICT = "/assets/images/logo-district.jpg";
+const LOGO_CNOUCI = "/assets/images/logo-cnouci.png";
+const LOGO_CETIF = "/assets/images/logo-cetif.jpg";
+// Galerie réalisations — rapatriement local (issue #14)
+const GALLERY_DRONE = "/assets/images/gallery-drone-lotissement.jpg";
+const GALLERY_PLAN = "/assets/images/gallery-plan-approuve.jpg";
+const GALLERY_MAQUETTE = "/assets/images/gallery-maquette-3d.jpg";
 
 const poppins = { fontFamily: "'Poppins', sans-serif" };
 
-// GeoJSON data URLs (via storage proxy)
-const CIV_OUTLINE_URL = "/manus-storage/civ_outline_d27819b9.geojson";
-const CIV_REGIONS_URL = "/manus-storage/civ_regions_555b60a5.geojson";
+// GeoJSON data URLs — fichiers locaux (source : geoBoundaries.org, CIV ADM0/ADM1)
+const CIV_OUTLINE_URL = "/geo/civ-outline.geojson";
+const CIV_REGIONS_URL = "/geo/civ-regions.geojson";
 
 // Intersection Observer hook for fade-in animations
 function useReveal() {
@@ -1118,57 +776,35 @@ const testimonials = [
   },
 ];
 
-//// ─── PDF DOWNLOAD HANDLER ─────────────────────────
-function handleDownloadPDF() {
-  window.print();
-}
-
-// ─── ANIMATED COUNTER HOOK ──────────────────────
-function useCountUp(target: number, duration: number = 2000, suffix: string = "") {
-  const [count, setCount] = useState(0);
-  const [hasStarted, setHasStarted] = useState(false);
+// ─── ANIMATED STAT (compteur visible-au-scroll) ─────────────────
+// Utilise le hook partagé hooks/useCountUp.ts (prefers-reduced-motion respecté).
+function AnimatedStat({ value, label, suffix = "" }: { value: number; label: string; suffix?: string }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasStarted) {
-          setHasStarted(true);
+        if (entry.isIntersecting) {
+          setVisible(true);
           observer.unobserve(el);
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.3 },
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [hasStarted]);
+  }, []);
 
-  useEffect(() => {
-    if (!hasStarted) return;
-    let startTime: number | null = null;
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      // Ease out cubic
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(eased * target));
-      if (progress < 1) requestAnimationFrame(step);
-      else setCount(target);
-    };
-    requestAnimationFrame(step);
-  }, [hasStarted, target, duration]);
+  const count = useCountUp(value, visible, 2000);
 
-  return { ref, count, suffix };
-}
-
-function AnimatedStat({ value, label, suffix = "" }: { value: number; label: string; suffix?: string }) {
-  const { ref, count } = useCountUp(value, 2000);
   return (
     <div ref={ref}>
       <div className="text-3xl lg:text-4xl font-bold text-white" style={poppins}>
-        {count}{suffix}
+        <span aria-hidden>{count}{suffix}</span>
+        <span className="sr-only">{value}{suffix}</span>
       </div>
       <div className="text-sm text-white/60 mt-1">{label}</div>
     </div>
@@ -1176,20 +812,25 @@ function AnimatedStat({ value, label, suffix = "" }: { value: number; label: str
 }
 
 // ─── NAVBAR COMPONENT ──────────────────────────
-const navLinks = [
-  { label: "Réglementation", href: "#reglementation" },
+type NavLink = { label: string; href: string; route?: boolean };
+
+const navLinks: NavLink[] = [
+  { label: "Accueil", href: "/", route: true },
   { label: "Services", href: "#services" },
   { label: "Méthodologie", href: "#methodologie" },
   { label: "Références", href: "#references" },
-  { label: "FAQ", href: "#faq" },
-  { label: "Partenaires", href: "#partenaires" },
-  { label: "Zones", href: "#zones" },
+  { label: "Le fondateur", href: "/a-propos", route: true },
   { label: "Contact", href: "#contact" },
 ];
 
-function Navbar({ isDark, onToggleDark }: { isDark: boolean; onToggleDark: () => void }) {
+export function Navbar() {
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
+  const onToggleDark = toggleTheme ?? (() => {});
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("");
+  const [pathname] = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -1197,43 +838,135 @@ function Navbar({ isDark, onToggleDark }: { isDark: boolean; onToggleDark: () =>
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Scroll spy: highlight the link of the section currently in viewport.
+  // IMPORTANT: les liens de route (`route: true` ou href ne commençant pas par `#`)
+  // ne sont JAMAIS passés à querySelector — un sélecteur CSS comme "/a-propos"
+  // déclencherait une SyntaxError.
+  useEffect(() => {
+    // Le scroll spy n'a de sens que sur la page d'accueil (sections ancres).
+    if (pathname !== "/") return;
+    const sections = navLinks
+      .filter((l) => !l.route && l.href.startsWith("#"))
+      .map((l) => {
+        try {
+          return document.querySelector(l.href);
+        } catch {
+          // Garde-fou : un href malformé ne doit jamais casser l'observer.
+          return null;
+        }
+      })
+      .filter((el): el is Element => el !== null);
+    if (sections.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActiveSection(`#${e.target.id}`);
+        });
+      },
+      { rootMargin: "-40% 0px -55% 0px", threshold: 0 }
+    );
+    sections.forEach((s) => observer.observe(s));
+    return () => observer.disconnect();
+  }, [pathname]);
+
+  /**
+   * Renvoie l'état actif d'un lien.
+   * - "Accueil" (`/`) : actif uniquement sur la home **et** quand aucune
+   *   section ancrée n'est dans le viewport (sinon « Services », « Contact »
+   *   etc. prennent le relais grâce au scroll spy).
+   * - Autre lien de route : actif si le pathname courant correspond.
+   * - Lien d'ancre : actif si la section courante (scroll spy) correspond,
+   *   uniquement quand on est sur la page d'accueil.
+   */
+  const isActive = (link: NavLink): boolean => {
+    if (link.route) {
+      if (link.href === "/") return pathname === "/" && activeSection === "";
+      return pathname === link.href;
+    }
+    return pathname === "/" && activeSection === link.href;
+  };
+
+  /**
+   * Résout le href affiché pour un lien d'ancre.
+   * - Sur la page d'accueil : `#services` → scroll natif intra-page.
+   * - Hors d'accueil (ex. /a-propos) : `/#services` → navigation vers
+   *   l'accueil + ancre traitée nativement par le navigateur.
+   * Les liens de route (`route: true`) sont retournés tels quels.
+   */
+  const resolveHref = (href: string): string => {
+    if (!href.startsWith("#")) return href;
+    return pathname === "/" ? href : `/${href}`;
+  };
+
+  /**
+   * Sur la home, cliquer « Accueil » re-pointe vers `/` (même URL) — wouter ne
+   * re-render rien. On intercepte pour scroller au top, comportement attendu.
+   */
+  const handleHomeClick = (e: React.MouseEvent) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <nav
-      className={`fixed left-0 right-0 z-50 transition-all duration-500 print:hidden ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 print:hidden ${
         scrolled
-          ? `top-0 ${isDark ? "bg-[#0A1628]/95" : "bg-white/95"} backdrop-blur-lg shadow-lg ${isDark ? "shadow-black/20" : "shadow-black/5"} py-3`
-          : "top-[40px] bg-transparent py-5"
+          ? `${isDark ? "bg-[#0A1628]/95" : "bg-white/95"} backdrop-blur-lg shadow-lg ${isDark ? "shadow-black/20" : "shadow-black/5"} py-3`
+          : "bg-transparent py-5"
       }`}
     >
       <div className="container mx-auto px-6 lg:px-12 flex items-center justify-between">
-        {/* Logo */}
-        <a href="#" className="flex items-center gap-2">
+        {/* Logo — vraie navigation route (depuis /a-propos, ramène à /) */}
+        <Link href="/" className="flex items-center gap-2" aria-label={`${company.shortName} — retour à l'accueil`}>
           <img
             src={scrolled ? (isDark ? LOGO_WHITE : LOGO_COLOR) : LOGO_WHITE}
-            alt="H-Spatial"
+            alt={company.shortName}
             className="h-10 transition-all duration-300"
           />
-        </a>
+        </Link>
 
         {/* Desktop links */}
         <div className="hidden lg:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                scrolled
-                  ? isDark ? "text-white/70 hover:text-white hover:bg-white/10" : "text-[#4A5568] hover:text-[#0047AB] hover:bg-[#0047AB]/5"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              }`}
-              style={poppins}
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) => {
+            const active = isActive(link);
+            const className = `relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+              scrolled
+                ? active
+                  ? isDark ? "text-white bg-white/10" : "text-[#0047AB] bg-[#0047AB]/10"
+                  : isDark ? "text-white/70 hover:text-white hover:bg-white/10" : "text-[#4A5568] hover:text-[#0047AB] hover:bg-[#0047AB]/5"
+                : active ? "text-white bg-white/15" : "text-white/80 hover:text-white hover:bg-white/10"
+            }`;
+            if (link.route) {
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={link.href === "/" ? handleHomeClick : undefined}
+                  aria-current={active ? "page" : undefined}
+                  className={className}
+                  style={poppins}
+                >
+                  {link.label}
+                </Link>
+              );
+            }
+            return (
+              <a
+                key={link.href}
+                href={resolveHref(link.href)}
+                aria-current={active ? "true" : undefined}
+                className={className}
+                style={poppins}
+              >
+                {link.label}
+              </a>
+            );
+          })}
           <DarkModeToggle isDark={isDark} onToggle={onToggleDark} scrolled={scrolled} />
           <a
-            href="#contact"
+            href={resolveHref("#contact")}
             className="ml-2 px-5 py-2.5 bg-[#00A86B] hover:bg-[#009960] text-white text-sm font-semibold rounded-lg transition-all duration-300 shadow-md shadow-[#00A86B]/20"
             style={poppins}
           >
@@ -1264,23 +997,47 @@ function Navbar({ isDark, onToggleDark }: { isDark: boolean; onToggleDark: () =>
         }}
       >
         <div className="container mx-auto px-6 py-4 space-y-1">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  scrolled
-                    ? isDark ? "text-white/70 hover:text-white hover:bg-white/10" : "text-[#4A5568] hover:text-[#0047AB] hover:bg-[#0047AB]/5"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
-                }`}
-                style={poppins}
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const active = isActive(link);
+              const className = `block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                scrolled
+                  ? active
+                    ? isDark ? "text-white bg-white/10" : "text-[#0047AB] bg-[#0047AB]/10"
+                    : isDark ? "text-white/70 hover:text-white hover:bg-white/10" : "text-[#4A5568] hover:text-[#0047AB] hover:bg-[#0047AB]/5"
+                  : active ? "text-white bg-white/15" : "text-white/80 hover:text-white hover:bg-white/10"
+              }`;
+              if (link.route) {
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={(e) => {
+                      if (link.href === "/") handleHomeClick(e);
+                      setMobileOpen(false);
+                    }}
+                    aria-current={active ? "page" : undefined}
+                    className={className}
+                    style={poppins}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              }
+              return (
+                <a
+                  key={link.href}
+                  href={resolveHref(link.href)}
+                  onClick={() => setMobileOpen(false)}
+                  aria-current={active ? "true" : undefined}
+                  className={className}
+                  style={poppins}
+                >
+                  {link.label}
+                </a>
+              );
+            })}
             <a
-              href="#contact"
+              href={resolveHref("#contact")}
               onClick={() => setMobileOpen(false)}
               className="block px-4 py-3 bg-[#00A86B] hover:bg-[#009960] text-white text-sm font-semibold rounded-lg text-center mt-2"
               style={poppins}
@@ -1570,7 +1327,7 @@ function LeafletMap({ isDark }: { isDark: boolean }) {
   );
 }
 
-function ScrollToTopButton() {
+export function ScrollToTopButton() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -1604,7 +1361,7 @@ function addUtm(url: string, source: string, medium: string, campaign: string = 
   return `${url}${separator}utm_source=${encodeURIComponent(source)}&utm_medium=${encodeURIComponent(medium)}&utm_campaign=${encodeURIComponent(campaign)}`;
 }
 
-function WhatsAppButton() {
+export function WhatsAppButton() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -1648,25 +1405,86 @@ function WhatsAppButton() {
 }
 
 // ─── COOKIE CONSENT BANNER ───────────────────
-function CookieBanner() {
+// RGPD : conservation max 1 an (CNIL recommande 6-13 mois). Ce composant
+// stocke un objet versionné, vérifie l'expiration à chaque visite, et
+// re-déclenche les side-effects (Umami) si le consentement est encore valide.
+const CONSENT_STORAGE_KEY = "hspatial_cookie_consent";
+const CONSENT_VERSION = 1;
+const CONSENT_TTL_MS = 365 * 24 * 60 * 60 * 1000;
+
+type ConsentStatus = "accepted" | "declined";
+type ConsentRecord = {
+  status: ConsentStatus;
+  timestamp: number;
+  version: number;
+};
+
+function readConsent(): ConsentRecord | null {
+  try {
+    const raw = localStorage.getItem(CONSENT_STORAGE_KEY);
+    if (!raw) return null;
+    // Rétro-compat : ancienne version stockait juste une chaîne.
+    if (raw === "accepted" || raw === "declined") {
+      return { status: raw, timestamp: 0, version: 0 };
+    }
+    const parsed = JSON.parse(raw) as Partial<ConsentRecord>;
+    if (
+      parsed &&
+      (parsed.status === "accepted" || parsed.status === "declined") &&
+      typeof parsed.timestamp === "number" &&
+      typeof parsed.version === "number"
+    ) {
+      return parsed as ConsentRecord;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function isConsentExpired(record: ConsentRecord): boolean {
+  if (record.version < CONSENT_VERSION) return true;
+  return Date.now() - record.timestamp > CONSENT_TTL_MS;
+}
+
+function writeConsent(status: ConsentStatus): void {
+  try {
+    const record: ConsentRecord = {
+      status,
+      timestamp: Date.now(),
+      version: CONSENT_VERSION,
+    };
+    localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(record));
+  } catch {
+    // localStorage indisponible (quota, mode privé Safari) — silencieux.
+  }
+}
+
+export function CookieBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const consent = localStorage.getItem("hspatial_cookie_consent");
-    if (!consent) {
-      // Show banner after 2s delay so it doesn't compete with loading screen
+    const record = readConsent();
+    if (!record || isConsentExpired(record)) {
+      // Pas de consentement valide → afficher après un délai pour ne pas
+      // entrer en conflit avec le loading screen.
       const timer = setTimeout(() => setVisible(true), 3500);
       return () => clearTimeout(timer);
+    }
+    // Consentement valide → re-déclencher Umami sur chaque visite si accepté.
+    if (record.status === "accepted") {
+      loadUmami();
     }
   }, []);
 
   const handleAccept = () => {
-    localStorage.setItem("hspatial_cookie_consent", "accepted");
+    writeConsent("accepted");
+    loadUmami();
     setVisible(false);
   };
 
   const handleDecline = () => {
-    localStorage.setItem("hspatial_cookie_consent", "declined");
+    writeConsent("declined");
     setVisible(false);
   };
 
@@ -1689,7 +1507,7 @@ function CookieBanner() {
                 <p className="text-white/90 text-sm font-medium leading-relaxed">
                   Ce site utilise des cookies pour améliorer votre expérience de navigation et analyser le trafic.
                 </p>
-                <p className="text-white/40 text-xs mt-1">
+                <p className="text-white/65 text-xs mt-1">
                   En poursuivant, vous acceptez notre{" "}
                   <a href="/politique-de-confidentialite" className="text-[#0047AB] hover:text-[#0055CC] underline transition-colors">
                     politique de confidentialité
@@ -1743,7 +1561,7 @@ const galleryItems = [
 ];
 
 // ─── READING PROGRESS BAR ───────────────────────
-function ReadingProgressBar() {
+export function ReadingProgressBar() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -1769,43 +1587,6 @@ function ReadingProgressBar() {
           boxShadow: progress > 0 ? "0 0 8px rgba(0, 168, 107, 0.4)" : "none",
         }}
       />
-    </div>
-  );
-}
-
-// ─── URGENCY BANNER COMPONENT ───────────────────
-function UrgencyBanner() {
-  const [visible, setVisible] = useState(true);
-  if (!visible) return null;
-  return (
-    <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-[#B91C1C] via-[#DC2626] to-[#B91C1C] text-white print:hidden">
-      <div className="container mx-auto px-6 lg:px-12 py-2.5 flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <AlertCircle className="w-4 h-4 shrink-0 animate-pulse" />
-          <p className="text-xs sm:text-sm font-medium truncate" style={poppins}>
-            <span className="font-bold">Code de l'Urbanisme 2020</span>
-            <span className="hidden sm:inline"> — Êtes-vous en conformité ? Tout lotissement sans urbaniste agréé est passible de sanctions pénales.</span>
-            <span className="sm:hidden"> — Conformité obligatoire !</span>
-          </p>
-        </div>
-        <div className="flex items-center gap-3 shrink-0 ml-4">
-          <a
-            href="#reglementation"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-md text-xs font-semibold transition-colors"
-            style={poppins}
-          >
-            En savoir plus
-            <ArrowRight className="w-3 h-3" />
-          </a>
-          <button
-            onClick={() => setVisible(false)}
-            className="p-1 hover:bg-white/20 rounded transition-colors"
-            aria-label="Fermer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
@@ -1993,44 +1774,148 @@ function DarkModeToggle({ isDark, onToggle, scrolled }: { isDark: boolean; onTog
 }
 
 // ─── CONTACT FORM COMPONENT ──────────────────────────
+// Schéma de validation : un seul schéma utilisé côté client (et plus tard côté
+// serveur si on bascule de Formspree à Express+Resend).
+const contactSchema = z.object({
+  nom: z.string().min(2, "Veuillez indiquer votre nom complet."),
+  email: z.string().email("Email invalide."),
+  telephone: z
+    .string()
+    .min(8, "Numéro de téléphone trop court.")
+    .max(30, "Numéro de téléphone trop long."),
+  typeProjet: z.string().optional().default(""),
+  superficie: z.string().optional().default(""),
+  message: z.string().optional().default(""),
+});
+
+type ContactFormData = z.infer<typeof contactSchema>;
+
+const INITIAL_CONTACT_FORM: ContactFormData = {
+  nom: "",
+  email: "",
+  telephone: "",
+  typeProjet: "",
+  superficie: "",
+  message: "",
+};
+
+/**
+ * Endpoint Formspree (issue #15).
+ * Définir VITE_FORMSPREE_ENDPOINT dans .env.local pour l'activer :
+ *   VITE_FORMSPREE_ENDPOINT=https://formspree.io/f/xxxxxxxx
+ * Si la variable n'est pas définie, le formulaire bascule sur un mailto:
+ * (rétro-compatibilité — pas de régression silencieuse).
+ */
+const FORMSPREE_ENDPOINT = import.meta.env.VITE_FORMSPREE_ENDPOINT as
+  | string
+  | undefined;
+
 function ContactForm() {
-  const [formData, setFormData] = useState({
-    nom: "",
-    email: "",
-    telephone: "",
-    typeProjet: "",
-    superficie: "",
-    message: "",
-  });
+  const [formData, setFormData] =
+    useState<ContactFormData>(INITIAL_CONTACT_FORM);
+  const [errors, setErrors] = useState<Partial<Record<keyof ContactFormData, string>>>(
+    {},
+  );
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
+    const name = e.target.name as keyof ContactFormData;
+    setFormData((prev) => ({ ...prev, [name]: e.target.value }));
+    // Effacer l'erreur du champ dès qu'il est modifié.
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const fallbackToMailto = (data: ContactFormData) => {
+    const subject = `Demande de devis - ${data.typeProjet || "Projet de lotissement"}`;
+    const body =
+      `Nom : ${data.nom}\n` +
+      `Email : ${data.email}\n` +
+      `Téléphone : ${data.telephone}\n` +
+      `Type de projet : ${data.typeProjet}\n` +
+      `Superficie estimée : ${data.superficie}\n\n` +
+      `Message :\n${data.message}\n\n` +
+      `---\nEnvoyé depuis la plaquette commerciale ${company.shortName}`;
+    window.location.href = buildMailtoUrl({ subject, body });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSending(true);
 
-    // Construct mailto link with form data
-    const subject = encodeURIComponent(`Demande de devis - ${formData.typeProjet || "Projet de lotissement"}`);
-    const body = encodeURIComponent(
-      `Nom : ${formData.nom}\n` +
-      `Email : ${formData.email}\n` +
-      `Téléphone : ${formData.telephone}\n` +
-      `Type de projet : ${formData.typeProjet}\n` +
-      `Superficie estimée : ${formData.superficie}\n\n` +
-      `Message :\n${formData.message}\n\n` +
-      `---\nEnvoyé depuis la plaquette commerciale H-Spatial`
-    );
-
-    window.location.href = `mailto:contact@horizonspatial.ci?subject=${subject}&body=${body}`;
-
-    setTimeout(() => {
-      setSending(false);
+    // Honeypot anti-spam : si rempli, on simule un succès silencieux.
+    const formEl = e.currentTarget;
+    const honeypot = (formEl.elements.namedItem("_gotcha") as HTMLInputElement | null)
+      ?.value;
+    if (honeypot) {
       setSubmitted(true);
-    }, 1000);
+      return;
+    }
+
+    // Validation côté client (Zod).
+    const parsed = contactSchema.safeParse(formData);
+    if (!parsed.success) {
+      const fieldErrors: Partial<Record<keyof ContactFormData, string>> = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0] as keyof ContactFormData;
+        if (key && !fieldErrors[key]) fieldErrors[key] = issue.message;
+      }
+      setErrors(fieldErrors);
+      toast.error("Vérifiez les champs en rouge avant d'envoyer.");
+      return;
+    }
+
+    setSending(true);
+    try {
+      if (!FORMSPREE_ENDPOINT) {
+        // Fallback : pas de backend configuré → ouvrir le client mail.
+        fallbackToMailto(parsed.data);
+        toast.info(
+          "Backend non configuré : votre client de messagerie va s'ouvrir.",
+        );
+        setSubmitted(true);
+        return;
+      }
+
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          ...parsed.data,
+          _subject: `Demande de devis - ${parsed.data.typeProjet || "Projet de lotissement"}`,
+          _origin: `${company.shortName} — formulaire site`,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur ${response.status}`);
+      }
+
+      toast.success(
+        `Demande envoyée ! Notre équipe vous répond sous 24h ouvrées.`,
+      );
+      setSubmitted(true);
+    } catch (err) {
+      console.error("[ContactForm] Échec d'envoi :", err);
+      toast.error(
+        "Impossible d'envoyer la demande. Réessayez ou écrivez-nous directement à " +
+          contact.emailPro,
+      );
+    } finally {
+      setSending(false);
+    }
   };
 
   if (submitted) {
@@ -2039,13 +1924,20 @@ function ContactForm() {
         <div className="w-20 h-20 rounded-full bg-[#00A86B]/20 flex items-center justify-center mx-auto mb-6">
           <CheckCircle2 className="w-10 h-10 text-[#00A86B]" />
         </div>
-        <h3 className="text-2xl font-bold text-white mb-3" style={poppins}>Demande envoyée !</h3>
+        <h3 className="text-2xl font-bold text-white mb-3" style={poppins}>
+          Demande envoyée !
+        </h3>
         <p className="text-white/60 leading-relaxed mb-6">
-          Votre client de messagerie s'est ouvert avec les informations pré-remplies.
-          Envoyez l'email pour finaliser votre demande. Notre équipe vous répondra sous 24h.
+          {FORMSPREE_ENDPOINT
+            ? "Votre demande nous est parvenue. Notre équipe vous répondra sous 24h ouvrées."
+            : "Votre client de messagerie s'est ouvert avec les informations pré-remplies. Envoyez l'email pour finaliser votre demande."}
         </p>
         <button
-          onClick={() => { setSubmitted(false); setFormData({ nom: "", email: "", telephone: "", typeProjet: "", superficie: "", message: "" }); }}
+          onClick={() => {
+            setSubmitted(false);
+            setFormData(INITIAL_CONTACT_FORM);
+            setErrors({});
+          }}
           className="text-[#00A86B] hover:text-white transition-colors text-sm font-medium"
         >
           Envoyer une autre demande
@@ -2054,66 +1946,123 @@ function ContactForm() {
     );
   }
 
+  // Helpers de styling : ajoute une bordure rouge quand un champ est en erreur.
+  const fieldClass = (fieldName: keyof ContactFormData) =>
+    `w-full bg-white/5 border rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/50 focus:ring-1 outline-none transition-all text-sm ${
+      errors[fieldName]
+        ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
+        : "border-white/10 focus:border-[#00A86B]/50 focus:ring-[#00A86B]/30"
+    }`;
+
   return (
-    <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 lg:p-10">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 lg:p-10"
+    >
+      {/* Honeypot anti-spam — caché aux humains, rempli par les bots. */}
+      <input
+        type="text"
+        name="_gotcha"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute left-[-9999px] w-px h-px opacity-0"
+      />
+
       <div className="flex items-center gap-3 mb-8">
         <div className="w-12 h-12 rounded-xl bg-[#00A86B]/20 flex items-center justify-center">
           <MessageSquare className="w-6 h-6 text-[#00A86B]" />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-white" style={poppins}>Demander un devis gratuit</h3>
-          <p className="text-white/40 text-sm">Réponse sous 24h ouvrées</p>
+          <h3 className="text-xl font-bold text-white" style={poppins}>
+            Demander un devis gratuit
+          </h3>
+          <p className="text-white/65 text-sm">Réponse sous 24h ouvrées</p>
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-5 mb-5">
         <div>
-          <label className="block text-white/60 text-sm mb-2 font-medium">Nom complet *</label>
+          <label htmlFor="contact-nom" className="block text-white/60 text-sm mb-2 font-medium">
+            Nom complet *
+          </label>
           <div className="relative">
-            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" aria-hidden />
             <input
+              id="contact-nom"
               type="text"
               name="nom"
               value={formData.nom}
               onChange={handleChange}
               required
               placeholder="Votre nom"
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/20 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm"
+              autoComplete="name"
+              aria-invalid={errors.nom ? "true" : undefined}
+              aria-describedby={errors.nom ? "contact-nom-error" : undefined}
+              className={fieldClass("nom")}
             />
           </div>
+          {errors.nom && (
+            <p id="contact-nom-error" className="mt-1.5 text-xs text-red-400">
+              {errors.nom}
+            </p>
+          )}
         </div>
         <div>
-          <label className="block text-white/60 text-sm mb-2 font-medium">Email *</label>
+          <label htmlFor="contact-email" className="block text-white/60 text-sm mb-2 font-medium">
+            Email *
+          </label>
           <div className="relative">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" aria-hidden />
             <input
+              id="contact-email"
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               required
               placeholder="votre@email.com"
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/20 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm"
+              autoComplete="email"
+              aria-invalid={errors.email ? "true" : undefined}
+              aria-describedby={errors.email ? "contact-email-error" : undefined}
+              className={fieldClass("email")}
             />
           </div>
+          {errors.email && (
+            <p id="contact-email-error" className="mt-1.5 text-xs text-red-400">
+              {errors.email}
+            </p>
+          )}
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-5 mb-5">
         <div>
-          <label className="block text-white/60 text-sm mb-2 font-medium">Téléphone *</label>
+          <label htmlFor="contact-tel" className="block text-white/60 text-sm mb-2 font-medium">
+            Téléphone *
+          </label>
           <div className="relative">
-            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" aria-hidden />
             <input
+              id="contact-tel"
               type="tel"
               name="telephone"
               value={formData.telephone}
               onChange={handleChange}
               required
               placeholder="+225 XX XX XX XX XX"
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/20 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm"
+              autoComplete="tel"
+              aria-invalid={errors.telephone ? "true" : undefined}
+              aria-describedby={errors.telephone ? "contact-tel-error" : undefined}
+              className={fieldClass("telephone")}
             />
           </div>
+          {errors.telephone && (
+            <p id="contact-tel-error" className="mt-1.5 text-xs text-red-400">
+              {errors.telephone}
+            </p>
+          )}
         </div>
         <div>
           <label className="block text-white/60 text-sm mb-2 font-medium">Type de projet</label>
@@ -2147,7 +2096,7 @@ function ContactForm() {
             value={formData.superficie}
             onChange={handleChange}
             placeholder="Ex : 5 hectares, 10 000 m²..."
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/20 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/50 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm"
           />
         </div>
       </div>
@@ -2160,7 +2109,7 @@ function ContactForm() {
           onChange={handleChange}
           rows={4}
           placeholder="Décrivez brièvement votre projet, sa localisation, vos attentes..."
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/20 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm resize-none"
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/50 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm resize-none"
         />
       </div>
 
@@ -2185,7 +2134,8 @@ function ContactForm() {
 
 // ─── COMPONENT ────────────────────────────────────────
 export default function Home() {
-  const [isDark, setIsDark] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
 
   // Parallax refs for dark sections background images
   const heroParallax = useParallax(0.15);
@@ -2193,36 +2143,30 @@ export default function Home() {
   const methodoParallax = useParallax(0.2);
   const contactParallax = useParallax(0.15);
 
+  // Lorsque l'utilisateur arrive depuis une autre page avec une ancre dans l'URL
+  // (ex. `/a-propos` → clic « Contact » → `/#contact`), le navigateur tente de
+  // scroller AVANT que React ait monté les sections — le scroll échoue.
+  // On re-traite l'ancre après le mount, en respectant le scroll-padding-top
+  // de la nav fixe.
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDark]);
+    const hash = window.location.hash;
+    if (!hash || hash.length < 2) return;
+    const timer = setTimeout(() => {
+      let target: Element | null = null;
+      try { target = document.querySelector(hash); } catch { /* hash malformé */ }
+      target?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 250);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className={`min-h-screen overflow-x-hidden transition-colors duration-500 ${isDark ? "bg-[#0A1628]" : "bg-white"}`}>
-      {/* Loading Screen */}
+      {/* Loading Screen — uniquement sur l'accueil (première impression) */}
       <LoadingScreen />
 
-      {/* Reading Progress Bar */}
-      <ReadingProgressBar />
-
-      {/* Urgency Banner */}
-      <UrgencyBanner />
-
-      {/* Fixed Navbar */}
-      <Navbar isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
-
-      {/* WhatsApp Floating Button */}
-      <WhatsAppButton />
-
-      {/* Particle System - fixed, covers entire page */}
-      <ParticleCanvas />
-
-      {/* Scroll to Top Button */}
-      <ScrollToTopButton />
+      {/* Note : Navbar, ReadingProgressBar, WhatsAppButton,
+         ScrollToTopButton et CookieBanner sont rendus au niveau App
+         (cf. App.tsx → SiteChrome) — partagés entre toutes les pages. */}
 
       {/* ===== SECTION 1: HERO / COVER ===== */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -2235,6 +2179,9 @@ export default function Home() {
 
         {/* Animated Perspective Grid */}
         <div className="hero-grid-bg" />
+
+        {/* Hero particles — uniquement dans la zone hero */}
+        <HeroParticles className="z-[2]" />
 
         {/* Floating Geometric Elements */}
         <div className="geo-element geo-diamond-1" />
@@ -2276,7 +2223,7 @@ export default function Home() {
                 pour vos projets de lotissement en Côte d'Ivoire.
               </p>
 
-              <div className="flex flex-wrap gap-4 hero-fade" style={{ animationDelay: "0.9s" }}>
+              <div className="flex flex-wrap items-center gap-6 hero-fade" style={{ animationDelay: "0.9s" }}>
                 <a
                   href="#contact"
                   className="inline-flex items-center gap-2 px-8 py-4 bg-[#00A86B] hover:bg-[#009960] text-white font-semibold rounded-lg transition-all duration-300 shadow-lg shadow-[#00A86B]/25 hover:shadow-xl hover:shadow-[#00A86B]/30"
@@ -2285,14 +2232,6 @@ export default function Home() {
                   Demander un devis gratuit
                   <ArrowRight className="w-5 h-5" />
                 </a>
-                <button
-                  onClick={handleDownloadPDF}
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-semibold rounded-lg border border-white/20 transition-all duration-300 print:hidden"
-                  style={poppins}
-                >
-                  <Download className="w-5 h-5" />
-                  Télécharger en PDF
-                </button>
               </div>
 
               <div className="mt-14 grid grid-cols-3 gap-8 max-w-lg hero-fade" style={{ animationDelay: "1.1s" }}>
@@ -2429,16 +2368,28 @@ export default function Home() {
                   <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-[#00A86B]/40 mb-5 shadow-xl shadow-black/30 ring-2 ring-white/10">
                     <LazyImage src={LAVOISIER_IMG} alt="Lavoisier Ousmane" className="w-full h-full object-cover" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-1" style={poppins}>Lavoisier Ousmane</h3>
-                  <p className="text-[#00A86B] text-sm font-medium mb-4">Urbaniste & Expert SIG</p>
+                  <h3 className="text-xl font-bold text-white mb-1" style={poppins}>{founder.fullName}</h3>
+                  <p className="text-[#00A86B] text-sm font-medium mb-4">{founder.shortRole}</p>
                   <p className="text-white/50 text-sm leading-relaxed mb-6">
-                    Fondateur d'Horizon Spatial, urbaniste inscrit à l'O.N.U.C.I.
-                    avec plus de 8 années d'expérience en aménagement du territoire et géomatique.
+                    {founder.bioShort}
                   </p>
-                  <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00A86B]/10 border border-[#00A86B]/20 text-[#00A86B] text-xs font-medium">
+                  <span
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00A86B]/10 border border-[#00A86B]/20 text-[#00A86B] text-xs font-medium"
+                    title={credentials.onuciFull}
+                  >
                     <BadgeCheck className="w-3.5 h-3.5" />
-                    Membre O.N.U.C.I.
+                    {credentials.onuciLabel}
                   </span>
+
+                  <Link
+                    href="/a-propos"
+                    aria-label="En savoir plus sur Lavoisier Ousmane, fondateur d'Horizon Spatial"
+                    className="mt-6 group inline-flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg bg-[#00A86B] hover:bg-[#009960] text-white text-sm font-semibold shadow-lg shadow-[#00A86B]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#00A86B]/30 hover:-translate-y-0.5"
+                    style={poppins}
+                  >
+                    Cliquer ICI pour en savoir Plus
+                    <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
                 </div>
               </div>
             </Reveal>
@@ -2508,58 +2459,33 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, i) => (
               <Reveal key={service.title} delay={i * 80}>
-                <div className="service-card-container h-full" style={{ minHeight: "320px" }}>
-                  <div className="service-card-inner">
-                    {/* FRONT FACE */}
-                    <div className={`service-card-face service-card-front rounded-2xl p-8 border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-[#E2E8F0]"}`}>
-                      <AnimatedServiceIcon icon={service.icon} color={service.color} index={i} />
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs font-bold text-[#0047AB]/30" style={poppins}>0{i + 1}</span>
-                        <div className="w-6 h-px bg-[#E2E8F0]" />
-                      </div>
-                      <h3 className={`text-lg font-bold mb-3 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{service.title}</h3>
-                      <p className={`text-sm leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>{service.desc}</p>
-                      <div className="mt-4 flex items-center gap-1.5 text-xs font-medium" style={{ color: service.color }}>
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Survoler pour les détails</span>
-                      </div>
-                    </div>
-                    {/* BACK FACE */}
-                    <div
-                      className="service-card-face service-card-back rounded-2xl p-8 border"
-                      style={{
-                        background: `linear-gradient(135deg, ${service.color}18, ${service.color}08)`,
-                        borderColor: `${service.color}40`,
-                      }}
-                    >
-                      <div className="flex items-center gap-3 mb-5">
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${service.color}20` }}>
-                          <service.icon className="w-5 h-5" style={{ color: service.color }} />
-                        </div>
-                        <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{service.title}</h3>
-                      </div>
+                <div className={`rounded-2xl p-8 border h-full flex flex-col transition-all duration-300 hover:-translate-y-1 ${isDark ? "bg-white/5 border-white/10 hover:bg-white/[0.07]" : "bg-white border-[#E2E8F0] hover:shadow-lg hover:border-[#0047AB]/20"}`}>
+                  <AnimatedServiceIcon icon={service.icon} color={service.color} index={i} />
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xs font-bold" style={{ ...poppins, color: `${service.color}80` }}>0{i + 1}</span>
+                    <div className={`w-6 h-px ${isDark ? "bg-white/15" : "bg-[#E2E8F0]"}`} />
+                  </div>
+                  <h3 className={`text-lg font-bold mb-3 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{service.title}</h3>
+                  <p className={`text-sm leading-relaxed mb-5 ${isDark ? "text-white/70" : "text-[#4A5568]"}`}>{service.desc}</p>
 
-                      <div className="mb-4">
-                        <div className={`text-xs font-semibold uppercase tracking-wider mb-2 ${isDark ? "text-white/50" : "text-[#4A5568]"}`} style={poppins}>Livrables</div>
-                        <div className="space-y-1.5">
-                          {service.deliverables.map((d) => (
-                            <div key={d} className="flex items-center gap-2">
-                              <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: service.color }} />
-                              <span className={`text-sm ${isDark ? "text-white/80" : "text-[#0A1628]"}`}>{d}</span>
-                            </div>
-                          ))}
-                        </div>
+                  <div className={`mt-auto pt-5 border-t ${isDark ? "border-white/10" : "border-[#E2E8F0]"}`}>
+                    <div className={`text-[10px] font-semibold uppercase tracking-wider mb-2 ${isDark ? "text-white/60" : "text-[#4A5568]"}`} style={poppins}>Livrables</div>
+                    <ul className="space-y-1.5 mb-4">
+                      {service.deliverables.map((d) => (
+                        <li key={d} className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: service.color }} />
+                          <span className={`text-sm ${isDark ? "text-white/80" : "text-[#0A1628]"}`}>{d}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <div className={`text-[10px] uppercase tracking-wider mb-0.5 ${isDark ? "text-white/50" : "text-[#4A5568]/80"}`} style={poppins}>Délai</div>
+                        <div className={`text-sm font-semibold ${isDark ? "text-white/90" : "text-[#0A1628]"}`} style={poppins}>{service.duration}</div>
                       </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className={`rounded-lg p-3 ${isDark ? "bg-white/5" : "bg-white/80"}`}>
-                          <div className={`text-[10px] uppercase tracking-wider mb-1 ${isDark ? "text-white/40" : "text-[#4A5568]"}`} style={poppins}>Délai</div>
-                          <div className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{service.duration}</div>
-                        </div>
-                        <div className={`rounded-lg p-3 ${isDark ? "bg-white/5" : "bg-white/80"}`}>
-                          <div className={`text-[10px] uppercase tracking-wider mb-1 ${isDark ? "text-white/40" : "text-[#4A5568]"}`} style={poppins}>Outils</div>
-                          <div className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{service.tools}</div>
-                        </div>
+                      <div>
+                        <div className={`text-[10px] uppercase tracking-wider mb-0.5 ${isDark ? "text-white/50" : "text-[#4A5568]/80"}`} style={poppins}>Outils</div>
+                        <div className={`text-sm font-semibold ${isDark ? "text-white/90" : "text-[#0A1628]"}`} style={poppins}>{service.tools}</div>
                       </div>
                     </div>
                   </div>
@@ -2756,7 +2682,7 @@ export default function Home() {
                   </p>
                   <div className={`border-t pt-4 ${isDark ? "border-white/10" : "border-[#E2E8F0]"}`}>
                     <div className={`font-bold text-sm ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>{t.name}</div>
-                    <div className={`text-xs ${isDark ? "text-white/40" : "text-[#4A5568]"}`}>{t.company}</div>
+                    <div className={`text-xs ${isDark ? "text-white/65" : "text-[#4A5568]"}`}>{t.company}</div>
                   </div>
                 </div>
               </Reveal>
@@ -2863,13 +2789,14 @@ export default function Home() {
           <Reveal delay={100}>
             <div className="mb-12">
               <h3 className={`text-center text-sm font-semibold uppercase tracking-widest mb-8 ${isDark ? "text-white/40" : "text-[#4A5568]/60"}`} style={poppins}>Institutions & Ordres Professionnels</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                 {[
                   { src: LOGO_MCLU, name: "MCLU", desc: "Ministère de la Construction", url: "https://construction.gouv.ci" },
                   { src: LOGO_GEOMETRES, name: "OGE-CI", desc: "Ordre des Géomètres-Experts", url: "https://www.geometres-experts.ci" },
                   { src: LOGO_OACI, name: "OACI", desc: "Ordre des Architectes", url: "https://www.oaci.ci" },
                   { src: LOGO_BNETD, name: "BNETD", desc: "Bureau National d'Études", url: "https://www.bnetd.ci" },
                   { src: LOGO_DISTRICT, name: "District d'Abidjan", desc: "District Autonome", url: "https://www.abidjan.district.ci" },
+                  { src: LOGO_CNOUCI, name: "O.N.U.C.I.", desc: "Ordre National des Urbanistes", url: "https://www.onuci.org" },
                 ].map((p, i) => (
                   <a
                     key={i}
@@ -2903,7 +2830,8 @@ export default function Home() {
                   { src: LOGO_IGNFI, name: "IGN FI", desc: "Ingénierie Géospatiale", url: "https://www.ignfi.fr" },
                   { src: LOGO_GEOFIT, name: "GeoFIT", desc: "Géomatique & Topographie", url: "https://www.geofit.fr" },
                   { src: LOGO_AFOR, name: "AFOR", desc: "Agence Foncière Rurale", url: "https://www.afor.ci" },
-                  { src: LAVOISIER_ONUCI_IMG, name: "O.N.U.C.I.", desc: "Ordre National des Urbanistes", url: "https://www.onuci.org" },
+                  // TODO(CETIF) : confirmer la description et l'URL officielle.
+                  { src: LOGO_CETIF, name: "CETIF", desc: "Partenaire technique", url: "#" },
                 ].map((p, i) => (
                   <a
                     key={i}
@@ -2969,26 +2897,28 @@ export default function Home() {
                 </p>
 
                 <div className="space-y-4 mb-10">
-                  <a href="tel:+2250143430505" className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                  <a href={`tel:${contact.phonePrimary.replace(/\s/g, "")}`} className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
                     <div className="w-12 h-12 rounded-xl bg-[#00A86B]/20 flex items-center justify-center">
                       <Phone className="w-5 h-5 text-[#00A86B]" />
                     </div>
                     <div>
-                      <div className="text-white font-semibold">+225 01 43 43 05 05</div>
-                      <div className="text-white/40 text-sm">+225 27 22 25 60 38</div>
+                      <div className="text-white font-semibold">{contact.phonePrimary}</div>
+                      {contact.phoneSecondary && (
+                        <div className="text-white/65 text-sm">{contact.phoneSecondary}</div>
+                      )}
                     </div>
                   </a>
-                  <a href={addUtm("mailto:contact@horizonspatial.ci", "plaquette", "email_button")} className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                  <a href={addUtm(buildMailtoUrl(), "plaquette", "email_button")} className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
                     <div className="w-12 h-12 rounded-xl bg-[#00A86B]/20 flex items-center justify-center">
                       <Mail className="w-5 h-5 text-[#00A86B]" />
                     </div>
-                    <div className="text-white font-semibold">contact@horizonspatial.ci</div>
+                    <div className="text-white font-semibold">{contact.emailPro}</div>
                   </a>
-                  <a href={addUtm("https://www.horizonspatial.ci", "plaquette", "website_button")} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                  <a href={addUtm(contact.websiteUrl, "plaquette", "website_button")} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
                     <div className="w-12 h-12 rounded-xl bg-[#00A86B]/20 flex items-center justify-center">
                       <Globe className="w-5 h-5 text-[#00A86B]" />
                     </div>
-                    <div className="text-white font-semibold">www.horizonspatial.ci</div>
+                    <div className="text-white font-semibold">{contact.websiteDisplay}</div>
                   </a>
                 </div>
 
@@ -3014,15 +2944,6 @@ export default function Home() {
                   </a>
                 </div>
 
-                {/* PDF Download button */}
-                <button
-                  onClick={handleDownloadPDF}
-                  className="inline-flex items-center gap-3 px-6 py-3 bg-white/5 backdrop-blur-sm hover:bg-white/10 text-white/70 hover:text-white font-medium rounded-xl border border-white/10 transition-all duration-300 print:hidden"
-                  style={poppins}
-                >
-                  <Download className="w-5 h-5" />
-                  Télécharger cette plaquette en PDF
-                </button>
               </div>
             </Reveal>
 
@@ -3034,84 +2955,258 @@ export default function Home() {
 
           <Reveal delay={300}>
             <div className="mt-16 text-center">
-              <p className="text-white/30 text-sm italic" style={poppins}>
-                « Voir plus loin, bâtir mieux »
+              <p className="text-white/60 text-sm italic" style={poppins}>
+                « {company.slogan} »
               </p>
-              <p className="text-white/20 text-xs mt-3">
-                H-Spatial | Spatial Intelligence for Africa
+              <p className="text-white/50 text-xs mt-3">
+                {company.internationalSignature}
               </p>
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* ===== COOKIE CONSENT BANNER ===== */}
-      <CookieBanner />
+      {/* Note : Navbar, ReadingProgressBar, WhatsAppButton, ScrollToTopButton,
+         CookieBanner ET SiteFooter sont rendus au niveau App
+         (cf. App.tsx → SiteChrome) — partagés entre toutes les pages. */}
+    </div>
+  );
+}
 
-      {/* ===== FOOTER ===== */}
-      <footer className="bg-[#0A1628] pt-8 pb-6 border-t border-white/5">
-        {/* Carrousel de logos partenaires */}
-        <div className="mb-8 overflow-hidden">
-          <p className="text-center text-white/20 text-[10px] uppercase tracking-widest mb-4" style={poppins}>Nos partenaires institutionnels</p>
-          <div className="relative">
-            <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[#0A1628] to-transparent z-10" />
-            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#0A1628] to-transparent z-10" />
-            <div className="flex animate-[scroll_25s_linear_infinite] gap-12 items-center w-max">
-              {[...Array(3)].map((_, setIdx) => (
-                <div key={setIdx} className="flex gap-12 items-center">
-                  {[
-                    { src: LOGO_MCLU, name: "MCLU", url: "https://construction.gouv.ci" },
-                    { src: LOGO_GEOMETRES, name: "OGE-CI", url: "https://www.geometres-experts.ci" },
-                    { src: LOGO_OACI, name: "OACI", url: "https://www.oaci.ci" },
-                    { src: LOGO_BNETD, name: "BNETD", url: "https://www.bnetd.ci" },
-                    { src: LOGO_DISTRICT, name: "District", url: "https://www.abidjan.district.ci" },
-                    { src: LOGO_IGNFI, name: "IGN FI", url: "https://www.ignfi.fr" },
-                    { src: LOGO_GEOFIT, name: "GeoFIT", url: "https://www.geofit.fr" },
-                    { src: LOGO_AFOR, name: "AFOR", url: "https://www.afor.ci" },
-                  ].map((p, i) => (
-                    <a
-                      key={`${setIdx}-${i}`}
-                      href={p.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-col items-center gap-1 opacity-40 hover:opacity-80 transition-opacity shrink-0"
-                      title={p.name}
+/* ─── SITE FOOTER ─────────────────────────────────────────────────────────
+ * Footer 4 colonnes partagé entre Home et About.
+ * Issue #13 : Navigation / Services / Contact (+ horaires) / Légal.
+ * Toutes les données viennent de company.ts — source unique.
+ */
+type FooterLink = { label: string; href: string };
+
+const footerNavigation: readonly FooterLink[] = [
+  { label: "Accueil", href: "/" },
+  { label: "Services", href: "/#services" },
+  { label: "Méthodologie", href: "/#methodologie" },
+  { label: "Références", href: "/#references" },
+  { label: "Le fondateur", href: "/a-propos" },
+  { label: "Contact", href: "/#contact" },
+];
+
+const footerServices: readonly FooterLink[] = [
+  { label: "Urbanisme & Aménagement", href: "/#services" },
+  { label: "SIG & Cartographie", href: "/#services" },
+  { label: "Sécurisation Foncière", href: "/#services" },
+  { label: "Solutions Numériques", href: "/#services" },
+];
+
+export function SiteFooter() {
+  const currentYear = new Date().getFullYear();
+  return (
+    <footer className="bg-[#0A1628] text-white pt-14 pb-6 print:hidden border-t border-white/5">
+      <div className="container mx-auto px-6 lg:px-12">
+        {/* Bande identité */}
+        <div className="mb-12 max-w-2xl">
+          <img
+            src={assets.logoWhite}
+            alt={company.shortName}
+            className="h-12 w-auto mb-4"
+          />
+          <p className="text-sm text-white/65 leading-relaxed">
+            {company.description}
+          </p>
+          <p className="mt-3 text-xs italic text-white/50" style={poppins}>
+            « {company.slogan} »
+          </p>
+        </div>
+
+        {/* Grille 4 colonnes */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-10 border-b border-white/10">
+          {/* Colonne 1 : Navigation */}
+          <nav aria-labelledby="footer-nav-heading">
+            <h2
+              id="footer-nav-heading"
+              className="text-xs uppercase tracking-wider text-white/50 font-semibold mb-4"
+              style={poppins}
+            >
+              Navigation
+            </h2>
+            <ul className="space-y-2 text-sm">
+              {footerNavigation.map((link) =>
+                link.href.startsWith("/") && !link.href.includes("#") ? (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-white/80 hover:text-white transition-colors"
                     >
-                      <LazyImage src={p.src} alt={p.name} className="h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all" />
-                      <span className="text-white/30 text-[8px]">{p.name}</span>
+                      {link.label}
+                    </Link>
+                  </li>
+                ) : (
+                  <li key={link.href}>
+                    <a
+                      href={link.href}
+                      className="text-white/80 hover:text-white transition-colors"
+                    >
+                      {link.label}
                     </a>
-                  ))}
-                </div>
+                  </li>
+                ),
+              )}
+            </ul>
+          </nav>
+
+          {/* Colonne 2 : Services */}
+          <nav aria-labelledby="footer-services-heading">
+            <h2
+              id="footer-services-heading"
+              className="text-xs uppercase tracking-wider text-white/50 font-semibold mb-4"
+              style={poppins}
+            >
+              Services
+            </h2>
+            <ul className="space-y-2 text-sm">
+              {footerServices.map((link) => (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Colonne 3 : Contact */}
+          <div>
+            <h2
+              className="text-xs uppercase tracking-wider text-white/50 font-semibold mb-4"
+              style={poppins}
+            >
+              Contact
+            </h2>
+            <address className="not-italic space-y-2 text-sm text-white/80">
+              <p>{address.full}</p>
+              <p>
+                <a
+                  href={`tel:${contact.phonePrimary.replace(/\s/g, "")}`}
+                  className="hover:text-white transition-colors"
+                >
+                  {contact.phonePrimary}
+                </a>
+              </p>
+              {contact.phoneSecondary && (
+                <p className="text-white/65">
+                  <a
+                    href={`tel:${contact.phoneSecondary.replace(/\s/g, "")}`}
+                    className="hover:text-white transition-colors"
+                  >
+                    {contact.phoneSecondary}
+                  </a>
+                </p>
+              )}
+              <p>
+                <a
+                  href={`mailto:${contact.emailPro}`}
+                  className="hover:text-white transition-colors break-all"
+                >
+                  {contact.emailPro}
+                </a>
+              </p>
+              <p>
+                <a
+                  href={buildWhatsAppUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
+                  WhatsApp
+                </a>
+              </p>
+            </address>
+            <div
+              className="mt-4 pt-4 border-t border-white/5 text-xs text-white/65 space-y-1"
+              aria-label="Horaires d'ouverture"
+            >
+              <p
+                className="text-[10px] uppercase tracking-wider text-white/45 font-semibold"
+                style={poppins}
+              >
+                Horaires
+              </p>
+              {contact.hours.map((line) => (
+                <p key={line}>{line}</p>
               ))}
             </div>
           </div>
-        </div>
 
-        <div className="container mx-auto px-6 lg:px-12">
-          <div className="border-t border-white/5 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <img src={LOGO_WHITE} alt="H-Spatial" className="h-8" />
-              <span className="text-white/30 text-sm">Bureau d'Études d'Urbaniste Agréé & Géomatique</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-white/20 text-xs">
-                RCCM : CI-ABJ-03-2026-B13-00264 | Abidjan, Côte d'Ivoire
-              </span>
-              <a href="/politique-de-confidentialite" className="text-white/20 hover:text-white/50 text-xs underline transition-colors">
-                Politique de confidentialité
-              </a>
-              <div className="flex gap-2">
-                <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-full bg-white/5 hover:bg-[#0077B5]/30 flex items-center justify-center transition-all" title="LinkedIn">
-                  <Linkedin className="w-3.5 h-3.5 text-white/40 hover:text-white" />
-                </a>
-                <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-full bg-white/5 hover:bg-[#1877F2]/30 flex items-center justify-center transition-all" title="Facebook">
-                  <Facebook className="w-3.5 h-3.5 text-white/40 hover:text-white" />
-                </a>
-              </div>
-            </div>
+          {/* Colonne 4 : Légal */}
+          <div>
+            <h2
+              className="text-xs uppercase tracking-wider text-white/50 font-semibold mb-4"
+              style={poppins}
+            >
+              Légal
+            </h2>
+            <ul className="space-y-2 text-sm text-white/80">
+              <li>
+                <span className="block text-[10px] uppercase tracking-wider text-white/45">
+                  RCCM
+                </span>
+                <span>{company.rccm}</span>
+              </li>
+              <li>
+                <span className="block text-[10px] uppercase tracking-wider text-white/45">
+                  Capital
+                </span>
+                <span>{company.capital}</span>
+              </li>
+              <li>
+                <span className="block text-[10px] uppercase tracking-wider text-white/45">
+                  Affiliation
+                </span>
+                <span>{credentials.onuciFull}</span>
+              </li>
+              <li className="pt-2">
+                <Link
+                  href="/politique-de-confidentialite"
+                  className="text-white/70 hover:text-white underline transition-colors"
+                >
+                  Politique de confidentialité
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
-      </footer>
-    </div>
+
+        {/* Bas de footer */}
+        <div className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/55">
+          <span>
+            © {currentYear} {company.legalName} — Tous droits réservés
+          </span>
+          <span style={poppins} className="text-white/45">
+            {company.internationalSignature}
+          </span>
+          <div className="flex items-center gap-2">
+            <a
+              href={social.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${company.brandName} sur LinkedIn`}
+              className="w-8 h-8 rounded-full bg-white/5 hover:bg-[#0077B5]/30 flex items-center justify-center transition-all"
+            >
+              <Linkedin className="w-4 h-4" aria-hidden />
+            </a>
+            <a
+              href={social.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${company.brandName} sur Facebook`}
+              className="w-8 h-8 rounded-full bg-white/5 hover:bg-[#1877F2]/30 flex items-center justify-center transition-all"
+            >
+              <Facebook className="w-4 h-4" aria-hidden />
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 }
