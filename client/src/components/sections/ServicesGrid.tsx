@@ -127,11 +127,11 @@ export function ServicesGrid({ isDark }: { isDark: boolean }) {
                 <div className="grid grid-cols-2 gap-4">
                   <div className={`rounded-xl p-4 border ${isDark ? "bg-white/5 border-white/10" : "bg-[#F8FAFC] border-[#E2E8F0]"}`}>
                     <div className="text-2xl font-bold text-[#0047AB]" style={poppins}>10 Ha</div>
-                    <div className={`text-xs mt-1 ${isDark ? "text-white/40" : "text-[#4A5568]"}`}>Surface totale</div>
+                    <div className={`text-xs mt-1 ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>Surface totale</div>
                   </div>
                   <div className={`rounded-xl p-4 border ${isDark ? "bg-white/5 border-white/10" : "bg-[#F8FAFC] border-[#E2E8F0]"}`}>
                     <div className="text-2xl font-bold text-[#00A86B]" style={poppins}>177</div>
-                    <div className={`text-xs mt-1 ${isDark ? "text-white/40" : "text-[#4A5568]"}`}>Lots créés</div>
+                    <div className={`text-xs mt-1 ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>Lots créés</div>
                   </div>
                 </div>
               </div>

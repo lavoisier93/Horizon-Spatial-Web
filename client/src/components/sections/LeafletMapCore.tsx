@@ -227,7 +227,7 @@ export default function LeafletMap({ isDark }: { isDark: boolean }) {
         </svg>
         <div className="flex items-center gap-1.5">
           <div className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-sm border ${isDark ? "border-[#00A86B]/40" : "border-[#00A86B]/30"}`} style={{ background: isDark ? "rgba(0,168,107,0.1)" : "rgba(0,168,107,0.08)" }} />
-          <span className={`text-[10px] sm:text-xs font-medium uppercase tracking-wider ${isDark ? "text-white/40" : "text-[#4A5568]/60"}`} style={poppins}>CEDEAO</span>
+          <span className={`text-[10px] sm:text-xs font-medium uppercase tracking-wider ${isDark ? "text-white/60" : "text-[#4A5568]"}`} style={poppins}>CEDEAO</span>
         </div>
         <svg viewBox="0 0 8 8" className={`w-2 h-2 ${isDark ? "text-white/20" : "text-[#4A5568]/30"}`} fill="currentColor">
           <path d="M2 4l3-2v4z" />

@@ -29,7 +29,7 @@ export function Partners({ isDark }: { isDark: boolean }) {
         {/* Grille de logos - Institutions publiques */}
         <Reveal delay={100}>
           <div className="mb-12">
-            <h3 className={`text-center text-sm font-semibold uppercase tracking-widest mb-8 ${isDark ? "text-white/40" : "text-[#4A5568]/60"}`} style={poppins}>Institutions & Ordres Professionnels</h3>
+            <h3 className={`text-center text-sm font-semibold uppercase tracking-widest mb-8 ${isDark ? "text-white/60" : "text-[#4A5568]"}`} style={poppins}>Institutions & Ordres Professionnels</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
               {institutionalPartners.map((p, i) => (
                 <a
@@ -47,7 +47,7 @@ export function Partners({ isDark }: { isDark: boolean }) {
                     <LazyImage src={p.src} alt={p.name} width={80} height={80} className="max-w-full max-h-full object-contain" />
                   </div>
                   <span className={`text-xs font-bold text-center ${isDark ? "text-white/80" : "text-[#0A1628]"}`} style={poppins}>{p.name}</span>
-                  <span className={`text-[10px] text-center mt-0.5 ${isDark ? "text-white/40" : "text-[#4A5568]/70"}`}>{p.desc}</span>
+                  <span className={`text-[10px] text-center mt-0.5 ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>{p.desc}</span>
                   <span className="text-[9px] text-[#0047AB] opacity-0 group-hover:opacity-100 transition-opacity mt-1">Visiter le site &rarr;</span>
                 </a>
               ))}
@@ -58,7 +58,7 @@ export function Partners({ isDark }: { isDark: boolean }) {
         {/* Grille de logos - Partenaires techniques */}
         <Reveal delay={200}>
           <div>
-            <h3 className={`text-center text-sm font-semibold uppercase tracking-widest mb-8 ${isDark ? "text-white/40" : "text-[#4A5568]/60"}`} style={poppins}>Partenaires Techniques & Fonciers</h3>
+            <h3 className={`text-center text-sm font-semibold uppercase tracking-widest mb-8 ${isDark ? "text-white/60" : "text-[#4A5568]"}`} style={poppins}>Partenaires Techniques & Fonciers</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {technicalPartners.map((p, i) => (
                 <a
@@ -76,7 +76,7 @@ export function Partners({ isDark }: { isDark: boolean }) {
                     <LazyImage src={p.src} alt={p.name} width={80} height={80} className="max-w-full max-h-full object-contain" />
                   </div>
                   <span className={`text-xs font-bold text-center ${isDark ? "text-white/80" : "text-[#0A1628]"}`} style={poppins}>{p.name}</span>
-                  <span className={`text-[10px] text-center mt-0.5 ${isDark ? "text-white/40" : "text-[#4A5568]/70"}`}>{p.desc}</span>
+                  <span className={`text-[10px] text-center mt-0.5 ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>{p.desc}</span>
                   <span className="text-[9px] text-[#00A86B] opacity-0 group-hover:opacity-100 transition-opacity mt-1">Visiter le site &rarr;</span>
                 </a>
               ))}
