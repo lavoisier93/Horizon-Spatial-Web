@@ -114,6 +114,36 @@ function AnimatedStat({ value, label, suffix = "" }: { value: number; label: str
   );
 }
 
+// Lignes de niveau topographiques — watermark géospatial discret, élément
+// signature de la DA « Geo-Corporate Luxe » (cf. ideas.md : « motif
+// topographique subtil (lignes de contour) en watermark »). Statique :
+// n'ajoute aucun mouvement (respecte la règle UX excessive-motion). Masqué sur
+// mobile, où le texte du Hero occupe toute la largeur.
+function HeroTopoLines() {
+  const base =
+    "M300,150 C 385,150 455,205 462,292 C 469,380 408,452 318,457 C 228,462 158,408 150,320 C 143,238 205,158 300,150 Z";
+  const rings = [0.35, 0.5, 0.65, 0.8, 0.95, 1.1, 1.25];
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 600 600"
+      fill="none"
+      className="hidden lg:block absolute top-1/2 -right-24 -translate-y-1/2 w-[680px] h-[680px] z-[2] pointer-events-none text-white opacity-[0.07]"
+    >
+      {rings.map((k) => (
+        <path
+          key={k}
+          d={base}
+          transform={`translate(300 300) scale(${k}) translate(-300 -300)`}
+          stroke="currentColor"
+          strokeWidth={1.25}
+          vectorEffect="non-scaling-stroke"
+        />
+      ))}
+    </svg>
+  );
+}
+
 export function Hero() {
   const heroParallax = useParallax(0.15);
 
@@ -139,6 +169,9 @@ export function Hero() {
          de la piste « Terrain Intelligence » écartée (cf. ideas.md), et
          surchargeaient le mouvement (règle UX excessive-motion). */}
       <div className="hero-grid-bg" />
+
+      {/* Watermark topographique géospatial (statique, discret) */}
+      <HeroTopoLines />
 
       <div className="relative z-10 w-full">
         <div className="container mx-auto px-6 lg:px-12 py-20">
