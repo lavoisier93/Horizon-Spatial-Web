@@ -190,7 +190,7 @@ export function Navbar() {
           <DarkModeToggle isDark={isDark} onToggle={onToggleDark} scrolled={scrolled} />
           <a
             href={resolveHref("#contact")}
-            className="ml-2 px-5 py-2.5 bg-[#00A86B] hover:bg-[#009960] text-white text-sm font-semibold rounded-lg transition-all duration-300 shadow-md shadow-[#00A86B]/20"
+            className="ml-2 px-5 py-2.5 bg-[#00A86B] hover:bg-[#009960] text-[#0A1628] text-sm font-semibold rounded-lg transition-all duration-300 shadow-md shadow-[#00A86B]/20"
             style={poppins}
           >
             Devis gratuit
@@ -267,7 +267,7 @@ export function Navbar() {
             <a
               href={resolveHref("#contact")}
               onClick={() => setMobileOpen(false)}
-              className="block px-4 py-3 bg-[#00A86B] hover:bg-[#009960] text-white text-sm font-semibold rounded-lg text-center mt-2"
+              className="block px-4 py-3 bg-[#00A86B] hover:bg-[#009960] text-[#0A1628] text-sm font-semibold rounded-lg text-center mt-2"
               style={poppins}
             >
               Devis gratuit

@@ -64,7 +64,7 @@ export function DoubleExpertise() {
                 <Link
                   href="/a-propos"
                   aria-label="En savoir plus sur Lavoisier Ousmane, fondateur d'Horizon Spatial"
-                  className="mt-6 group inline-flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg bg-[#00A86B] hover:bg-[#009960] text-white text-sm font-semibold shadow-lg shadow-[#00A86B]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#00A86B]/30 hover:-translate-y-0.5"
+                  className="mt-6 group inline-flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg bg-[#00A86B] hover:bg-[#009960] text-[#0A1628] text-sm font-semibold shadow-lg shadow-[#00A86B]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#00A86B]/30 hover:-translate-y-0.5"
                   style={poppins}
                 >
                   Cliquer ICI pour en savoir Plus

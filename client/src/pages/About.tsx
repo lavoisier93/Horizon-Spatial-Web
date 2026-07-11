@@ -155,7 +155,7 @@ function FounderAvatar() {
         />
       </div>
       <span
-        className="absolute -bottom-1 -right-1 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#00A86B] text-white text-xs font-semibold shadow-lg"
+        className="absolute -bottom-1 -right-1 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#00A86B] text-[#0A1628] text-xs font-semibold shadow-lg"
         style={poppins}
         title={credentials.onuciFull}
       >
@@ -273,7 +273,7 @@ function HeroSection() {
             </a>
             <a
               href="/#contact"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-[#00A86B] hover:bg-[#009960] text-white font-semibold text-sm shadow-lg transition-all"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-[#00A86B] hover:bg-[#009960] text-[#0A1628] font-semibold text-sm shadow-lg transition-all"
               style={poppins}
             >
               Démarrer un projet
@@ -399,7 +399,7 @@ function BioSection({ isDark }: { isDark: boolean }) {
                   <a
                     href={founder.cvUrl}
                     download
-                    className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#00A86B] hover:bg-[#009960] text-white text-sm font-semibold transition-all"
+                    className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#00A86B] hover:bg-[#009960] text-[#0A1628] text-sm font-semibold transition-all"
                     style={poppins}
                   >
                     <Download className="w-4 h-4" />

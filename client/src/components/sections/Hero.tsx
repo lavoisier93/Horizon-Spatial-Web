@@ -184,7 +184,7 @@ export function Hero() {
             <div className="flex flex-wrap items-center gap-6 hero-fade" style={{ animationDelay: "0.9s" }}>
               <a
                 href="#contact"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-[#00A86B] hover:bg-[#009960] text-white font-semibold rounded-lg transition-all duration-300 shadow-lg shadow-[#00A86B]/25 hover:shadow-xl hover:shadow-[#00A86B]/30"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-[#00A86B] hover:bg-[#009960] text-[#0A1628] font-semibold rounded-lg transition-all duration-300 shadow-lg shadow-[#00A86B]/25 hover:shadow-xl hover:shadow-[#00A86B]/30"
                 style={poppins}
               >
                 Demander un devis gratuit
