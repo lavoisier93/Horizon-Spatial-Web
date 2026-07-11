@@ -1,6 +1,5 @@
 import { ArrowRight, BadgeCheck, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { HeroParticles } from "../../components/HeroParticles";
 import { useCountUp } from "../../hooks/useCountUp";
 import { useParallax } from "../../hooks/useParallax";
 
@@ -135,17 +134,11 @@ export function Hero() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628]/90 via-[#0A1628]/70 to-[#0047AB]/40" />
       </div>
 
-      {/* Animated Perspective Grid */}
+      {/* Grille perspective — watermark topographique subtil (DA « Geo-Corporate
+         Luxe »). Particules Canvas et losanges flottants retirés : ils relevaient
+         de la piste « Terrain Intelligence » écartée (cf. ideas.md), et
+         surchargeaient le mouvement (règle UX excessive-motion). */}
       <div className="hero-grid-bg" />
-
-      {/* Hero particles — uniquement dans la zone hero */}
-      <HeroParticles className="z-[2]" />
-
-      {/* Floating Geometric Elements */}
-      <div className="geo-element geo-diamond-1" />
-      <div className="geo-element geo-diamond-2" />
-      <div className="geo-element geo-diamond-3" />
-      <div className="geo-element geo-diamond-4" />
 
       <div className="relative z-10 w-full">
         <div className="container mx-auto px-6 lg:px-12 py-20">
@@ -181,7 +174,7 @@ export function Hero() {
               pour vos projets de lotissement en Côte d'Ivoire.
             </p>
 
-            <div className="flex flex-wrap items-center gap-6 hero-fade" style={{ animationDelay: "0.9s" }}>
+            <div className="flex flex-wrap items-center gap-4 hero-fade" style={{ animationDelay: "0.9s" }}>
               <a
                 href="#contact"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-[#00A86B] hover:bg-[#009960] text-[#0A1628] font-semibold rounded-lg transition-all duration-300 shadow-lg shadow-[#00A86B]/25 hover:shadow-xl hover:shadow-[#00A86B]/30"
@@ -189,6 +182,13 @@ export function Hero() {
               >
                 Demander un devis gratuit
                 <ArrowRight className="w-5 h-5" />
+              </a>
+              <a
+                href="#services"
+                className="inline-flex items-center gap-2 px-8 py-4 border border-white/30 hover:border-white/60 hover:bg-white/5 text-white font-semibold rounded-lg transition-all duration-300"
+                style={poppins}
+              >
+                Découvrir nos services
               </a>
             </div>
 
