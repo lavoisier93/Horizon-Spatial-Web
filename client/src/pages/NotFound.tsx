@@ -12,7 +12,7 @@ const poppins = { fontFamily: "'Poppins', sans-serif" };
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-white px-6">
+    <main id="main-content" className="min-h-screen flex items-center justify-center bg-white px-6">
       <div className="max-w-lg w-full text-center">
         <div
           aria-hidden

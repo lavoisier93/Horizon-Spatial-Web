@@ -100,6 +100,12 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light" switchable>
         <TooltipProvider>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[10001] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[#0047AB] focus:text-white focus:font-semibold focus:shadow-lg"
+          >
+            Aller au contenu principal
+          </a>
           <Toaster />
           <Router />
           <SiteChrome />

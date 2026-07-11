@@ -1108,7 +1108,7 @@ export default function About() {
   }, []);
 
   return (
-    <main className={isDark ? "bg-[#0A1628] text-white" : "bg-white text-[#0A1628]"}>
+    <main id="main-content" className={isDark ? "bg-[#0A1628] text-white" : "bg-white text-[#0A1628]"}>
       <HeroSection />
       <BioSection isDark={isDark} />
       <SkillsSection isDark={isDark} />

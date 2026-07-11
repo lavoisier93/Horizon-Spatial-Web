@@ -13,6 +13,9 @@ export function useParallax(speed: number = 0.3) {
     const isMobile = window.innerWidth < 768;
     if (isMobile) return;
 
+    // Respecte la préférence système "mouvement réduit"
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
     const handleScroll = () => {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => {

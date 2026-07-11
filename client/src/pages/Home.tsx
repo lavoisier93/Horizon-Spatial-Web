@@ -137,7 +137,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className={`min-h-screen overflow-x-hidden transition-colors duration-500 ${isDark ? "bg-[#0A1628]" : "bg-white"}`}>
+    <main id="main-content" className={`min-h-screen overflow-x-hidden transition-colors duration-500 ${isDark ? "bg-[#0A1628]" : "bg-white"}`}>
       {/* Loading Screen — uniquement sur l'accueil (première impression) */}
       <LoadingScreen />
 
@@ -170,7 +170,7 @@ export default function Home() {
       {/* Note : Navbar, ReadingProgressBar, WhatsAppButton, ScrollToTopButton,
          CookieBanner ET SiteFooter sont rendus au niveau App
          (cf. App.tsx → SiteChrome) — partagés entre toutes les pages. */}
-    </div>
+    </main>
   );
 }
 

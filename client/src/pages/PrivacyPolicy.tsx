@@ -36,7 +36,7 @@ export default function PrivacyPolicy() {
       </header>
 
       {/* Content */}
-      <main className="container mx-auto px-4 sm:px-6 lg:px-12 py-12 sm:py-16 lg:py-20 max-w-4xl">
+      <main id="main-content" className="container mx-auto px-4 sm:px-6 lg:px-12 py-12 sm:py-16 lg:py-20 max-w-4xl">
         {/* Title */}
         <div className="text-center mb-12 sm:mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0047AB]/10 border border-[#0047AB]/20 mb-6">

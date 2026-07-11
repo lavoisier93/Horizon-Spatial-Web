@@ -31,6 +31,13 @@ function TypewriterText({
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
+    // Respecte la préférence système "mouvement réduit" : affiche la première
+    // phrase sans animation plutôt que de faire défiler/effacer en boucle.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setDisplayText(phrases[0]);
+      return;
+    }
+
     const currentPhrase = phrases[phraseIndex];
 
     if (isPaused) {

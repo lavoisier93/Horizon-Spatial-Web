@@ -23,6 +23,9 @@ function FAQSection({ isDark }: { isDark: boolean }) {
           >
             <button
               onClick={() => setOpenIdx(isOpen ? null : i)}
+              aria-expanded={isOpen}
+              aria-controls={`faq-answer-${i}`}
+              id={`faq-question-${i}`}
               className="w-full flex items-start gap-4 p-5 text-left"
             >
               <div className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
@@ -39,6 +42,10 @@ function FAQSection({ isDark }: { isDark: boolean }) {
               </span>
             </button>
             <div
+              id={`faq-answer-${i}`}
+              role="region"
+              aria-labelledby={`faq-question-${i}`}
+              aria-hidden={!isOpen}
               className="faq-answer"
               style={{
                 maxHeight: isOpen ? "300px" : "0px",

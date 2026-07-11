@@ -49,6 +49,16 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Ferme le menu mobile au clavier (Échap) — accessibilité.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
+
   // Scroll spy: highlight the link of the section currently in viewport.
   // IMPORTANT: les liens de route (`route: true` ou href ne commençant pas par `#`)
   // ne sont JAMAIS passés à querySelector — un sélecteur CSS comme "/a-propos"
@@ -190,6 +200,9 @@ export function Navbar() {
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-menu"
           className={`lg:hidden p-2 rounded-lg transition-colors ${
             scrolled ? (isDark ? "text-white hover:bg-white/10" : "text-[#0A1628] hover:bg-gray-100") : "text-white hover:bg-white/10"
           }`}
@@ -200,6 +213,8 @@ export function Navbar() {
 
       {/* Mobile menu - animated */}
       <div
+        id="mobile-menu"
+        inert={!mobileOpen}
         className={`lg:hidden overflow-hidden transition-all duration-500 ease-in-out border-t ${
           scrolled ? (isDark ? "bg-[#0A1628]/95 backdrop-blur-lg border-white/10" : "bg-white border-gray-100") : "bg-[#0A1628]/95 backdrop-blur-lg border-white/10"
         }`}
