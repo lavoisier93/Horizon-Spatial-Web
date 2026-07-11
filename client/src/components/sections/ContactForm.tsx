@@ -187,7 +187,7 @@ function ContactForm() {
 
   // Helpers de styling : ajoute une bordure rouge quand un champ est en erreur.
   const fieldClass = (fieldName: keyof ContactFormData) =>
-    `w-full bg-white/5 border rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/50 focus:ring-1 outline-none transition-all text-sm ${
+    `w-full bg-white/5 border rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/50 focus:ring-2 outline-none transition-all text-sm ${
       errors[fieldName]
         ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
         : "border-white/10 focus:border-[#00A86B]/50 focus:ring-[#00A86B]/30"
@@ -311,7 +311,7 @@ function ContactForm() {
               name="typeProjet"
               value={formData.typeProjet}
               onChange={handleChange}
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm appearance-none"
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white focus:border-[#00A86B]/50 focus:ring-2 focus:ring-[#00A86B]/30 outline-none transition-all text-sm appearance-none"
             >
               <option value="" className="bg-[#0A1628]">Sélectionner...</option>
               <option value="Lotissement résidentiel" className="bg-[#0A1628]">Lotissement résidentiel</option>
@@ -335,7 +335,7 @@ function ContactForm() {
             value={formData.superficie}
             onChange={handleChange}
             placeholder="Ex : 5 hectares, 10 000 m²..."
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/50 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-white/50 focus:border-[#00A86B]/50 focus:ring-2 focus:ring-[#00A86B]/30 outline-none transition-all text-sm"
           />
         </div>
       </div>
@@ -348,7 +348,7 @@ function ContactForm() {
           onChange={handleChange}
           rows={4}
           placeholder="Décrivez brièvement votre projet, sa localisation, vos attentes..."
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/50 focus:border-[#00A86B]/50 focus:ring-1 focus:ring-[#00A86B]/30 outline-none transition-all text-sm resize-none"
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/50 focus:border-[#00A86B]/50 focus:ring-2 focus:ring-[#00A86B]/30 outline-none transition-all text-sm resize-none"
         />
       </div>
 
