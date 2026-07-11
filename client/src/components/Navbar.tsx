@@ -146,7 +146,7 @@ export function Navbar() {
             alt={company.shortName}
             width={292}
             height={197}
-            className="h-10 transition-all duration-300"
+            className="h-10 w-auto transition-all duration-300"
           />
         </Link>
 

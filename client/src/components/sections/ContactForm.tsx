@@ -388,7 +388,7 @@ export function ContactSection() {
           {/* Left: Info */}
           <Reveal>
             <div>
-              <img src={assets.logoWhite} alt="Horizon Spatial" width={292} height={197} className="h-16 mb-10" />
+              <img src={assets.logoWhite} alt="Horizon Spatial" width={292} height={197} className="h-16 w-auto mb-10" />
 
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-6" style={poppins}>
                 Prêt à sécuriser votre prochain{" "}
