@@ -187,13 +187,13 @@ export function Hero() {
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 hero-fade"
               style={{ ...poppins, animationDelay: "0.5s" }}
             >
-              Offre de Services{" "}
+              Votre lotissement{" "}
               <TypewriterText
                 phrases={[
-                  "Aménageurs Fonciers",
-                  "Promoteurs Immobiliers",
-                  "Opérateurs Fonciers",
-                  "Collectivités Territoriales",
+                  "approuvé en toute conformité",
+                  "conçu par un urbaniste agréé",
+                  "sécurisé juridiquement",
+                  "commercialisé plus vite",
                 ]}
                 className="text-[#00A86B]"
                 typingSpeed={65}

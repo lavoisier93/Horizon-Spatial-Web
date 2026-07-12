@@ -396,8 +396,8 @@ export function ContactSection() {
               </h2>
 
               <p className="text-lg text-white/70 leading-relaxed mb-10">
-                Contactez-nous dès aujourd'hui pour une étude de faisabilité
-                gratuite de votre projet. Notre équipe est à votre disposition.
+                Contactez-nous dès aujourd'hui : premier échange et devis
+                gratuits, sans engagement. Notre équipe est à votre disposition.
               </p>
 
               <div className="space-y-4 mb-10">

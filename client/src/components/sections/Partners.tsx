@@ -18,10 +18,10 @@ export function Partners({ isDark }: { isDark: boolean }) {
               <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
             </div>
             <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
-              Nos <span className="text-[#0047AB]">partenaires</span> institutionnels
+              Notre <span className="text-[#0047AB]">réseau</span> institutionnel et technique
             </h2>
             <p className={`text-lg leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>
-              H-Spatial évolue au sein d'un réseau solide d'institutions publiques et de partenaires techniques de référence en Côte d'Ivoire et à l'international.
+              H-Spatial collabore au quotidien avec les institutions publiques du foncier et de l'urbanisme, et s'appuie sur des partenaires techniques de référence en Côte d'Ivoire et à l'international.
             </p>
           </div>
         </Reveal>
@@ -88,7 +88,7 @@ export function Partners({ isDark }: { isDark: boolean }) {
         <Reveal delay={300}>
           <div className={`mt-16 text-center p-8 rounded-2xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200"}`}>
             <p className={`text-lg font-medium mb-2 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
-              Un réseau de <span className="text-[#0047AB] font-bold">9 partenaires</span> institutionnels et techniques
+              Un réseau de <span className="text-[#0047AB] font-bold">9 institutions</span> et partenaires techniques
             </p>
             <p className={`text-sm ${isDark ? "text-white/50" : "text-[#4A5568]"}`}>
               H-Spatial collabore avec les acteurs majeurs du foncier, de l'urbanisme et de la géomatique en Côte d'Ivoire et en Afrique de l'Ouest.

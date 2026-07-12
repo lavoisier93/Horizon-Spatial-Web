@@ -29,8 +29,9 @@ export function DoubleExpertise() {
               <span className="text-[#00A86B]">unique</span>
             </h2>
             <p className="text-lg text-white/60 leading-relaxed">
-              Horizon Spatial est le seul bureau d'études ivoirien combinant l'urbanisme certifié
-              et la géomatique avancée, pour des projets d'aménagement conformes, optimisés et innovants.
+              Horizon Spatial réunit dans un même bureau d'études une double expertise rare en
+              Côte d'Ivoire — urbanisme agréé O.N.U.C.I. et géomatique avancée — pour des projets
+              d'aménagement conformes, optimisés et innovants.
             </p>
           </div>
         </Reveal>
