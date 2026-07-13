@@ -107,3 +107,6 @@ temp/
 
 # Webdev artifacts (checkpoint zips, migrations, etc.)
 .webdev/
+
+# Fichiers temporaires d'outils (éditeur/agent)
+_tmp_*
