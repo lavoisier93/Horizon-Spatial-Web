@@ -102,7 +102,7 @@ export function Methodology() {
         <Reveal delay={200}>
           <div className="text-center mt-14">
             <p className="text-white/70 text-sm mb-5">
-              De la prise de contact au dépôt de dossier pour l'arrêté d'approbation, comptez en moyenne 3 à 6 mois.
+              De la prise de contact au dépôt du dossier pour l'arrêté d'approbation, comptez en moyenne 3 à 6 mois.
             </p>
             <a
               href="#contact"
