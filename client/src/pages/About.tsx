@@ -333,7 +333,7 @@ function BioSection({ isDark }: { isDark: boolean }) {
                   <div className="mt-5 grid grid-cols-4 gap-2">
                     <a
                       href={`mailto:${founder.channels.emailPro}`}
-                      aria-label="Envoyer un email à Horizon Spatial"
+                      aria-label="Envoyer un email à HORIZON SPATIAL"
                       className="flex items-center justify-center w-10 h-10 mx-auto rounded-full bg-white/10 hover:bg-white/20 transition-all"
                     >
                       <Mail className="w-4 h-4" />
@@ -342,7 +342,7 @@ function BioSection({ isDark }: { isDark: boolean }) {
                       href={buildWhatsAppUrl()}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label="Contacter Horizon Spatial via WhatsApp"
+                      aria-label="Contacter HORIZON SPATIAL via WhatsApp"
                       className="flex items-center justify-center w-10 h-10 mx-auto rounded-full bg-white/10 hover:bg-white/20 transition-all"
                     >
                       <MessageSquare className="w-4 h-4" />
@@ -352,7 +352,7 @@ function BioSection({ isDark }: { isDark: boolean }) {
                         href={founder.channels.linkedin}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label="Page LinkedIn d'Horizon Spatial"
+                        aria-label="Page LinkedIn d'HORIZON SPATIAL"
                         className="flex items-center justify-center w-10 h-10 mx-auto rounded-full bg-white/10 hover:bg-white/20 transition-all"
                       >
                         <Linkedin className="w-4 h-4" />
@@ -363,7 +363,7 @@ function BioSection({ isDark }: { isDark: boolean }) {
                         href={founder.channels.facebook}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label="Page Facebook d'Horizon Spatial"
+                        aria-label="Page Facebook d'HORIZON SPATIAL"
                         className="flex items-center justify-center w-10 h-10 mx-auto rounded-full bg-white/10 hover:bg-white/20 transition-all"
                       >
                         <Facebook className="w-4 h-4" />
@@ -377,17 +377,17 @@ function BioSection({ isDark }: { isDark: boolean }) {
                 <ProfileFact
                   icon={<GraduationCap className="w-4 h-4" />}
                   label="Formation"
-                  value="Master Urbanisme · Mastère Géomatique · Executive Master Data"
+                  value="Master Urbanisme · Mastère Géomatique · Gestion Urbaine"
                 />
                 <ProfileFact
                   icon={<Briefcase className="w-4 h-4" />}
                   label="Expérience"
-                  value={`${founder.yearsOfExperience}+ années en aménagement, SIG et foncier`}
+                  value={`${founder.yearsOfExperience}+ années en urbanisme, amenagement, foncier et SIG`}
                 />
                 <ProfileFact
                   icon={<MapPin className="w-4 h-4" />}
                   label="Terrain"
-                  value="Côte d'Ivoire, France, Maroc, Togo"
+                  value="Côte d'Ivoire, France, Togo"
                 />
                 <ProfileFact
                   icon={<Award className="w-4 h-4" />}
@@ -885,22 +885,22 @@ function TestimonialsSection({ isDark }: { isDark: boolean }) {
   const [ref, visible] = useReveal<HTMLDivElement>();
   const items = [
     {
-      initials: "PK",
-      name: "Paul Kouamé",
-      role: "Directeur de projet — Abidjan",
+      initials: "GP",
+      name: "Gerard PAILLAT",
+      role: "Conseiller Technique — CETIF",
       quote:
-        "Son accompagnement a été décisif dans la réalisation de notre plan de lotissement. Grâce à son expertise SIG, nous avons obtenu des cartes précises et exploitables.",
+        "Son accompagnement des équipes terrain et de l'atelier SIG a été décisif dans la production de plans parcellaires et l'automatisation de shapefiles. Grâce à son expertise SIG, nous avons obtenu des shapefiles au format SIFOR.",
     },
     {
-      initials: "MD",
-      name: "Marie Diallo",
-      role: "Responsable développement — Yamoussoukro",
+      initials: "AL",
+      name: "Arthur LEROUX",
+      role: "Directeur Régional — IGN FI",
       quote:
-        "Sa compréhension du foncier et ses compétences techniques ont grandement facilité nos démarches de certification. Son professionnalisme est remarquable.",
+        "Sa compréhension du foncier et ses compétences techniques ont grandement facilité la gestion de nos projets de delimitation de territoire de village et de certification foncière en Côte d'Ivoire. Son professionnalisme est remarquable.",
     },
     {
-      initials: "JT",
-      name: "Jacques Touré",
+      initials: "BD",
+      name: "Ben DOUKOURE",
       role: "Architecte urbaniste — San-Pédro",
       quote:
         "L'expertise en cartographie drone et en analyse spatiale a permis d'optimiser notre projet d'aménagement. Une collaboration fructueuse.",

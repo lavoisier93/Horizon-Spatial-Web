@@ -66,16 +66,16 @@ export interface CompanyAssets {
 
 export const company: CompanyInfo = {
   legalName: "HORIZON SPATIAL",
-  brandName: "Horizon Spatial",
-  shortName: "H-Spatial",
+  brandName: "HORIZON SPATIAL",
+  shortName: "H-SPATIAL",
   legalForm: "SARL",
   capital: "1 000 000 FCFA",
   rccm: "CI-ABJ-03-2026-B13-00264",
   slogan: "Voir plus loin, bâtir mieux",
-  internationalSignature: "H-Spatial | Spatial Intelligence for Africa",
+  internationalSignature: "H-SPATIAL | Spatial Intelligence for Africa",
   tagline: "Bureau d'Études d'Urbaniste Agréé & Géomatique",
   description:
-    "Bureau d'études ivoirien combinant urbanisme certifié O.N.U.C.I. et géomatique avancée, pour des projets d'aménagement conformes, optimisés et innovants.",
+    "Bureau d'études ivoirien combinant urbanisme et géomatique avancée, pour des projets d'aménagement conformes, optimisés et innovants.",
 };
 
 /* -------------------------------------------------------------------------- */
@@ -84,8 +84,8 @@ export const company: CompanyInfo = {
 
 export const contact: CompanyContact = {
   emailPro: "contact@horizonspatial.ci",
-  phonePrimary: "+225 27 22 25 60 38",
-  phoneSecondary: "+225 01 43 43 05 05",
+  phonePrimary: "+225 01 43 43 05 05",
+  phoneSecondary: "+225 27 22 25 60 38",
   whatsappE164: "2250143430505",
   websiteUrl: "https://www.horizonspatial.ci",
   websiteDisplay: "www.horizonspatial.ci",
@@ -137,7 +137,7 @@ export const assets: CompanyAssets = {
 /* -------------------------------------------------------------------------- */
 
 export const credentials = {
-  onuciLabel: "Membre O.N.U.C.I.",
+  onuciLabel: "Membre du Conseil O.N.U.C.I.",
   onuciFull: "Ordre National des Urbanistes de Côte d'Ivoire",
 } as const;
 

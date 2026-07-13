@@ -29,8 +29,8 @@ export function DoubleExpertise() {
               <span className="text-[#00A86B]">unique</span>
             </h2>
             <p className="text-lg text-white/60 leading-relaxed">
-              Horizon Spatial réunit dans un même bureau d'études une double expertise rare en
-              Côte d'Ivoire — urbanisme agréé O.N.U.C.I. et géomatique avancée — pour des projets
+              Horizon SPATIAL réunit dans un même bureau d'études une double expertise rare en
+              Côte d'Ivoire — Urbanisme agréé et Géomatique avancée — pour des projets
               d'aménagement conformes, optimisés et innovants.
             </p>
           </div>
@@ -68,7 +68,7 @@ export function DoubleExpertise() {
                   className="mt-6 group inline-flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg bg-[#00A86B] hover:bg-[#009960] text-[#0A1628] text-sm font-semibold shadow-lg shadow-[#00A86B]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#00A86B]/30 hover:-translate-y-0.5"
                   style={poppins}
                 >
-                  Cliquer ICI pour en savoir Plus
+                  Découvrir le parcours du fondateur
                   <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
               </div>
@@ -82,7 +82,7 @@ export function DoubleExpertise() {
                   <Building2 className="w-5 h-5 text-[#0047AB]" />
                   <span className="text-[#0047AB] font-semibold text-xs uppercase tracking-wider" style={poppins}>Pôle Urbanisme</span>
                 </div>
-                <h3 className="text-lg font-bold text-white mb-6" style={poppins}>Conformité & Conception</h3>
+                <h3 className="text-lg font-bold text-white mb-6" style={poppins}>Conformité & conception</h3>
                 <ul className="space-y-3">
                   {poleUrbanisme.map((item) => (
                     <li key={item} className="flex items-start gap-3">
@@ -100,7 +100,7 @@ export function DoubleExpertise() {
                   <MapPin className="w-5 h-5 text-[#00A86B]" />
                   <span className="text-[#00A86B] font-semibold text-xs uppercase tracking-wider" style={poppins}>Pôle Géomatique</span>
                 </div>
-                <h3 className="text-lg font-bold text-white mb-6" style={poppins}>Optimisation & Technologie</h3>
+                <h3 className="text-lg font-bold text-white mb-6" style={poppins}>Optimisation & technologie</h3>
                 <ul className="space-y-3">
                   {poleGeomatique.map((item) => (
                     <li key={item} className="flex items-start gap-3">

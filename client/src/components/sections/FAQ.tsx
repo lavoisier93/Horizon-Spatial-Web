@@ -1,4 +1,4 @@
-import { Minus, Plus } from "lucide-react";
+import { ArrowRight, Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { Reveal } from "../../components/Reveal";
 import { faqItems } from "../../data/faq";
@@ -86,6 +86,21 @@ export function FAQ({ isDark }: { isDark: boolean }) {
         </Reveal>
         <Reveal delay={100}>
           <FAQSection isDark={isDark} />
+        </Reveal>
+        <Reveal delay={150}>
+          <div className="text-center mt-12">
+            <p className={`text-sm mb-4 ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>
+              Vous ne trouvez pas la réponse à votre question ?
+            </p>
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#0047AB] hover:bg-[#003D91] text-white font-semibold rounded-lg transition-colors duration-300"
+              style={poppins}
+            >
+              Poser ma question
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
         </Reveal>
       </div>
     </section>

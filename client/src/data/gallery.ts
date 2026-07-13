@@ -14,19 +14,19 @@ export const galleryItems: GalleryItem[] = [
   {
     img: GALLERY_DRONE,
     title: "Vue aérienne par drone",
-    desc: "Levé topographique et photogrammétrie par drone pour un lotissement résidentiel de 15 hectares",
+    desc: "Photogrammétrie par drone et Cartographie numérique pour un lotissement résidentiel",
     tag: "Photogrammétrie",
   },
   {
     img: GALLERY_PLAN,
-    title: "Plan de lotissement approuvé",
-    desc: "Plan d'aménagement détaillé avec tampons officiels, soumis au MCLU pour approbation",
+    title: "Projets de lotissement",
+    desc: "Plans d'aménagement détaillé, documents graphiques et rapports écrits",
     tag: "Urbanisme",
   },
   {
     img: GALLERY_MAQUETTE,
     title: "Maquette 3D du projet",
-    desc: "Rendu 3D photoréaliste d'un projet de lotissement mixte avec équipements et espaces verts",
+    desc: "Rendu 3D photoréaliste d'un projet d'opération immobilière",
     tag: "Modélisation 3D",
   },
 ];

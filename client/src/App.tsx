@@ -5,6 +5,7 @@ import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { CookieBanner } from "./components/floating/CookieBanner";
+import { FounderButton } from "./components/floating/FounderButton";
 import { ReadingProgressBar } from "./components/floating/ReadingProgressBar";
 import { ScrollToTopButton } from "./components/floating/ScrollToTop";
 import { WhatsAppButton } from "./components/floating/WhatsAppButton";
@@ -71,6 +72,7 @@ function SiteChrome() {
           <ReadingProgressBar />
           <Navbar />
           <WhatsAppButton />
+          <FounderButton />
           <ScrollToTopButton />
           <CookieBanner />
         </>

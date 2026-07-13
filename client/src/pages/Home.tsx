@@ -56,8 +56,8 @@ import { Testimonials } from "../components/sections/Testimonials";
 
 // ─── SEO ──────────────────────────────────────────────
 const HOME_URL = "https://www.horizonspatial.ci/";
-const HOME_TITLE = "H-Spatial | Bureau d'Études d'Urbaniste Agréé O.N.U.C.I. — Côte d'Ivoire";
-const HOME_DESCRIPTION = "Horizon Spatial : urbaniste agréé O.N.U.C.I. spécialisé en lotissements, aménagement foncier, géomatique et cartographie par drone en Côte d'Ivoire. Conformité légale garantie, devis gratuit.";
+const HOME_TITLE = "H-Spatial | Bureau d'Études d'Urbaniste Agréé — Côte d'Ivoire";
+const HOME_DESCRIPTION = "Horizon Spatial : urbaniste agréé O.N.U.C.I. spécialisé en lotissements, aménagement foncier, promotion immobilière,géomatique et cartographie par drone en Côte d'Ivoire. Conformité légale garantie, devis gratuit.";
 const HOME_IMAGE = "https://www.horizonspatial.ci/assets/images/hero-cover.webp";
 
 // ─── COMPONENT ────────────────────────────────────────

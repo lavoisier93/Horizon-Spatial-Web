@@ -5,8 +5,7 @@ import { useParallax } from "../../hooks/useParallax";
 
 const poppins = { fontFamily: "'Poppins', sans-serif" };
 
-// Image locale (rapatriement issue #14 — finies les URLs Manus CDN signées
-// qui expiraient le 31 décembre 2026). Source : client/public/assets/images/
+// Image locale Source : client/public/assets/images/
 const HERO_IMG = "/assets/images/hero-cover.webp";
 
 function TypewriterText({
@@ -179,7 +178,7 @@ export function Hero() {
             <div className="mb-6 hero-fade" style={{ animationDelay: "0.3s" }}>
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium">
                 <BadgeCheck className="w-4 h-4 text-[#00A86B]" />
-                Bureau d'Études d'Urbaniste Agréé O.N.U.C.I.
+                Bureau d'Études d'Urbaniste Agréé
               </span>
             </div>
 
@@ -187,7 +186,7 @@ export function Hero() {
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 hero-fade"
               style={{ ...poppins, animationDelay: "0.5s" }}
             >
-              Votre lotissement{" "}
+              Votre Projet d'Aménagement{" "}
               <TypewriterText
                 phrases={[
                   "approuvé en toute conformité",
@@ -204,7 +203,7 @@ export function Hero() {
 
             <p className="text-lg md:text-xl text-white/80 leading-relaxed mb-8 max-w-2xl hero-fade" style={{ animationDelay: "0.7s" }}>
               Conformité légale, expertise technique et accompagnement complet
-              pour vos projets de lotissement en Côte d'Ivoire.
+              pour vos projets de lotissements, opérations immobilières et sécurisation foncière en Côte d'Ivoire.
             </p>
 
             <div className="flex flex-wrap items-center gap-4 hero-fade" style={{ animationDelay: "0.9s" }}>
@@ -227,8 +226,8 @@ export function Hero() {
 
             <div className="mt-14 grid grid-cols-3 gap-8 max-w-lg hero-fade" style={{ animationDelay: "1.1s" }}>
               <AnimatedStat value={8} label="Années d'expérience" suffix="+" />
-              <AnimatedStat value={100} label="Conformité légale" suffix="%" />
-              <AnimatedStat value={2} label="Pôles d'expertise" />
+              <AnimatedStat value={2000} label="Hectares aménagés" suffix="+" />
+              <AnimatedStat value={25000} label="Lots conçus" suffix="+" />
             </div>
           </div>
         </div>

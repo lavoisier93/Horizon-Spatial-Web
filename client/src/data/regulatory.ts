@@ -4,9 +4,9 @@ export interface RegulatoryArticle {
 }
 
 export const articles: RegulatoryArticle[] = [
-  { num: "Article 60", text: "Les lotissements sont conçus exclusivement par les urbanistes inscrits au tableau de l'O.N.U.C.I." },
-  { num: "Article 65", text: "L'autorisation de lotir est conditionnée par la présentation d'un plan visé par un urbaniste agréé." },
-  { num: "Article 76", text: "L'exercice illégal est passible de peines allant jusqu'à 2 ans d'emprisonnement et 50 000 000 FCFA d'amende." },
+  { num: "Article 61", text: "Les opérations d'urbanisme sont initiées conformément aux prescriptions du schéma directeur d'urbanisme, des plans d'urbanisme directeur, des schémas de structure et des plans d'urbanisme de détail." },
+  { num: "Article 76", text: "Les projets d'aménagement sont dressés par un urbaniste agréé et inscrit à l'Ordre national des urbanistes de Côte d'Ivoire." },
+  { num: "Article 282", text: "L'exercice illégal est passible de peines allant jusqu'à 2 ans d'emprisonnement et 20 000 000 FCFA d'amende." },
 ];
 
 export const risks: string[] = [

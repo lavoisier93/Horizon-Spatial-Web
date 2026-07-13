@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, Scale } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Scale } from "lucide-react";
 import { Reveal } from "../../components/Reveal";
 import { assets } from "../../data/company";
 import { articles, risks } from "../../data/regulatory";
@@ -21,8 +21,9 @@ export function RegulatoryFrame({ isDark }: { isDark: boolean }) {
               <span className="text-[#0047AB]">Urbaniste Agréé</span> ?
             </h2>
             <p className={`text-lg leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>
-              Depuis le Code de l'Urbanisme de 2020, tout projet de lotissement en Côte d'Ivoire
-              doit être réalisé par un urbaniste inscrit à l'Ordre National des Urbanistes (O.N.U.C.I.).
+              Depuis la loi n° 2020-624 du 14 août 2020 instituant le Code de l'urbanisme et du
+              domaine foncier urbain, tout projet de lotissement en Côte d'Ivoire doit être réalisé
+              par un urbaniste inscrit à l'Ordre National des Urbanistes de Côte d'Ivoire (O.N.U.C.I.).
               Le non-respect de cette obligation expose à des sanctions pénales lourdes.
             </p>
           </div>
@@ -72,13 +73,21 @@ export function RegulatoryFrame({ isDark }: { isDark: boolean }) {
               <div className="bg-[#0047AB] rounded-2xl p-8 text-white">
                 <div className="flex items-center gap-3 mb-4">
                   <CheckCircle2 className="w-6 h-6 text-[#00A86B]" />
-                  <h3 className="text-lg font-bold" style={poppins}>La Solution</h3>
+                  <h3 className="text-lg font-bold" style={poppins}>Votre garantie de conformité</h3>
                 </div>
                 <p className="text-white/80 text-sm leading-relaxed">
-                  Horizon Spatial est un bureau d'études inscrit à l'O.N.U.C.I.
+                  Horizon Spatial est un bureau d'études d'Urbanisme Agréé et de Géomatique.
                   Nous garantissons la conformité légale complète de vos projets
                   de lotissement, de la conception à l'approbation.
                 </p>
+                <a
+                  href="#contact"
+                  className="mt-6 inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-[#00A86B] hover:bg-[#009960] text-[#0A1628] text-sm font-semibold transition-colors duration-300"
+                  style={poppins}
+                >
+                  Vérifier la conformité de mon projet
+                  <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
             </div>
           </Reveal>

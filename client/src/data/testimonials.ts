@@ -12,15 +12,15 @@ export interface ProjectReference {
 
 export const references: ProjectReference[] = [
   {
-    type: "Lotissement résidentiel",
+    type: "Aménagement foncier",
     location: "Grand Abidjan",
     surface: "10 Ha",
     lots: 177,
     icon: MapPinned,
-    details: "Aménagement complet avec espaces verts, groupes scolaires, aires de jeux et réseau viaire structuré. Arrêté d'approbation obtenu.",
+    details: "Aménagement complet avec espaces verts, groupes scolaires, aires de jeux et réseau viaire structuré.",
   },
   {
-    type: "Lotissement mixte",
+    type: "Lotissement résidentiel",
     location: "Région des Grands Ponts",
     surface: "25 Ha",
     lots: 312,
@@ -28,12 +28,12 @@ export const references: ProjectReference[] = [
     details: "Projet intégrant zones résidentielles, commerciales et équipements publics. Cartographie drone et conception SIG complète.",
   },
   {
-    type: "Restructuration urbaine",
-    location: "Abidjan Sud",
-    surface: "5 Ha",
-    lots: 89,
+    type: "Regularisation urbaine",
+    location: "Yamoussoukro",
+    surface: "100 Ha",
+    lots: +1300,
     icon: Ruler,
-    details: "Régularisation foncière et redécoupage parcellaire conforme au PUD. Accompagnement jusqu'à l'approbation ministérielle.",
+    details: "Régularisation foncière et redécoupage parcellaire conforme au SDU. Accompagnement jusqu'à l'approbation ministérielle.",
   },
 ];
 
@@ -46,20 +46,20 @@ export interface Testimonial {
 
 export const testimonials: Testimonial[] = [
   {
-    name: "Directeur Général",
-    company: "Groupe de Promotion Immobilière",
+    name: "Lago Rodolphe",
+    company: "GBC Group — Abidjan",
     text: "Horizon Spatial nous a accompagnés de A à Z sur notre projet de lotissement. Leur double expertise urbanisme-géomatique a fait toute la différence. Dossier approuvé du premier coup.",
     rating: 5,
   },
   {
-    name: "Responsable Foncier",
-    company: "Société d'Aménagement",
+    name: "Alexis Kouamé",
+    company: "NetGeo Topo — Abidjan",
     text: "La rigueur technique et la connaissance parfaite du cadre réglementaire ivoirien nous ont permis de gagner un temps considérable. Je recommande vivement.",
     rating: 5,
   },
   {
-    name: "Promoteur Immobilier",
-    company: "Investisseur Privé",
+    name: "Promoteur privé (Anonyme)",
+    company: "Abidjan",
     text: "Les maquettes 3D et les plans de vente fournis par H-Spatial ont accéléré la commercialisation de nos lots. Un partenaire de confiance.",
     rating: 5,
   },

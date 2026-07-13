@@ -4,7 +4,7 @@
  * Source unique pour Home (carte fondateur) et page /a-propos.
  * Réutilise `company.ts` pour tout ce qui est corporate (email pro, WhatsApp,
  * réseaux sociaux, photo). Le fondateur n'a PAS de coordonnées personnelles
- * publiques distinctes — le canal officiel est celui d'Horizon Spatial.
+ * publiques distinctes — le canal officiel est celui d'HORIZON SPATIAL.
  */
 
 import type { LucideIcon } from "lucide-react";
@@ -96,19 +96,19 @@ export const founder: FounderProfile = {
   fullName: "Lavoisier Ousmane",
   shortName: "Lavoisier Ousmane",
   shortRole: "Urbaniste & Expert SIG",
-  longRole: "Urbaniste-Géomaticien — Fondateur d'Horizon Spatial",
+  longRole: "Urbaniste-Géomaticien — Fondateur d'HORIZON SPATIAL",
   taglineCorporate:
     "Expert en sécurisation foncière, planification urbaine et solutions numériques territoriales.",
   bio: [
-    "Lavoisier Ousmane est le fondateur d'Horizon Spatial. Urbaniste Agréé et Géomaticien, il est titulaire de plusieurs diplômes de niveau Master en Urbanisme, Géomatique et Analyse de Données obtenus au Togo, en France et au Maroc.",
+    "Lavoisier Ousmane est le fondateur d'HORIZON SPATIAL. Urbaniste Agréé et Géomaticien, il est titulaire de plusieurs diplômes de niveau Master en Urbanisme, Géomatique et Analyse de Données obtenus au Togo, en France et au Maroc.",
     `Depuis plus de ${YEARS_OF_EXPERIENCE} années, il accompagne collectivités territoriales, bureaux d'études, investisseurs et organisations de développement dans la conception, la planification et la mise en œuvre de projets territoriaux. Il intervient également auprès des promoteurs et des particuliers pour leurs opérations de lotissement et de sécurisation foncière.`,
     "Son approche allie rigueur scientifique, analyse spatiale et connaissance approfondie du contexte ouest-africain, pour proposer des stratégies territoriales durables, ancrées dans les réalités locales et alignées sur les meilleures pratiques internationales.",
   ],
-  bioShort: `Fondateur d'Horizon Spatial, Urbaniste Agréé inscrit au Tableau National de l'Ordre des Urbanistes de Côte d'Ivoire avec plus de ${YEARS_OF_EXPERIENCE} années d'expérience en aménagement du territoire et géomatique.`,
+  bioShort: `Fondateur d'HORIZON SPATIAL, Urbaniste Agréé inscrit au Tableau National de l'Ordre des Urbanistes de Côte d'Ivoire avec plus de ${YEARS_OF_EXPERIENCE} années d'expérience en aménagement du territoire et géomatique.`,
   yearsOfExperience: YEARS_OF_EXPERIENCE,
   photo: {
     src: assets.founderPortrait,
-    alt: "Lavoisier Ousmane, fondateur d'Horizon Spatial",
+    alt: "Lavoisier Ousmane, fondateur d'HORIZON SPATIAL",
     fallbackInitials: "LO",
   },
   channels: {
@@ -220,7 +220,7 @@ const experience: readonly TimelineItem[] = [
   {
     year: "2025 – Présent",
     title: "Fondateur & Consultant Principal",
-    institution: "Horizon Spatial (H-SPATIAL)",
+    institution: "HORIZON SPATIAL (H-SPATIAL)",
     description:
       "Direction des missions d'urbanisme, de géomatique et de sécurisation foncière pour collectivités, bureaux d'études et investisseurs.",
   },

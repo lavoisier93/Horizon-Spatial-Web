@@ -78,10 +78,14 @@ export function Advantages({ isDark }: { isDark: boolean }) {
               <span className="text-[#00A86B] font-semibold text-sm uppercase tracking-wider" style={poppins}>Nos Avantages</span>
               <div className="w-10 h-1 bg-[#00A86B] rounded-full" />
             </div>
-            <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold leading-tight ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
+            <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6 ${isDark ? "text-white" : "text-[#0A1628]"}`} style={poppins}>
               Pourquoi choisir{" "}
               <span className="text-[#0047AB]">H-Spatial</span> ?
             </h2>
+            <p className={`text-lg leading-relaxed ${isDark ? "text-white/60" : "text-[#4A5568]"}`}>
+              Six raisons concrètes de confier votre projet à un bureau d'études
+              qui engage sa responsabilité d'urbaniste agréé.
+            </p>
           </div>
         </Reveal>
 

@@ -314,11 +314,11 @@ function ContactForm() {
               className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white focus:border-[#00A86B]/50 focus:ring-2 focus:ring-[#00A86B]/30 outline-none transition-all text-sm appearance-none"
             >
               <option value="" className="bg-[#0A1628]">Sélectionner...</option>
-              <option value="Lotissement résidentiel" className="bg-[#0A1628]">Lotissement résidentiel</option>
-              <option value="Lotissement mixte" className="bg-[#0A1628]">Lotissement mixte</option>
-              <option value="Lotissement commercial" className="bg-[#0A1628]">Lotissement commercial</option>
-              <option value="Restructuration urbaine" className="bg-[#0A1628]">Restructuration urbaine</option>
-              <option value="Régularisation foncière" className="bg-[#0A1628]">Régularisation foncière</option>
+              <option value="Lotissement résidentiel" className="bg-[#0A1628]">Lotissement ou Régularisation foncière</option>
+              <option value="Lotissement mixte" className="bg-[#0A1628]">Opération immobilière</option>
+              <option value="Restructuration urbaine" className="bg-[#0A1628]">Aménagement foncier</option>
+              <option value="Régularisation foncière" className="bg-[#0A1628]">Restructuration urbaine</option>
+              <option value="Lotissement commercial" className="bg-[#0A1628]">Géomatique ou Cartographie</option>
               <option value="Autre" className="bg-[#0A1628]">Autre</option>
             </select>
           </div>

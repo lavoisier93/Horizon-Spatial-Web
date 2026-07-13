@@ -27,8 +27,8 @@ export interface InterventionZone {
 
 export const interventionZones: InterventionZone[] = [
   { city: "Abidjan", type: "Siège social", desc: "District autonome — Lotissements résidentiels, mixtes et commerciaux", active: true },
-  { city: "San-Pédro", type: "Zone active", desc: "Pôle économique Sud-Ouest — Aménagements portuaires et résidentiels", active: true },
-  { city: "Yamoussoukro", type: "Zone active", desc: "Capitale politique — Projets d'urbanisation", active: true },
+  { city: "San-Pédro", type: "Zone active", desc: "Pôle économique Sud-Ouest — Aménagements résidentiels", active: true },
+  { city: "Yamoussoukro", type: "Zone active", desc: "Capitale politique — Projets d'urbanisation et regularisation urbaine", active: true },
   { city: "Bouaké", type: "Zone active", desc: "Deuxième ville — Restructuration et extension urbaine", active: true },
   { city: "Korhogo", type: "Zone active", desc: "Pôle Nord — Développement urbain et foncier", active: true },
 ];

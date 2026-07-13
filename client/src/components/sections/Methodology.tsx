@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { LazyImage } from "../../components/LazyImage";
 import { Reveal } from "../../components/Reveal";
@@ -97,6 +98,22 @@ export function Methodology() {
             <AnimatedStep key={item.title} item={item} index={i} isLast={i === steps.length - 1} />
           ))}
         </div>
+
+        <Reveal delay={200}>
+          <div className="text-center mt-14">
+            <p className="text-white/70 text-sm mb-5">
+              De la prise de contact au dépôt de dossier pour l'arrêté d'approbation, comptez en moyenne 3 à 6 mois.
+            </p>
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 px-6 py-3.5 bg-white hover:bg-white/90 text-[#0047AB] font-semibold rounded-lg transition-colors duration-300"
+              style={poppins}
+            >
+              Lancer mon projet
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
