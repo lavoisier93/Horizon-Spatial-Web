@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { LazyImage } from "../../components/LazyImage";
 import { Reveal } from "../../components/Reveal";
-import { assets, buildMailtoUrl, company, contact, social } from "../../data/company";
+import { address, assets, buildMailtoUrl, company, contact, social } from "../../data/company";
 import { useParallax } from "../../hooks/useParallax";
 import { addUtm } from "../../lib/utm";
 
@@ -427,7 +427,7 @@ export function ContactSection() {
               </div>
 
               {/* Réseaux sociaux */}
-              <div className="flex gap-4 mt-2">
+              <div className="flex flex-wrap gap-4 mt-2">
                 <a
                   href={addUtm(social.linkedin, "plaquette", "social_button")}
                   target="_blank"
@@ -445,6 +445,15 @@ export function ContactSection() {
                 >
                   <Facebook className="w-5 h-5 text-[#1877F2]" />
                   <span className="text-white font-medium text-sm">Facebook</span>
+                </a>
+                <a
+                  href={address.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-5 py-3 bg-[#00A86B]/20 backdrop-blur-sm rounded-xl border border-[#00A86B]/30 hover:bg-[#00A86B]/30 transition-all duration-300"
+                >
+                  <MapPin className="w-5 h-5 text-[#00A86B]" />
+                  <span className="text-white font-medium text-sm">Localisation</span>
                 </a>
               </div>
 
