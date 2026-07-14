@@ -9,7 +9,7 @@ import { useId } from "react";
 export function GoogleMapsIcon({ className = "" }: { className?: string }) {
   const clipId = useId();
   return (
-    <svg viewBox="0 0 48 48" className={className} role="img" aria-label="Google Maps">
+    <svg viewBox="8 5 32 40" className={className} role="img" aria-label="Google Maps">
       <defs>
         <clipPath id={clipId}>
           <path d="M24 6 C15.7 6 9 12.7 9 21 c0 11.25 15 23 15 23 s15-11.75 15-23 C39 12.7 32.3 6 24 6 Z" />

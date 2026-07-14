@@ -33,7 +33,7 @@ export function LocationButton() {
         <div className="absolute inset-0 rounded-full bg-[#4285F4] animate-ping opacity-20" />
         {/* Button — fond blanc pour faire ressortir l'épingle multicolore Google Maps */}
         <div className="relative w-14 h-14 rounded-full bg-white hover:bg-gray-50 border border-black/5 shadow-xl shadow-black/20 hover:shadow-2xl hover:shadow-black/30 flex items-center justify-center transition-all duration-300 hover:scale-110">
-          <GoogleMapsIcon className="w-8 h-8" />
+          <GoogleMapsIcon className="w-11 h-11" />
         </div>
         {/* Tooltip */}
         <div className="absolute bottom-full right-0 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
