@@ -103,8 +103,8 @@ export const address: CompanyAddress = {
   city: "Abidjan",
   country: "Côte d'Ivoire",
   full: "Abidjan — Cocody Angré CHU, Côte d'Ivoire",
-  // Coordonnées approximatives Cocody Angré
-  geo: { lat: 5.3795, lng: -3.9802 },
+  // Coordonnées GPS réelles de la fiche Google Maps (cf. address.mapsUrl).
+  geo: { lat: 5.3975693, lng: -3.9468431 },
   // Fiche Google Maps de l'entreprise (lien court officiel partagé).
   mapsUrl: "https://maps.app.goo.gl/ehZvq6oVQUZvzhsr8",
 };
