@@ -7,6 +7,7 @@ import { Reveal } from "../../components/Reveal";
 import { address, assets, buildMailtoUrl, company, contact, social } from "../../data/company";
 import { useParallax } from "../../hooks/useParallax";
 import { addUtm } from "../../lib/utm";
+import { GoogleMapsIcon } from "../GoogleMapsIcon";
 
 const poppins = { fontFamily: "'Poppins', sans-serif" };
 
@@ -450,9 +451,9 @@ export function ContactSection() {
                   href={address.mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 px-5 py-3 bg-[#00A86B]/20 backdrop-blur-sm rounded-xl border border-[#00A86B]/30 hover:bg-[#00A86B]/30 transition-all duration-300"
+                  className="flex items-center gap-3 px-5 py-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
                 >
-                  <MapPin className="w-5 h-5 text-[#00A86B]" />
+                  <GoogleMapsIcon className="w-5 h-5" />
                   <span className="text-white font-medium text-sm">Localisation</span>
                 </a>
               </div>

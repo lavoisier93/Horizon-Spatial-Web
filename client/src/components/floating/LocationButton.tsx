@@ -1,5 +1,5 @@
-import { MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
+import { GoogleMapsIcon } from "../GoogleMapsIcon";
 import { address } from "../../data/company";
 
 const poppins = { fontFamily: "'Poppins', sans-serif" };
@@ -30,10 +30,10 @@ export function LocationButton() {
     >
       <div className="relative">
         {/* Pulse ring */}
-        <div className="absolute inset-0 rounded-full bg-[#0047AB] animate-ping opacity-20" />
-        {/* Button */}
-        <div className="relative w-14 h-14 rounded-full bg-[#0047AB] hover:bg-[#003D91] shadow-xl shadow-[#0047AB]/30 hover:shadow-2xl hover:shadow-[#0047AB]/40 flex items-center justify-center transition-all duration-300 hover:scale-110">
-          <MapPin className="w-7 h-7 text-white" />
+        <div className="absolute inset-0 rounded-full bg-[#4285F4] animate-ping opacity-20" />
+        {/* Button — fond blanc pour faire ressortir l'épingle multicolore Google Maps */}
+        <div className="relative w-14 h-14 rounded-full bg-white hover:bg-gray-50 border border-black/5 shadow-xl shadow-black/20 hover:shadow-2xl hover:shadow-black/30 flex items-center justify-center transition-all duration-300 hover:scale-110">
+          <GoogleMapsIcon className="w-8 h-8" />
         </div>
         {/* Tooltip */}
         <div className="absolute bottom-full right-0 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
