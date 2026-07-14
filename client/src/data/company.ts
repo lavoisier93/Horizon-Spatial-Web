@@ -40,6 +40,8 @@ export interface CompanyAddress {
   country: string;
   full: string;
   geo: { lat: number; lng: number };
+  /** Lien vers la fiche Google Maps de l'entreprise (bouton flottant). */
+  mapsUrl: string;
 }
 
 export interface CompanySocial {
@@ -103,6 +105,9 @@ export const address: CompanyAddress = {
   full: "Abidjan — Cocody Angré CHU, Côte d'Ivoire",
   // Coordonnées approximatives Cocody Angré
   geo: { lat: 5.3795, lng: -3.9802 },
+  // Fiche Google Maps de l'entreprise (identifiant de lieu issu de l'embed officiel).
+  mapsUrl:
+    "https://www.google.com/maps?q=HORIZON+SPATIAL&ftid=0xfc193006d5cdc29:0xd938cd509c92e478",
 };
 
 /* -------------------------------------------------------------------------- */
