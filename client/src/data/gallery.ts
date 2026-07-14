@@ -14,7 +14,7 @@ export const galleryItems: GalleryItem[] = [
   {
     img: GALLERY_DRONE,
     title: "Vue aérienne par drone",
-    desc: "Photogrammétrie par drone et Cartographie numérique pour un lotissement résidentiel",
+    desc: "Photogrammétrie par drone et Cartographie numérique pour un projet de developpement local",
     tag: "Photogrammétrie",
   },
   {
