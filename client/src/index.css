@@ -144,6 +144,25 @@
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+/* ─── Respect reduced-motion preference ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .hero-grid-bg,
+  .typewriter-cursor {
+    display: none !important;
+  }
+  .reveal-element {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* Custom scrollbar */
@@ -159,6 +178,16 @@ html {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
+}
+
+/* Utilitaire : masquer la barre de scroll (utilisé pour les tabs scrollables
+   horizontalement sur mobile, où la barre crée du bruit visuel). */
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge legacy */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chromium / Safari */
 }
 
 /* ─── Hero entrance animations ─── */
@@ -213,77 +242,7 @@ html {
   }
 }
 
-/* ─── Floating Geometric Elements ─── */
-.geo-element {
-  position: absolute;
-  pointer-events: none;
-  z-index: 2;
-  opacity: 0.18;
-}
-
-@keyframes geoFloat {
-  0%, 100% { transform: rotate(45deg) translateY(0) scale(1); }
-  25%      { transform: rotate(50deg) translateY(-20px) scale(1.02); }
-  50%      { transform: rotate(45deg) translateY(10px) scale(0.98); }
-  75%      { transform: rotate(40deg) translateY(-10px) scale(1.01); }
-}
-
-/* Large blue diamond – top-left */
-.geo-diamond-1 {
-  width: 280px;
-  height: 280px;
-  border: 2px solid #0047AB;
-  top: 8%;
-  left: 3%;
-  animation: geoFloat 20s ease-in-out infinite;
-}
-
-/* Medium green diamond – bottom-right */
-.geo-diamond-2 {
-  width: 200px;
-  height: 200px;
-  border: 2px solid #00A86B;
-  bottom: 12%;
-  right: 8%;
-  animation: geoFloat 20s ease-in-out infinite -5s;
-}
-
-/* Small filled gradient diamond – mid-left */
-.geo-diamond-3 {
-  width: 140px;
-  height: 140px;
-  background: linear-gradient(45deg, rgba(0, 71, 171, 0.4), transparent);
-  top: 55%;
-  left: 12%;
-  animation: geoFloat 20s ease-in-out infinite -10s;
-}
-
-/* Tiny blue diamond – top-right accent */
-.geo-diamond-4 {
-  width: 90px;
-  height: 90px;
-  border: 1.5px solid #0047AB;
-  top: 18%;
-  right: 15%;
-  opacity: 0.12;
-  animation: geoFloat 18s ease-in-out infinite -7s;
-}
-
-/* Hide on small screens for cleaner mobile UX */
-@media (max-width: 768px) {
-  .geo-element {
-    display: none;
-  }
-}
-
-/* Hide in print */
-@media print {
-  .geo-element {
-    display: none !important;
-  }
-}
-
-/* ─── Loading Screen – Phase 1: Spinning Diamonds ─── */
+/* ─── Loading Screen – Phase 1 : losanges tournants ─── */
 .loader-diamond {
   transform: rotate(45deg);
   animation: loaderSpin 2s ease-in-out infinite;
@@ -298,7 +257,7 @@ html {
   50% { transform: rotate(225deg) scale(1.1); }
 }
 
-/* ─── Loading Screen – Phase 2: Logo pathReveal (exact HTML file reproduction) ─── */
+/* ─── Loading Screen – Phase 2 : Logo pathReveal + pulse + progress (cf. hspatial-immersive.html) ─── */
 
 /* Logo SVG entrance + pulse */
 .loader-icon-svg {
@@ -660,63 +619,6 @@ select option {
 .service-icon-float {
   animation: icon-float 3s ease-in-out infinite;
   animation-delay: var(--float-delay, 0s);
-}
-
-/* ─── SERVICE CARD FLIP EFFECT ───────────────── */
-
-.service-card-container {
-  perspective: 1000px;
-  cursor: pointer;
-}
-
-.service-card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
-  transform-style: preserve-3d;
-}
-
-.service-card-container:hover .service-card-inner {
-  transform: rotateY(180deg);
-}
-
-.service-card-face {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.service-card-front {
-  z-index: 2;
-}
-
-.service-card-back {
-  transform: rotateY(180deg);
-  z-index: 1;
-}
-
-/* Touch devices: tap to flip */
-@media (hover: none) {
-  .service-card-container:active .service-card-inner {
-    transform: rotateY(180deg);
-  }
-}
-
-/* Print: show front only, no flip */
-@media print {
-  .service-card-inner {
-    transform: none !important;
-  }
-  .service-card-back {
-    display: none !important;
-  }
-  .service-card-front {
-    position: relative !important;
-  }
 }
 
 /* ─── MICRO-ANIMATIONS ÉTAPES MÉTHODOLOGIE ───────────── */

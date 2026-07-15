@@ -1,49 +1,62 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, Home } from "lucide-react";
-import { useLocation } from "wouter";
+/**
+ * Page 404 — H-Spatial
+ * Route /404 + fallback wouter (page introuvable).
+ * Charte H-Spatial : #0047AB primaire, #00A86B accent, Poppins titres.
+ */
+
+import { Link } from "wouter";
+import { ArrowLeft, MapPinOff } from "lucide-react";
+import { company } from "@/data/company";
+
+const poppins = { fontFamily: "'Poppins', sans-serif" };
 
 export default function NotFound() {
-  const [, setLocation] = useLocation();
-
-  const handleGoHome = () => {
-    setLocation("/");
-  };
-
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-      <Card className="w-full max-w-lg mx-4 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-        <CardContent className="pt-8 pb-8 text-center">
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <div className="absolute inset-0 bg-red-100 rounded-full animate-pulse" />
-              <AlertCircle className="relative h-16 w-16 text-red-500" />
-            </div>
-          </div>
+    <main id="main-content" className="min-h-screen flex items-center justify-center bg-white px-6">
+      <div className="max-w-lg w-full text-center">
+        <div
+          aria-hidden
+          className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[#0047AB]/10 mb-6"
+        >
+          <MapPinOff className="w-10 h-10 text-[#0047AB]" />
+        </div>
 
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">404</h1>
+        <p
+          className="text-xs uppercase tracking-wider text-[#0047AB] font-semibold mb-3"
+          style={poppins}
+        >
+          Erreur 404
+        </p>
+        <h1
+          className="text-4xl sm:text-5xl font-bold text-[#0A1628] mb-4"
+          style={poppins}
+        >
+          Page introuvable
+        </h1>
+        <p className="text-[#4A5568] text-base sm:text-lg leading-relaxed mb-8">
+          La page que vous cherchez n'existe pas ou a été déplacée. Revenez à
+          l'accueil pour reprendre votre exploration des services
+          d'{company.brandName}.
+        </p>
 
-          <h2 className="text-xl font-semibold text-slate-700 mb-4">
-            Page Not Found
-          </h2>
-
-          <p className="text-slate-600 mb-8 leading-relaxed">
-            Sorry, the page you are looking for doesn't exist.
-            <br />
-            It may have been moved or deleted.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button
-              onClick={handleGoHome}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              <Home className="w-4 h-4 mr-2" />
-              Go Home
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-[#0047AB] hover:bg-[#003580] text-white font-semibold text-sm shadow-lg shadow-[#0047AB]/20 transition-all"
+            style={poppins}
+          >
+            <ArrowLeft className="w-4 h-4" aria-hidden />
+            Retour à l'accueil
+          </Link>
+          <Link
+            href="/#contact"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-[#0047AB]/20 text-[#0047AB] hover:bg-[#0047AB]/5 font-semibold text-sm transition-all"
+            style={poppins}
+          >
+            Nous contacter
+          </Link>
+        </div>
+      </div>
+    </main>
   );
 }
